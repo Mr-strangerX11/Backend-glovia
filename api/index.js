@@ -77,9 +77,17 @@ async function createHandler() {
 }
 
 module.exports = async (req, res) => {
-  if (!cachedHandler) {
-    cachedHandler = await createHandler();
+  try {
+    if (!cachedHandler) {
+      cachedHandler = await createHandler();
+    }
+    return cachedHandler(req, res);
+  } catch (error) {
+    console.error('Function invocation failed:', error);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: error.message,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+    });
   }
-
-  return cachedHandler(req, res);
 };
