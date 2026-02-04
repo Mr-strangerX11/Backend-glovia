@@ -1,5 +1,4 @@
 const express = require('express');
-const serverless = require('serverless-http');
 const helmet = require('helmet');
 const compression = require('compression');
 const { NestFactory } = require('@nestjs/core');
@@ -80,7 +79,8 @@ async function createHandler() {
   }
 
   await app.init();
-  return serverless(expressApp);
+  // Express app is a valid (req, res) handler - no serverless-http needed on Vercel
+  return expressApp;
 }
 
 // Helper function to add CORS headers
