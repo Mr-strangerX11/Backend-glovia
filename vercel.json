@@ -6,15 +6,11 @@
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["dist/**", "node_modules/.prisma/**", "node_modules/@prisma/**"]
+        "includeFiles": ["dist/**", "node_modules/.prisma/**", "node_modules/@prisma/**"],
+        "maxDuration": 60,
+        "memory": 1024
       }
     }
   ],
   "routes": [{ "src": "/(.*)", "dest": "api/index.js" }],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  }
 }
