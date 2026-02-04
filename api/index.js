@@ -20,14 +20,15 @@ async function createHandler() {
     .map((url) => url.trim())
     .filter(Boolean);
 
-  const allowedOrigins = frontendUrls.length
-    ? frontendUrls
-    : [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://glovia.com.np',
-        'https://www.glovia.com.np',
-      ];
+  const allowedOrigins =
+    frontendUrls.length > 0
+      ? frontendUrls
+      : [
+          'http://localhost:3000',
+          'http://localhost:3001',
+          'https://glovia.com.np',
+          'https://www.glovia.com.np',
+        ];
 
   // Configure CORS first, before helmet
   app.enableCors({
@@ -83,28 +84,30 @@ async function createHandler() {
   return expressApp;
 }
 
-// Helper function to add CORS headers
+// Same default frontend URLs as in createHandler – keep in sync
+const DEFAULT_FRONTEND_URLS = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://glovia.com.np',
+  'https://www.glovia.com.np',
+];
+
+function getAllowedOrigins() {
+  const fromEnv = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+  return fromEnv.length > 0 ? fromEnv : DEFAULT_FRONTEND_URLS;
+}
+
 function addCorsHeaders(res, origin) {
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://glovia.com.np',
-    'https://www.glovia.com.np',
-  ];
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (process.env.FRONTEND_URL) {
-    const frontendUrls = process.env.FRONTEND_URL.split(',')
-      .map((url) => url.trim())
-      .filter(Boolean);
-    if (frontendUrls.length > 0) {
-      res.setHeader('Access-Control-Allow-Origin', frontendUrls[0]);
-    }
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://glovia.com.np');
-  }
-  
+  const allowedOrigins = getAllowedOrigins();
+  const allowOrigin =
+    origin && allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0] || 'https://glovia.com.np';
+
+  res.setHeader('Access-Control-Allow-Origin', allowOrigin);
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
