@@ -38,6 +38,6 @@ export class Category extends Document {
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
 
-CategorySchema.index({ slug: 1 });
+// Note: slug has unique: true in @Prop, so no need for explicit index
 CategorySchema.index({ parentId: 1 });
 CategorySchema.index({ isActive: 1 });

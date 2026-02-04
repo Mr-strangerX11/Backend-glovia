@@ -28,5 +28,5 @@ export class Payment extends Document {
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
 
-PaymentSchema.index({ orderId: 1 });
-PaymentSchema.index({ transactionId: 1 });
+// Note: orderId has unique: true in @Prop, so no need for explicit index
+// Note: transactionId has unique: true, sparse: true in @Prop, so no need for explicit index

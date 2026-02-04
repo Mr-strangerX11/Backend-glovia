@@ -39,5 +39,5 @@ export class Blog extends Document {
 
 export const BlogSchema = SchemaFactory.createForClass(Blog);
 
-BlogSchema.index({ slug: 1 });
+// Note: slug has unique: true in @Prop, so no need for explicit index
 BlogSchema.index({ isPublished: 1 });

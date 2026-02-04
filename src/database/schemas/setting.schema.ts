@@ -18,4 +18,4 @@ export class Setting extends Document {
 
 export const SettingSchema = SchemaFactory.createForClass(Setting);
 
-SettingSchema.index({ key: 1 });
+// Note: key has unique: true in @Prop, so no need for explicit index

@@ -73,7 +73,6 @@ export class User extends Document {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Add indexes
-UserSchema.index({ email: 1 });
+// Note: email has unique: true in @Prop, so no need for explicit index
 UserSchema.index({ phone: 1 });
 UserSchema.index({ role: 1 });

@@ -21,5 +21,5 @@ export class Brand extends Document {
 
 export const BrandSchema = SchemaFactory.createForClass(Brand);
 
-BrandSchema.index({ slug: 1 });
+// Note: slug has unique: true in @Prop, so no need for explicit index
 BrandSchema.index({ isActive: 1 });

@@ -90,6 +90,6 @@ export class Order extends Document {
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
-OrderSchema.index({ orderNumber: 1 });
+// Note: orderNumber has unique: true in @Prop, so no need for explicit index
 OrderSchema.index({ userId: 1 });
 OrderSchema.index({ status: 1 });

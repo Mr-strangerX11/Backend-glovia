@@ -39,5 +39,5 @@ export class Coupon extends Document {
 
 export const CouponSchema = SchemaFactory.createForClass(Coupon);
 
-CouponSchema.index({ code: 1 });
+// Note: code has unique: true in @Prop, so no need for explicit index
 CouponSchema.index({ isActive: 1 });

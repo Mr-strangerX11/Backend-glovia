@@ -79,7 +79,7 @@ export class Product extends Document {
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
 
-ProductSchema.index({ slug: 1 });
+// Note: slug has unique: true in @Prop, so no need for explicit index
 ProductSchema.index({ sku: 1 });
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ brandId: 1 });
