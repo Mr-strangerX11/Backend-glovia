@@ -1,5 +1,5 @@
 import { PrismaClient, UserRole } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
 const prisma = new PrismaClient();
