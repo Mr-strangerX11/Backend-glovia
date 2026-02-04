@@ -16,6 +16,7 @@ import { BannersModule } from './modules/banners/banners.module';
 import { BlogsModule } from './modules/blogs/blogs.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { VerificationModule } from './modules/verification/verification.module';
+import { BrandsModule } from './modules/brands/brands.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { VerificationModule } from './modules/verification/verification.module';
     UsersModule,
     ProductsModule,
     CategoriesModule,
+    BrandsModule,
     OrdersModule,
     PaymentsModule,
     AdminModule,

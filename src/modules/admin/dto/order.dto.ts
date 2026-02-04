@@ -1,6 +1,7 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsNumber, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { OrderStatus } from '@prisma/client';
+import { Type } from 'class-transformer';
 
 export class UpdateOrderDto {
   @ApiProperty({ required: false, enum: OrderStatus })
@@ -22,4 +23,18 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsString()
   adminNote?: string;
+
+  @ApiProperty({ required: false, description: 'Discount amount in NPR' })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  discount?: number;
+
+  @ApiProperty({ required: false, description: 'Delivery charge in NPR' })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  deliveryCharge?: number;
 }

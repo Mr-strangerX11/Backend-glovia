@@ -19,6 +19,8 @@ import { UserRole, OrderStatus } from '@prisma/client';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateOrderDto } from './dto/order.dto';
+import { UpdateDeliverySettingsDto } from './dto/settings.dto';
+import { UpdateAnnouncementDto } from './dto/announcement.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Admin')
@@ -89,6 +91,12 @@ export class AdminController {
     });
   }
 
+  @Get('orders/:id')
+  @ApiOperation({ summary: 'Get order details' })
+  getOrder(@Param('id') id: string) {
+    return this.adminService.getOrder(id);
+  }
+
   @Put('orders/:id')
   @ApiOperation({ summary: 'Update order' })
   updateOrder(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
@@ -128,5 +136,29 @@ export class AdminController {
   @ApiOperation({ summary: 'Delete review' })
   deleteReview(@Param('id') id: string) {
     return this.adminService.deleteReview(id);
+  }
+
+  @Get('settings/delivery')
+  @ApiOperation({ summary: 'Get delivery settings' })
+  getDeliverySettings() {
+    return this.adminService.getDeliverySettings();
+  }
+
+  @Put('settings/delivery')
+  @ApiOperation({ summary: 'Update delivery settings (discount and free delivery)' })
+  updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto) {
+    return this.adminService.updateDeliverySettings(dto);
+  }
+
+  @Get('settings/announcement')
+  @ApiOperation({ summary: 'Get announcement bar settings' })
+  getAnnouncement() {
+    return this.adminService.getAnnouncement();
+  }
+
+  @Put('settings/announcement')
+  @ApiOperation({ summary: 'Update announcement bar' })
+  updateAnnouncement(@Body() dto: UpdateAnnouncementDto) {
+    return this.adminService.updateAnnouncement(dto);
   }
 }

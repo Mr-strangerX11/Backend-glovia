@@ -4,6 +4,8 @@ import { OrderStatus, UserRole } from '@prisma/client';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { UpdateOrderDto } from './dto/order.dto';
 import { CreateUserDto } from './dto/user.dto';
+import { UpdateDeliverySettingsDto, GetDeliverySettingsDto } from './dto/settings.dto';
+import { UpdateAnnouncementDto, GetAnnouncementDto } from './dto/announcement.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -260,6 +262,32 @@ export class AdminService {
     };
   }
 
+  async getOrder(id: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, email: true, phone: true },
+        },
+        address: true,
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, sku: true },
+            },
+          },
+        },
+        payment: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
+  }
+
   async updateOrder(id: string, dto: UpdateOrderDto) {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) {
@@ -268,6 +296,7 @@ export class AdminService {
 
     const updateData: any = { ...dto };
 
+    // Set timestamp when status changes
     if (dto.status === OrderStatus.CONFIRMED && !order.confirmedAt) {
       updateData.confirmedAt = new Date();
     }
@@ -279,6 +308,17 @@ export class AdminService {
     }
     if (dto.status === OrderStatus.CANCELLED && !order.cancelledAt) {
       updateData.cancelledAt = new Date();
+    }
+
+    // If discount or deliveryCharge is updated, recalculate total
+    if (dto.discount !== undefined || dto.deliveryCharge !== undefined) {
+      const subtotal = Number(order.subtotal);
+      const currentDiscount = dto.discount !== undefined ? dto.discount : Number(order.discount);
+      const currentDeliveryCharge = dto.deliveryCharge !== undefined ? dto.deliveryCharge : Number(order.deliveryCharge);
+      
+      updateData.discount = currentDiscount;
+      updateData.deliveryCharge = currentDeliveryCharge;
+      updateData.total = subtotal + currentDeliveryCharge - currentDiscount;
     }
 
     return this.prisma.order.update({
@@ -377,5 +417,171 @@ export class AdminService {
   async deleteReview(id: string) {
     await this.prisma.review.delete({ where: { id } });
     return { message: 'Review deleted successfully' };
+  }
+
+  // Settings Management
+  async getDeliverySettings(): Promise<GetDeliverySettingsDto> {
+    const settings = await this.prisma.setting.findMany({
+      where: {
+        key: {
+          in: ['FREE_DELIVERY_THRESHOLD', 'VALLEY_DELIVERY_CHARGE', 'OUTSIDE_VALLEY_DELIVERY_CHARGE'],
+        },
+      },
+    });
+
+    const settingsMap = new Map(settings.map((s) => [s.key, s.value]));
+
+    return {
+      freeDeliveryThreshold: Number(settingsMap.get('FREE_DELIVERY_THRESHOLD') || 2000),
+      valleyDeliveryCharge: Number(settingsMap.get('VALLEY_DELIVERY_CHARGE') || 100),
+      outsideValleyDeliveryCharge: Number(settingsMap.get('OUTSIDE_VALLEY_DELIVERY_CHARGE') || 150),
+    };
+  }
+
+  async updateDeliverySettings(dto: UpdateDeliverySettingsDto): Promise<GetDeliverySettingsDto> {
+    const updates = [];
+
+    if (dto.freeDeliveryThreshold !== undefined) {
+      updates.push(
+        this.prisma.setting.upsert({
+          where: { key: 'FREE_DELIVERY_THRESHOLD' },
+          update: { value: String(dto.freeDeliveryThreshold) },
+          create: {
+            key: 'FREE_DELIVERY_THRESHOLD',
+            value: String(dto.freeDeliveryThreshold),
+            type: 'NUMBER',
+            description: 'Orders above this amount get free delivery',
+          },
+        }),
+      );
+    }
+
+    if (dto.valleyDeliveryCharge !== undefined) {
+      updates.push(
+        this.prisma.setting.upsert({
+          where: { key: 'VALLEY_DELIVERY_CHARGE' },
+          update: { value: String(dto.valleyDeliveryCharge) },
+          create: {
+            key: 'VALLEY_DELIVERY_CHARGE',
+            value: String(dto.valleyDeliveryCharge),
+            type: 'NUMBER',
+            description: 'Delivery charge for Kathmandu Valley',
+          },
+        }),
+      );
+    }
+
+    if (dto.outsideValleyDeliveryCharge !== undefined) {
+      updates.push(
+        this.prisma.setting.upsert({
+          where: { key: 'OUTSIDE_VALLEY_DELIVERY_CHARGE' },
+          update: { value: String(dto.outsideValleyDeliveryCharge) },
+          create: {
+            key: 'OUTSIDE_VALLEY_DELIVERY_CHARGE',
+            value: String(dto.outsideValleyDeliveryCharge),
+            type: 'NUMBER',
+            description: 'Delivery charge for areas outside Kathmandu Valley',
+          },
+        }),
+      );
+    }
+
+    if (updates.length > 0) {
+      await Promise.all(updates);
+    }
+
+    return this.getDeliverySettings();
+  }
+
+  // Announcement Bar Management
+  async getAnnouncement(): Promise<GetAnnouncementDto> {
+    const announcement = await this.prisma.setting.findUnique({
+      where: { key: 'ANNOUNCEMENT_TEXT' },
+    });
+
+    const icon = await this.prisma.setting.findUnique({
+      where: { key: 'ANNOUNCEMENT_ICON' },
+    });
+
+    const backgroundColor = await this.prisma.setting.findUnique({
+      where: { key: 'ANNOUNCEMENT_BG_COLOR' },
+    });
+
+    const isActive = await this.prisma.setting.findUnique({
+      where: { key: 'ANNOUNCEMENT_ACTIVE' },
+    });
+
+    return {
+      id: announcement?.id || '',
+      text: announcement?.value || '🚚 Express Delivery: We deliver within 60 minutes!',
+      icon: icon?.value || '🚚',
+      backgroundColor: backgroundColor?.value || '#0066CC',
+      isActive: isActive?.value === 'true',
+      createdAt: announcement?.createdAt || new Date(),
+      updatedAt: announcement?.updatedAt || new Date(),
+    };
+  }
+
+  async updateAnnouncement(dto: UpdateAnnouncementDto): Promise<GetAnnouncementDto> {
+    const updates: Promise<any>[] = [];
+
+    // Update or create each setting
+    updates.push(
+      this.prisma.setting.upsert({
+        where: { key: 'ANNOUNCEMENT_TEXT' },
+        update: { value: dto.text },
+        create: {
+          key: 'ANNOUNCEMENT_TEXT',
+          value: dto.text,
+          type: 'STRING',
+          description: 'Announcement bar text content',
+        },
+      }),
+    );
+
+    updates.push(
+      this.prisma.setting.upsert({
+        where: { key: 'ANNOUNCEMENT_ICON' },
+        update: { value: dto.icon },
+        create: {
+          key: 'ANNOUNCEMENT_ICON',
+          value: dto.icon,
+          type: 'STRING',
+          description: 'Announcement bar icon (emoji)',
+        },
+      }),
+    );
+
+    updates.push(
+      this.prisma.setting.upsert({
+        where: { key: 'ANNOUNCEMENT_BG_COLOR' },
+        update: { value: dto.backgroundColor },
+        create: {
+          key: 'ANNOUNCEMENT_BG_COLOR',
+          value: dto.backgroundColor,
+          type: 'STRING',
+          description: 'Announcement bar background color (hex)',
+        },
+      }),
+    );
+
+    updates.push(
+      this.prisma.setting.upsert({
+        where: { key: 'ANNOUNCEMENT_ACTIVE' },
+        update: { value: String(dto.isActive) },
+        create: {
+          key: 'ANNOUNCEMENT_ACTIVE',
+          value: String(dto.isActive),
+          type: 'BOOLEAN',
+          description: 'Whether announcement bar is active',
+        },
+      }),
+    );
+
+    if (updates.length > 0) {
+      await Promise.all(updates);
+    }
+
+    return this.getAnnouncement();
   }
 }

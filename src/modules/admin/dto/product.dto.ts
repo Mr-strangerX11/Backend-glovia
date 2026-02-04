@@ -90,6 +90,12 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   isNew?: boolean;
+
+  @ApiProperty({ required: false, description: 'Discount percentage (0-100)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discountPercentage?: number;
 }
 
 export class UpdateProductDto {
@@ -133,4 +139,10 @@ export class UpdateProductDto {
   @IsArray()
   @IsString({ each: true })
   images?: string[];
+
+  @ApiProperty({ required: false, description: 'Discount percentage (0-100)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discountPercentage?: number;
 }
