@@ -1,25 +1,28 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class DatabaseService implements OnModuleInit, OnModuleDestroy {
+  constructor(@InjectConnection() private connection: Connection) {}
+
   async onModuleInit() {
-    await this.$connect();
+    // Connection is already established by MongooseModule
+    console.log('MongoDB connection established');
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    await this.connection.close();
   }
 
   async cleanDatabase() {
     if (process.env.NODE_ENV === 'production') return;
     
-    const models = Reflect.ownKeys(this).filter(
-      (key) => key[0] !== '_' && typeof key === 'string',
-    );
-
+    const collections = await this.connection.db.collections();
+    
     return Promise.all(
-      models.map((modelKey) => this[modelKey].deleteMany()),
+      collections.map((collection) => collection.deleteMany({})),
     );
   }
 }
+

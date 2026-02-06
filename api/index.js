@@ -1,11 +1,11 @@
 const path = require('path');
 
-// Try loading from dist/src first, fallback to src for development
+// Try loading from dist first, fallback to src for development
 let AppModule;
 try {
-  AppModule = require(path.join(__dirname, '../dist/src/app.module')).AppModule;
+  AppModule = require(path.join(__dirname, '../dist/app.module')).AppModule;
 } catch (err) {
-  console.error('Failed to load compiled module from dist/src:', err.message);
+  console.error('Failed to load compiled module from dist:', err.message);
   console.error('Trying alternative path...');
   try {
     AppModule = require(path.join(__dirname, '../src/app.module')).AppModule;
