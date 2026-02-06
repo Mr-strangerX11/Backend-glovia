@@ -20,6 +20,7 @@ const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const common_2 = require("@nestjs/common");
 const user_schema_1 = require("../../database/schemas/user.schema");
 const product_dto_1 = require("./dto/product.dto");
 const user_dto_1 = require("./dto/user.dto");
@@ -83,12 +84,17 @@ let AdminController = class AdminController {
         return this.adminService.updateAnnouncementBar(dto);
     }
     async initializeUsers() {
-        const result = await this.adminService.seedInitialUsers();
-        return {
-            status: 'success',
-            message: 'Initial users created successfully',
-            data: result,
-        };
+        try {
+            const result = await this.adminService.seedInitialUsers();
+            return {
+                status: 'success',
+                message: 'Initial users created successfully',
+                data: result,
+            };
+        }
+        catch (error) {
+            throw new common_2.BadRequestException(error.message || 'Failed to initialize users');
+        }
     }
 };
 exports.AdminController = AdminController;
