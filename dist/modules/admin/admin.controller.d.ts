@@ -6,9 +6,12 @@ import { CreateUserDto } from './dto/user.dto';
 import { UpdateOrderDto } from './dto/order.dto';
 import { UpdateDeliverySettingsDto } from './dto/settings.dto';
 import { UpdateAnnouncementDto } from './dto/announcement.dto';
+import { UploadService } from '../upload/upload.service';
 export declare class AdminController {
     private adminService;
-    constructor(adminService: AdminService);
+    private uploadService;
+    constructor(adminService: AdminService, uploadService: UploadService);
+    private parseProductFormData;
     getDashboard(): Promise<{
         totalOrders: number;
         totalRevenue: any;
@@ -52,12 +55,10 @@ export declare class AdminController {
         }[];
         revenueByMonth: any[];
     }>;
-    createUser(dto: CreateUserDto): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas/user.schema").User & Required<{
+    createUser(dto: CreateUserDto): Promise<import("../../database/schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     updateUserRole(id: string, role: UserRole, actorRole: UserRole): Promise<import("../../database/schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -76,7 +77,19 @@ export declare class AdminController {
     } & {
         id: string;
     }>;
+    createProductWithImages(files: Express.Multer.File[], body: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Product, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Product & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
     updateProduct(id: string, dto: UpdateProductDto): Promise<import("../../database/schemas").Product & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
+    updateProductWithImages(id: string, files: Express.Multer.File[], body: any): Promise<import("../../database/schemas").Product & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

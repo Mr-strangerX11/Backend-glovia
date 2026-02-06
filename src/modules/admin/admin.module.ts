@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { VendorController } from './vendor.controller';
+import { UploadModule } from '../upload/upload.module';
 import { User, UserSchema } from '../../database/schemas/user.schema';
 import { Product, ProductSchema } from '../../database/schemas/product.schema';
 import { Order, OrderSchema } from '../../database/schemas/order.schema';
@@ -26,6 +27,7 @@ import { Setting, SettingSchema } from '../../database/schemas/setting.schema';
       { name: ProductImage.name, schema: ProductImageSchema },
       { name: Setting.name, schema: SettingSchema },
     ]),
+    UploadModule,
   ],
   controllers: [AdminController, VendorController],
   providers: [AdminService],

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const platform_express_1 = require("@nestjs/platform-express");
 const admin_service_1 = require("./admin.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
@@ -28,9 +29,51 @@ const order_dto_1 = require("./dto/order.dto");
 const settings_dto_1 = require("./dto/settings.dto");
 const announcement_dto_1 = require("./dto/announcement.dto");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const upload_service_1 = require("../upload/upload.service");
 let AdminController = class AdminController {
-    constructor(adminService) {
+    constructor(adminService, uploadService) {
         this.adminService = adminService;
+        this.uploadService = uploadService;
+    }
+    parseProductFormData(body) {
+        const parseNumber = (value) => {
+            if (value === undefined || value === null || value === '')
+                return undefined;
+            const num = Number(value);
+            return Number.isNaN(num) ? undefined : num;
+        };
+        const parseBoolean = (value) => {
+            if (value === true || value === false)
+                return value;
+            if (typeof value === 'string')
+                return value.toLowerCase() === 'true';
+            return undefined;
+        };
+        const parseArray = (value) => {
+            if (!value)
+                return undefined;
+            if (Array.isArray(value))
+                return value;
+            if (typeof value === 'string') {
+                return value
+                    .split(',')
+                    .map((v) => v.trim())
+                    .filter(Boolean);
+            }
+            return undefined;
+        };
+        return {
+            ...body,
+            price: parseNumber(body.price),
+            compareAtPrice: parseNumber(body.compareAtPrice),
+            stockQuantity: parseNumber(body.stockQuantity),
+            discountPercentage: parseNumber(body.discountPercentage),
+            isFeatured: parseBoolean(body.isFeatured),
+            isBestSeller: parseBoolean(body.isBestSeller),
+            isNew: parseBoolean(body.isNew),
+            suitableFor: parseArray(body.suitableFor),
+            tags: parseArray(body.tags),
+        };
     }
     getDashboard() {
         return this.adminService.getDashboard();
@@ -47,8 +90,27 @@ let AdminController = class AdminController {
     createProduct(dto) {
         return this.adminService.createProduct(dto);
     }
+    async createProductWithImages(files, body) {
+        const payload = this.parseProductFormData(body);
+        if (files && files.length > 0) {
+            const urls = await this.uploadService.uploadMultiple(files, 'products');
+            payload.images = urls;
+        }
+        return this.adminService.createProduct(payload);
+    }
     updateProduct(id, dto) {
         return this.adminService.updateProduct(id, dto);
+    }
+    async updateProductWithImages(id, files, body) {
+        const payload = this.parseProductFormData(body);
+        if (files && files.length > 0) {
+            const urls = await this.uploadService.uploadMultiple(files, 'products');
+            payload.images = urls.map((url, index) => ({
+                url,
+                isPrimary: index === 0,
+            }));
+        }
+        return this.adminService.updateProduct(id, payload);
     }
     deleteProduct(id) {
         return this.adminService.deleteProduct(id);
@@ -144,6 +206,17 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "createProduct", null);
 __decorate([
+    (0, common_1.Post)('products/with-images'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create product with image upload' }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('images', 10)),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "createProductWithImages", null);
+__decorate([
     (0, common_1.Put)('products/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update product' }),
     __param(0, (0, common_1.Param)('id')),
@@ -152,6 +225,18 @@ __decorate([
     __metadata("design:paramtypes", [String, product_dto_1.UpdateProductDto]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateProduct", null);
+__decorate([
+    (0, common_1.Put)('products/:id/with-images'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update product with image upload' }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('images', 10)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateProductWithImages", null);
 __decorate([
     (0, common_1.Delete)('products/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete product' }),
@@ -259,6 +344,7 @@ exports.AdminController = AdminController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
     (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [admin_service_1.AdminService])
+    __metadata("design:paramtypes", [admin_service_1.AdminService,
+        upload_service_1.UploadService])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map

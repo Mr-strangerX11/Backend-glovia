@@ -9,8 +9,11 @@ import {
   Query,
   UseGuards,
   Patch,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -25,6 +28,7 @@ import { UpdateOrderDto } from './dto/order.dto';
 import { UpdateDeliverySettingsDto } from './dto/settings.dto';
 import { UpdateAnnouncementDto } from './dto/announcement.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UploadService } from '../upload/upload.service';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -32,7 +36,49 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 @ApiBearerAuth()
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private uploadService: UploadService,
+  ) {}
+
+  private parseProductFormData(body: any) {
+    const parseNumber = (value: any) => {
+      if (value === undefined || value === null || value === '') return undefined;
+      const num = Number(value);
+      return Number.isNaN(num) ? undefined : num;
+    };
+
+    const parseBoolean = (value: any) => {
+      if (value === true || value === false) return value;
+      if (typeof value === 'string') return value.toLowerCase() === 'true';
+      return undefined;
+    };
+
+    const parseArray = (value: any) => {
+      if (!value) return undefined;
+      if (Array.isArray(value)) return value;
+      if (typeof value === 'string') {
+        return value
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean);
+      }
+      return undefined;
+    };
+
+    return {
+      ...body,
+      price: parseNumber(body.price),
+      compareAtPrice: parseNumber(body.compareAtPrice),
+      stockQuantity: parseNumber(body.stockQuantity),
+      discountPercentage: parseNumber(body.discountPercentage),
+      isFeatured: parseBoolean(body.isFeatured),
+      isBestSeller: parseBoolean(body.isBestSeller),
+      isNew: parseBoolean(body.isNew),
+      suitableFor: parseArray(body.suitableFor),
+      tags: parseArray(body.tags),
+    };
+  }
 
   @Get('dashboard')
   @ApiOperation({ summary: 'Get dashboard analytics' })
@@ -68,10 +114,48 @@ export class AdminController {
     return this.adminService.createProduct(dto);
   }
 
+  @Post('products/with-images')
+  @ApiOperation({ summary: 'Create product with image upload' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('images', 10))
+  async createProductWithImages(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any,
+  ) {
+    const payload = this.parseProductFormData(body) as CreateProductDto;
+    if (files && files.length > 0) {
+      const urls = await this.uploadService.uploadMultiple(files, 'products');
+      payload.images = urls;
+    }
+
+    return this.adminService.createProduct(payload);
+  }
+
   @Put('products/:id')
   @ApiOperation({ summary: 'Update product' })
   updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.adminService.updateProduct(id, dto);
+  }
+
+  @Put('products/:id/with-images')
+  @ApiOperation({ summary: 'Update product with image upload' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('images', 10))
+  async updateProductWithImages(
+    @Param('id') id: string,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any,
+  ) {
+    const payload: any = this.parseProductFormData(body);
+    if (files && files.length > 0) {
+      const urls = await this.uploadService.uploadMultiple(files, 'products');
+      payload.images = urls.map((url: string, index: number) => ({
+        url,
+        isPrimary: index === 0,
+      }));
+    }
+
+    return this.adminService.updateProduct(id, payload);
   }
 
   @Delete('products/:id')

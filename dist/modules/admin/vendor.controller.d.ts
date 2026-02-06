@@ -1,8 +1,11 @@
 import { AdminService } from './admin.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { UploadService } from '../upload/upload.service';
 export declare class VendorController {
     private adminService;
-    constructor(adminService: AdminService);
+    private uploadService;
+    constructor(adminService: AdminService, uploadService: UploadService);
+    private parseProductFormData;
     getProducts(search?: string, page?: string, limit?: string): Promise<{
         data: {
             images: any[];
@@ -110,7 +113,19 @@ export declare class VendorController {
     } & {
         id: string;
     }>;
+    createProductWithImages(files: Express.Multer.File[], body: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Product, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Product & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
     updateProduct(id: string, dto: UpdateProductDto): Promise<import("../../database/schemas").Product & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
+    updateProductWithImages(id: string, files: Express.Multer.File[], body: any): Promise<import("../../database/schemas").Product & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

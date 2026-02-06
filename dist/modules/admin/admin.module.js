@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const admin_controller_1 = require("./admin.controller");
 const admin_service_1 = require("./admin.service");
 const vendor_controller_1 = require("./vendor.controller");
+const upload_module_1 = require("../upload/upload.module");
 const user_schema_1 = require("../../database/schemas/user.schema");
 const product_schema_1 = require("../../database/schemas/product.schema");
 const order_schema_1 = require("../../database/schemas/order.schema");
@@ -38,6 +39,7 @@ exports.AdminModule = AdminModule = __decorate([
                 { name: product_image_schema_1.ProductImage.name, schema: product_image_schema_1.ProductImageSchema },
                 { name: setting_schema_1.Setting.name, schema: setting_schema_1.SettingSchema },
             ]),
+            upload_module_1.UploadModule,
         ],
         controllers: [admin_controller_1.AdminController, vendor_controller_1.VendorController],
         providers: [admin_service_1.AdminService],
