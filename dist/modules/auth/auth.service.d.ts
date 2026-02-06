@@ -14,7 +14,9 @@ export declare class AuthService {
     private emailOtpService;
     constructor(userModel: Model<User>, otpVerificationModel: Model<OtpVerification>, jwtService: JwtService, configService: ConfigService, otpService: OtpService, emailOtpService: EmailOtpService);
     register(dto: RegisterDto, ipAddress?: string, deviceFingerprint?: string): Promise<{
+        success: boolean;
         message: string;
+        nextStep: string;
         userId: string;
         email: string;
         isEmailVerified: boolean;
@@ -57,9 +59,10 @@ export declare class AuthService {
     }>;
     verifyEmailOtp(dto: VerifyEmailOtpDto): Promise<{
         message: string;
-        user: any;
-        accessToken: string;
-        refreshToken: string;
+        success: boolean;
+        user?: any;
+        accessToken?: string;
+        refreshToken?: string;
     }>;
     resendVerificationOtp(email: string): Promise<{
         message: string;

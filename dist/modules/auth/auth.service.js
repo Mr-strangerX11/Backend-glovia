@@ -64,7 +64,9 @@ let AuthService = class AuthService {
             throw new common_1.BadRequestException('Failed to send verification email');
         }
         return {
-            message: 'Registration successful. Please verify your email to complete signup.',
+            success: true,
+            message: 'Registration successful. Please check your email for verification code.',
+            nextStep: 'VERIFY_EMAIL',
             userId: user._id.toString(),
             email: user.email,
             isEmailVerified: false,
@@ -208,6 +210,9 @@ let AuthService = class AuthService {
         if (!user) {
             throw new common_1.NotFoundException('User not found');
         }
+        if (user.isEmailVerified) {
+            throw new common_1.BadRequestException('Email already verified. Please login.');
+        }
         const otpRecord = await this.otpVerificationModel.findOne({
             userId: user._id,
             phone: email,
@@ -217,7 +222,18 @@ let AuthService = class AuthService {
             expiresAt: { $gt: new Date() },
         }).sort({ createdAt: -1 }).lean();
         if (!otpRecord) {
-            throw new common_1.BadRequestException('Invalid or expired verification code');
+            const anyOtpRecord = await this.otpVerificationModel.findOne({
+                userId: user._id,
+                phone: email,
+                purpose: 'email_verification',
+                isVerified: false,
+                expiresAt: { $gt: new Date() },
+            }).sort({ createdAt: -1 }).lean();
+            if (anyOtpRecord) {
+                await this.otpVerificationModel.findByIdAndUpdate(anyOtpRecord._id, { $inc: { attempts: 1 } }, { new: true });
+                throw new common_1.BadRequestException('Wrong code. Please check your email and try again.');
+            }
+            throw new common_1.BadRequestException('Verification code expired. Please request a new code.');
         }
         if (otpRecord.attempts >= 5) {
             throw new common_1.BadRequestException('Too many failed attempts. Please request a new code.');
@@ -227,7 +243,8 @@ let AuthService = class AuthService {
         const tokens = await this.generateTokens(updatedUser._id.toString(), updatedUser.email, updatedUser.role);
         await this.updateRefreshToken(updatedUser._id.toString(), tokens.refreshToken);
         return {
-            message: 'Email verified successfully',
+            success: true,
+            message: 'Email verified successfully. You can now login.',
             user: {
                 id: updatedUser._id.toString(),
                 email: updatedUser.email,

@@ -61,7 +61,9 @@ export class AuthService {
     }
 
     return {
-      message: 'Registration successful. Please verify your email to complete signup.',
+      success: true,
+      message: 'Registration successful. Please check your email for verification code.',
+      nextStep: 'VERIFY_EMAIL',
       userId: user._id.toString(),
       email: user.email,
       isEmailVerified: false,
@@ -266,12 +268,16 @@ export class AuthService {
     return { message: 'Password reset successfully' };
   }
 
-  async verifyEmailOtp(dto: VerifyEmailOtpDto): Promise<{ message: string; user: any; accessToken: string; refreshToken: string }> {
+  async verifyEmailOtp(dto: VerifyEmailOtpDto): Promise<{ message: string; success: boolean; user?: any; accessToken?: string; refreshToken?: string }> {
     const { email, otp } = dto;
 
     const user = await this.userModel.findOne({ email }).lean();
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email already verified. Please login.');
     }
 
     const otpRecord = await this.otpVerificationModel.findOne({
@@ -284,7 +290,26 @@ export class AuthService {
     }).sort({ createdAt: -1 }).lean();
 
     if (!otpRecord) {
-      throw new BadRequestException('Invalid or expired verification code');
+      // Check if OTP exists but wrong code
+      const anyOtpRecord = await this.otpVerificationModel.findOne({
+        userId: user._id,
+        phone: email,
+        purpose: 'email_verification',
+        isVerified: false,
+        expiresAt: { $gt: new Date() },
+      }).sort({ createdAt: -1 }).lean();
+
+      if (anyOtpRecord) {
+        // Increment attempts
+        await this.otpVerificationModel.findByIdAndUpdate(
+          anyOtpRecord._id,
+          { $inc: { attempts: 1 } },
+          { new: true },
+        );
+        throw new BadRequestException('Wrong code. Please check your email and try again.');
+      }
+      
+      throw new BadRequestException('Verification code expired. Please request a new code.');
     }
 
     if (otpRecord.attempts >= 5) {
@@ -307,7 +332,8 @@ export class AuthService {
     await this.updateRefreshToken(updatedUser._id.toString(), tokens.refreshToken);
 
     return {
-      message: 'Email verified successfully',
+      success: true,
+      message: 'Email verified successfully. You can now login.',
       user: {
         id: updatedUser._id.toString(),
         email: updatedUser.email,
