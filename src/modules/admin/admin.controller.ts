@@ -16,7 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { BadRequestException } from '@nestjs/common';
+import { HttpCode } from '@nestjs/common';
 import { UserRole } from '../../database/schemas/user.schema';
 import { OrderStatus } from '../../database/schemas/order.schema';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
@@ -161,6 +161,7 @@ export class AdminController {
 
   @Post('init')
   @Public()
+  @HttpCode(200)
   @ApiOperation({ summary: 'Initialize default users (Super Admin, Admin, Vendor, User)' })
   async initializeUsers() {
     try {
@@ -171,7 +172,11 @@ export class AdminController {
         data: result,
       };
     } catch (error) {
-      throw new BadRequestException(error.message || 'Failed to initialize users');
+      console.error('Init users failed:', error);
+      return {
+        status: 'error',
+        message: error?.message || 'Failed to initialize users',
+      };
     }
   }
 }

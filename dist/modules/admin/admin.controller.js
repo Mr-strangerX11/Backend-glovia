@@ -93,7 +93,11 @@ let AdminController = class AdminController {
             };
         }
         catch (error) {
-            throw new common_2.BadRequestException(error.message || 'Failed to initialize users');
+            console.error('Init users failed:', error);
+            return {
+                status: 'error',
+                message: error?.message || 'Failed to initialize users',
+            };
         }
     }
 };
@@ -243,6 +247,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('init'),
     (0, public_decorator_1.Public)(),
+    (0, common_2.HttpCode)(200),
     (0, swagger_1.ApiOperation)({ summary: 'Initialize default users (Super Admin, Admin, Vendor, User)' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

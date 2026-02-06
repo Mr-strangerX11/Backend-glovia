@@ -228,5 +228,9 @@ export declare class AdminController {
         status: string;
         message: string;
         data: any[];
+    } | {
+        status: string;
+        message: any;
+        data?: undefined;
     }>;
 }
