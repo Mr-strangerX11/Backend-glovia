@@ -742,4 +742,18 @@ export class AdminService {
 
     return createdUsers;
   }
+
+  async fixSuperAdminRole() {
+    const superadmin = await this.userModel.findOne({ email: 'superadmin@glovia.com.np' });
+    if (!superadmin) {
+      throw new NotFoundException('SuperAdmin user not found');
+    }
+
+    if (superadmin.role === UserRole.SUPER_ADMIN) {
+      return { email: superadmin.email, role: superadmin.role, status: 'already_correct' };
+    }
+
+    await this.userModel.findByIdAndUpdate(superadmin._id, { role: UserRole.SUPER_ADMIN });
+    return { email: superadmin.email, oldRole: superadmin.role, newRole: UserRole.SUPER_ADMIN, status: 'updated' };
+  }
 }

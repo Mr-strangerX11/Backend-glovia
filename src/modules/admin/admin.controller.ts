@@ -275,4 +275,25 @@ export class AdminController {
       };
     }
   }
+
+  @Post('fix-superadmin')
+  @Public()
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Fix SuperAdmin role (temporary endpoint)' })
+  async fixSuperAdmin() {
+    try {
+      const result = await this.adminService.fixSuperAdminRole();
+      return {
+        status: 'success',
+        message: 'SuperAdmin role fixed',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Init users failed:', error);
+      return {
+        status: 'error',
+        message: error?.message || 'Failed to initialize users',
+      };
+    }
+  }
 }
