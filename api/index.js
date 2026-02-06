@@ -25,10 +25,14 @@ async function createHandler() {
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
+    } else if (!origin) {
+      // Allow requests without origin (for health checks, etc)
+      res.setHeader('Access-Control-Allow-Origin', '*');
     }
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    res.setHeader('X-Powered-By', 'Glovia-Backend');
     
     if (req.method === 'OPTIONS') {
       return res.status(200).end();
