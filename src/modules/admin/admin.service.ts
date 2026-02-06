@@ -709,10 +709,19 @@ export class AdminService {
     for (const userData of users) {
       const existingUser = await this.userModel.findOne({ email: userData.email });
       if (existingUser) {
-        createdUsers.push({
-          email: userData.email,
-          status: 'already_exists',
-        });
+        // Update role if it's incorrect (especially for superadmin)
+        if (existingUser.role !== userData.role && userData.role === UserRole.SUPER_ADMIN) {
+          await this.userModel.findByIdAndUpdate(existingUser._id, { role: userData.role });
+          createdUsers.push({
+            email: userData.email,
+            status: 'role_updated_to_SUPER_ADMIN',
+          });
+        } else {
+          createdUsers.push({
+            email: userData.email,
+            status: 'already_exists',
+          });
+        }
         continue;
       }
 
