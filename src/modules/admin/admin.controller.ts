@@ -23,7 +23,7 @@ import { HttpCode } from '@nestjs/common';
 import { UserRole } from '../../database/schemas/user.schema';
 import { OrderStatus } from '../../database/schemas/order.schema';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, UpdateUserRoleDto } from './dto/user.dto';
 import { UpdateOrderDto } from './dto/order.dto';
 import { UpdateDeliverySettingsDto } from './dto/settings.dto';
 import { UpdateAnnouncementDto } from './dto/announcement.dto';
@@ -96,10 +96,10 @@ export class AdminController {
   @ApiOperation({ summary: 'Update user role' })
   updateUserRole(
     @Param('id') id: string,
-    @Body('role') role: UserRole,
+    @Body() dto: UpdateUserRoleDto,
     @CurrentUser('role') actorRole: UserRole,
   ) {
-    return this.adminService.updateUserRole(id, role, actorRole);
+    return this.adminService.updateUserRole(id, dto.role, actorRole);
   }
 
   @Delete('users/:id')
