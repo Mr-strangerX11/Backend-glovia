@@ -364,4 +364,5 @@ export declare class AdminService {
         __v: number;
     }>;
     getDiscountSettings(): Promise<any>;
+    seedInitialUsers(): Promise<any[]>;
 }

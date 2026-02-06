@@ -10,6 +10,7 @@ exports.AdminModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const admin_controller_1 = require("./admin.controller");
+const admin_init_controller_1 = require("./admin-init.controller");
 const admin_service_1 = require("./admin.service");
 const vendor_controller_1 = require("./vendor.controller");
 const user_schema_1 = require("../../database/schemas/user.schema");
@@ -39,7 +40,7 @@ exports.AdminModule = AdminModule = __decorate([
                 { name: setting_schema_1.Setting.name, schema: setting_schema_1.SettingSchema },
             ]),
         ],
-        controllers: [admin_controller_1.AdminController, vendor_controller_1.VendorController],
+        controllers: [admin_controller_1.AdminController, admin_init_controller_1.AdminInitController, vendor_controller_1.VendorController],
         providers: [admin_service_1.AdminService],
     })
 ], AdminModule);

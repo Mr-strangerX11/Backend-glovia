@@ -521,6 +521,73 @@ let AdminService = class AdminService {
         }
         return JSON.parse(setting.value);
     }
+    async seedInitialUsers() {
+        const users = [
+            {
+                email: 'superadmin@glovia.com.np',
+                password: 'SuperAdmin123!',
+                firstName: 'Super',
+                lastName: 'Admin',
+                phone: '+977-9800000001',
+                role: user_schema_1.UserRole.SUPER_ADMIN,
+                isEmailVerified: true,
+                trustScore: 100,
+            },
+            {
+                email: 'admin@glovia.com.np',
+                password: 'Admin123!',
+                firstName: 'Admin',
+                lastName: 'User',
+                phone: '+977-9800000002',
+                role: user_schema_1.UserRole.ADMIN,
+                isEmailVerified: true,
+                trustScore: 100,
+            },
+            {
+                email: 'vendor@glovia.com.np',
+                password: 'Vendor123!',
+                firstName: 'Vendor',
+                lastName: 'Account',
+                phone: '+977-9800000003',
+                role: user_schema_1.UserRole.VENDOR,
+                isEmailVerified: true,
+                trustScore: 75,
+            },
+            {
+                email: 'user@glovia.com.np',
+                password: 'User123!',
+                firstName: 'Regular',
+                lastName: 'User',
+                phone: '+977-9800000004',
+                role: user_schema_1.UserRole.CUSTOMER,
+                isEmailVerified: true,
+                trustScore: 50,
+            },
+        ];
+        const createdUsers = [];
+        for (const userData of users) {
+            const existingUser = await this.userModel.findOne({ email: userData.email });
+            if (existingUser) {
+                createdUsers.push({
+                    email: userData.email,
+                    status: 'already_exists',
+                });
+                continue;
+            }
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
+            const user = await this.userModel.create({
+                ...userData,
+                password: hashedPassword,
+            });
+            createdUsers.push({
+                email: userData.email,
+                password: userData.password,
+                role: userData.role,
+                status: 'created',
+            });
+        }
+        return createdUsers;
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
