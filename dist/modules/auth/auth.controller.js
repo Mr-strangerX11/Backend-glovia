@@ -31,6 +31,9 @@ let AuthController = class AuthController {
     async verifyEmailOtp(dto) {
         return this.authService.verifyEmailOtp(dto);
     }
+    async resendVerificationOtp(dto) {
+        return this.authService.resendVerificationOtp(dto.email);
+    }
     async login(dto, req) {
         const ipAddress = req.ip || req.socket.remoteAddress;
         return this.authService.login(dto, ipAddress);
@@ -71,6 +74,15 @@ __decorate([
     __metadata("design:paramtypes", [auth_dto_1.VerifyEmailOtpDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "verifyEmailOtp", null);
+__decorate([
+    (0, common_1.Post)('verify-email/resend'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Resend email verification OTP' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resendVerificationOtp", null);
 __decorate([
     (0, common_1.Post)('login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

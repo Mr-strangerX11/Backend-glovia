@@ -321,4 +321,36 @@ export class AuthService {
       refreshToken: tokens.refreshToken,
     };
   }
+
+  async resendVerificationOtp(email: string): Promise<{ message: string }> {
+    const user = await this.userModel.findOne({ email }).lean();
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email already verified');
+    }
+
+    const otp = this.otpService.generateOtp();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await this.otpVerificationModel.create({
+      userId: user._id,
+      phone: user.email,
+      otp,
+      purpose: 'email_verification',
+      expiresAt,
+    });
+
+    const sent = await this.emailOtpService.sendEmailOtp(user.email, otp, 'email_verification');
+    if (!sent) {
+      throw new BadRequestException('Failed to send verification email');
+    }
+
+    return {
+      message: 'Verification OTP resent successfully. Please check your email.',
+    };
+  }
 }

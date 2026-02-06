@@ -35,6 +35,13 @@ export class AuthController {
     return this.authService.verifyEmailOtp(dto);
   }
 
+  @Post('verify-email/resend')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend email verification OTP' })
+  async resendVerificationOtp(@Body() dto: { email: string }) {
+    return this.authService.resendVerificationOtp(dto.email);
+  }
+
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User login (requires verified email)' })

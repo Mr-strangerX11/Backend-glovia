@@ -16,6 +16,11 @@ export declare class AuthController {
         accessToken: string;
         refreshToken: string;
     }>;
+    resendVerificationOtp(dto: {
+        email: string;
+    }): Promise<{
+        message: string;
+    }>;
     login(dto: LoginDto, req: Request): Promise<{
         accessToken: string;
         refreshToken: string;

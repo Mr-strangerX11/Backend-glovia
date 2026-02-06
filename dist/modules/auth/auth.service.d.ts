@@ -61,4 +61,7 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
+    resendVerificationOtp(email: string): Promise<{
+        message: string;
+    }>;
 }
