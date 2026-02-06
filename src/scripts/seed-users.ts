@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
-import { UsersService } from '../modules/users/users.service';
+import { getModelToken } from '@nestjs/mongoose';
 import * as bcryptjs from 'bcryptjs';
+import { User, UserRole } from '../database/schemas/user.schema';
 
 async function seedUsers() {
   const app = await NestFactory.create(AppModule);
-  const usersService = app.get(UsersService);
+  const userModel = app.get(getModelToken(User.name));
 
   const users = [
     {
@@ -14,8 +15,8 @@ async function seedUsers() {
       firstName: 'Super',
       lastName: 'Admin',
       phone: '+977-9800000001',
-      role: 'super_admin',
-      isVerified: true,
+      role: UserRole.SUPER_ADMIN,
+      isEmailVerified: true,
       trustScore: 100,
     },
     {
@@ -24,8 +25,8 @@ async function seedUsers() {
       firstName: 'Admin',
       lastName: 'User',
       phone: '+977-9800000002',
-      role: 'admin',
-      isVerified: true,
+      role: UserRole.ADMIN,
+      isEmailVerified: true,
       trustScore: 100,
     },
     {
@@ -34,8 +35,8 @@ async function seedUsers() {
       firstName: 'Vendor',
       lastName: 'Account',
       phone: '+977-9800000003',
-      role: 'vendor',
-      isVerified: true,
+      role: UserRole.VENDOR,
+      isEmailVerified: true,
       trustScore: 75,
     },
     {
@@ -44,8 +45,8 @@ async function seedUsers() {
       firstName: 'Regular',
       lastName: 'User',
       phone: '+977-9800000004',
-      role: 'user',
-      isVerified: true,
+      role: UserRole.CUSTOMER,
+      isEmailVerified: true,
       trustScore: 50,
     },
   ];
@@ -53,7 +54,7 @@ async function seedUsers() {
   try {
     for (const userData of users) {
       // Check if user already exists
-      const existingUser = await usersService.findByEmail(userData.email);
+      const existingUser = await userModel.findOne({ email: userData.email });
       if (existingUser) {
         console.log(`✓ User ${userData.email} already exists`);
         continue;
@@ -63,7 +64,7 @@ async function seedUsers() {
       const hashedPassword = await bcryptjs.hash(userData.password, 10);
 
       // Create user
-      const user = await usersService.create({
+      const user = await userModel.create({
         ...userData,
         password: hashedPassword,
       });
