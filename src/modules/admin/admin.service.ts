@@ -142,8 +142,13 @@ export class AdminService {
       this.userModel.countDocuments(filter)
     ]);
 
+    const usersWithId = users.map((user) => ({
+      ...user,
+      id: user._id.toString()
+    }));
+
     return {
-      data: users,
+      data: usersWithId,
       meta: {
         total,
         page,
@@ -485,6 +490,7 @@ export class AdminService {
 
     const customersWithStats = customers.map(customer => ({
       ...customer,
+      id: customer._id.toString(),
       orderCount: orderCountMap[customer._id.toString()]?.orderCount || 0,
       totalSpent: orderCountMap[customer._id.toString()]?.totalSpent || 0
     }));
