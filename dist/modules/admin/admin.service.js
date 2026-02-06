@@ -120,11 +120,11 @@ let AdminService = class AdminService {
             throw new common_1.BadRequestException('User with this email already exists');
         }
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-        const user = new this.userModel({
+        const user = await this.userModel.create({
             ...createUserDto,
             password: hashedPassword,
         });
-        return user.save();
+        return user.toObject();
     }
     async getAllUsers(page = 1, limit = 10, role) {
         const skip = (page - 1) * limit;

@@ -64,12 +64,10 @@ export declare class AdminService {
         }[];
         revenueByMonth: any[];
     }>;
-    createUser(createUserDto: CreateUserDto): Promise<import("mongoose").Document<unknown, {}, User, {}, import("mongoose").DefaultSchemaOptions> & User & Required<{
+    createUser(createUserDto: CreateUserDto): Promise<User & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     getAllUsers(page?: number, limit?: number, role?: UserRole): Promise<{
         data: (User & Required<{
