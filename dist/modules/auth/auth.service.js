@@ -48,7 +48,7 @@ let AuthService = class AuthService {
             role: user_schema_1.UserRole.CUSTOMER,
             ipAddress,
             deviceFingerprint,
-            isEmailVerified: process.env.NODE_ENV !== 'production',
+            isEmailVerified: false,
         });
         const otp = this.otpService.generateOtp();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -59,23 +59,15 @@ let AuthService = class AuthService {
             purpose: 'email_verification',
             expiresAt,
         });
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`📧 DEV MODE - OTP for ${user.email}: ${otp}`);
-        }
-        else {
-            const sent = await this.emailOtpService.sendEmailOtp(user.email, otp, 'email_verification');
-            if (!sent) {
-                throw new common_1.BadRequestException('Failed to send verification email');
-            }
+        const sent = await this.emailOtpService.sendEmailOtp(user.email, otp, 'email_verification');
+        if (!sent) {
+            throw new common_1.BadRequestException('Failed to send verification email');
         }
         return {
-            message: process.env.NODE_ENV !== 'production'
-                ? `Registration successful. OTP: ${otp}`
-                : 'Registration successful. Please verify your email to complete signup.',
+            message: 'Registration successful. Please verify your email to complete signup.',
             userId: user._id.toString(),
             email: user.email,
-            otp: process.env.NODE_ENV !== 'production' ? otp : undefined,
-            isEmailVerified: user.isEmailVerified,
+            isEmailVerified: false,
         };
     }
     async login(dto, ipAddress) {

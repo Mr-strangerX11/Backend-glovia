@@ -40,7 +40,7 @@ export class AuthService {
       role: UserRole.CUSTOMER,
       ipAddress,
       deviceFingerprint,
-      isEmailVerified: process.env.NODE_ENV !== 'production', // Auto-verify in dev
+      isEmailVerified: false, // Always require email verification
     });
 
     const otp = this.otpService.generateOtp();
@@ -54,24 +54,17 @@ export class AuthService {
       expiresAt,
     });
 
-    // In development, log OTP to console. In production, send email.
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`📧 DEV MODE - OTP for ${user.email}: ${otp}`);
-    } else {
-      const sent = await this.emailOtpService.sendEmailOtp(user.email, otp, 'email_verification');
-      if (!sent) {
-        throw new BadRequestException('Failed to send verification email');
-      }
+    // Send OTP via email
+    const sent = await this.emailOtpService.sendEmailOtp(user.email, otp, 'email_verification');
+    if (!sent) {
+      throw new BadRequestException('Failed to send verification email');
     }
 
     return {
-      message: process.env.NODE_ENV !== 'production' 
-        ? `Registration successful. OTP: ${otp}` 
-        : 'Registration successful. Please verify your email to complete signup.',
+      message: 'Registration successful. Please verify your email to complete signup.',
       userId: user._id.toString(),
       email: user.email,
-      otp: process.env.NODE_ENV !== 'production' ? otp : undefined,
-      isEmailVerified: user.isEmailVerified,
+      isEmailVerified: false,
     };
   }
 
