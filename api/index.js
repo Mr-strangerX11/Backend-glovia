@@ -1,4 +1,12 @@
 const path = require('path');
+const express = require('express');
+const { NestFactory } = require('@nestjs/core');
+const { ExpressAdapter } = require('@nestjs/platform-express');
+const { ValidationPipe } = require('@nestjs/common');
+const { SwaggerModule, DocumentBuilder } = require('@nestjs/swagger');
+const { ConfigService } = require('@nestjs/config');
+const helmet = require('helmet');
+const compression = require('compression');
 
 // Try loading from dist first, fallback to src for development
 let AppModule;
