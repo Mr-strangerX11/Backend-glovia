@@ -156,4 +156,15 @@ export class AdminController {
   updateAnnouncement(@Body() dto: UpdateAnnouncementDto) {
     return this.adminService.updateAnnouncementBar(dto);
   }
+
+  @Post('init')
+  @ApiOperation({ summary: 'Initialize default users (Super Admin, Admin, Vendor, User)' })
+  async initializeUsers() {
+    const result = await this.adminService.seedInitialUsers();
+    return {
+      status: 'success',
+      message: 'Initial users created successfully',
+      data: result,
+    };
+  }
 }

@@ -81,6 +81,14 @@ let AdminController = class AdminController {
     updateAnnouncement(dto) {
         return this.adminService.updateAnnouncementBar(dto);
     }
+    async initializeUsers() {
+        const result = await this.adminService.seedInitialUsers();
+        return {
+            status: 'success',
+            message: 'Initial users created successfully',
+            data: result,
+        };
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -225,6 +233,13 @@ __decorate([
     __metadata("design:paramtypes", [announcement_dto_1.UpdateAnnouncementDto]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateAnnouncement", null);
+__decorate([
+    (0, common_1.Post)('init'),
+    (0, swagger_1.ApiOperation)({ summary: 'Initialize default users (Super Admin, Admin, Vendor, User)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "initializeUsers", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin'),
     (0, common_1.Controller)('admin'),

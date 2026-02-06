@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdminController } from './admin.controller';
-import { AdminInitController } from './admin-init.controller';
 import { AdminService } from './admin.service';
 import { VendorController } from './vendor.controller';
 import { User, UserSchema } from '../../database/schemas/user.schema';
@@ -28,7 +27,7 @@ import { Setting, SettingSchema } from '../../database/schemas/setting.schema';
       { name: Setting.name, schema: SettingSchema },
     ]),
   ],
-  controllers: [AdminController, AdminInitController, VendorController],
+  controllers: [AdminController, VendorController],
   providers: [AdminService],
 })
 export class AdminModule {}

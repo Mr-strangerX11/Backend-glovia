@@ -224,4 +224,9 @@ export declare class AdminController {
     }> & {
         __v: number;
     }>;
+    initializeUsers(): Promise<{
+        status: string;
+        message: string;
+        data: any[];
+    }>;
 }
