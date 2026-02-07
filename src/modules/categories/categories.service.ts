@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Category, Product, ProductImage } from '../../database/schemas';
+import { Category, Product, ProductImage, ProductCategory } from '../../database/schemas';
 
 @Injectable()
 export class CategoriesService {
@@ -114,5 +114,74 @@ export class CategoriesService {
       children,
       products: productsWithImages,
     };
+  }
+
+  async create(dto: any) {
+    const category = await this.categoryModel.create(dto);
+    return category;
+  }
+
+  async update(id: string, dto: any) {
+    const category = await this.categoryModel.findByIdAndUpdate(id, dto, { new: true });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    return category;
+  }
+
+  async remove(id: string) {
+    const category = await this.categoryModel.findByIdAndDelete(id);
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    return { message: 'Category deleted successfully' };
+  }
+
+  async seedInitialCategories() {
+    const existingCount = await this.categoryModel.countDocuments();
+    if (existingCount > 0) {
+      return { message: 'Categories already exist', count: existingCount };
+    }
+
+    const categories = [
+      {
+        name: 'Skincare',
+        slug: 'skincare',
+        description: 'Skincare products for healthy and glowing skin',
+        type: ProductCategory.SKINCARE,
+        displayOrder: 1,
+      },
+      {
+        name: 'Haircare',
+        slug: 'haircare',
+        description: 'Haircare products for beautiful and healthy hair',
+        type: ProductCategory.HAIRCARE,
+        displayOrder: 2,
+      },
+      {
+        name: 'Makeup',
+        slug: 'makeup',
+        description: 'Makeup products for all your beauty needs',
+        type: ProductCategory.MAKEUP,
+        displayOrder: 3,
+      },
+      {
+        name: 'Organic',
+        slug: 'organic',
+        description: 'Natural and organic beauty products',
+        type: ProductCategory.ORGANIC,
+        displayOrder: 4,
+      },
+      {
+        name: 'Herbal',
+        slug: 'herbal',
+        description: 'Herbal beauty products with natural ingredients',
+        type: ProductCategory.HERBAL,
+        displayOrder: 5,
+      },
+    ];
+
+    const created = await this.categoryModel.insertMany(categories);
+    return { message: 'Categories seeded successfully', count: created.length, categories: created };
   }
 }
