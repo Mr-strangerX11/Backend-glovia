@@ -1,12 +1,13 @@
-import { IsNumber, Min, IsBoolean, IsOptional } from 'class-validator';
+import { IsNumber, Min, IsBoolean, IsOptional, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class UpdateDeliverySettingsDto {
-  @ApiProperty({ description: 'Delivery charge in NPR' })
-  @IsNumber()
+  @ApiProperty({ description: 'Delivery charge in NPR', example: 150 })
+  @IsNotEmpty({ message: 'Delivery charge is required' })
+  @IsNumber({}, { message: 'Delivery charge must be a number' })
   @Type(() => Number)
-  @Min(0)
+  @Min(0, { message: 'Delivery charge cannot be negative' })
   charge: number;
 }
 

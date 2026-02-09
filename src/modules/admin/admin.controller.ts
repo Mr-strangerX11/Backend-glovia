@@ -221,14 +221,16 @@ export class AdminController {
 
   @Get('settings/delivery')
   @ApiOperation({ summary: 'Get delivery charge' })
-  getDeliverySettings() {
-    return this.adminService.getDeliveryCharge();
+  async getDeliverySettings() {
+    const charge = await this.adminService.getDeliveryCharge();
+    return { charge };
   }
 
   @Put('settings/delivery')
   @ApiOperation({ summary: 'Update delivery charge' })
-  updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto) {
-    return this.adminService.updateDeliveryCharge(dto.charge);
+  async updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto) {
+    await this.adminService.updateDeliveryCharge(dto.charge);
+    return { charge: dto.charge, message: 'Delivery charge updated successfully' };
   }
 
   @Get('settings/announcement')
