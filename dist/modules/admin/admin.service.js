@@ -524,7 +524,38 @@ let AdminService = class AdminService {
                 minOrderAmount: 0
             };
         }
-        return JSON.parse(setting.value);
+        try {
+            return JSON.parse(setting.value);
+        }
+        catch (e) {
+            return {
+                enabled: false,
+                percentage: 0,
+                minOrderAmount: 0
+            };
+        }
+    }
+    async getAllCategories() {
+        try {
+            const categories = await this.categoryModel
+                .find({ isActive: true })
+                .sort({ displayOrder: 1 })
+                .lean();
+            if (!categories || categories.length === 0) {
+                throw new common_1.NotFoundException('No categories found. Please seed categories first using POST /categories/seed');
+            }
+            return {
+                data: categories,
+                count: categories.length,
+                message: 'Categories retrieved successfully'
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.BadRequestException('Failed to retrieve categories');
+        }
     }
     async seedInitialUsers() {
         const users = [

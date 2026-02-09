@@ -389,6 +389,15 @@ export declare class AdminService {
         __v: number;
     }>;
     getDiscountSettings(): Promise<any>;
+    getAllCategories(): Promise<{
+        data: (Category & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        })[];
+        count: number;
+        message: string;
+    }>;
     seedInitialUsers(): Promise<any[]>;
     fixSuperAdminRole(): Promise<{
         email: string;

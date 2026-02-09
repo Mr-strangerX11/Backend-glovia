@@ -19,9 +19,9 @@ exports.UpdateDeliverySettingsDto = UpdateDeliverySettingsDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Delivery charge in NPR', example: 150 }),
     (0, class_validator_1.IsNotEmpty)({ message: 'Delivery charge is required' }),
-    (0, class_validator_1.IsNumber)({}, { message: 'Delivery charge must be a number' }),
+    (0, class_validator_1.IsNumber)({}, { message: 'charge must be a number conforming to the specified constraints' }),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.Min)(0, { message: 'Delivery charge cannot be negative' }),
+    (0, class_validator_1.Min)(0, { message: 'charge must not be less than 0' }),
     __metadata("design:type", Number)
 ], UpdateDeliverySettingsDto.prototype, "charge", void 0);
 class UpdateDiscountSettingsDto {
@@ -30,22 +30,24 @@ exports.UpdateDiscountSettingsDto = UpdateDiscountSettingsDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Enable or disable discount', example: true }),
     (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Boolean)
 ], UpdateDiscountSettingsDto.prototype, "enabled", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, description: 'Discount percentage (0-100)', example: 10 }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: 'percentage must be a number conforming to the specified constraints' }),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Min)(0, { message: 'percentage must not be less than 0' }),
+    (0, class_validator_1.Max)(100, { message: 'percentage cannot exceed 100' }),
     __metadata("design:type", Number)
 ], UpdateDiscountSettingsDto.prototype, "percentage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, description: 'Minimum order amount for discount in NPR', example: 1000 }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: 'minOrderAmount must be a number conforming to the specified constraints' }),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Min)(0, { message: 'minOrderAmount must not be less than 0' }),
     __metadata("design:type", Number)
 ], UpdateDiscountSettingsDto.prototype, "minOrderAmount", void 0);
 //# sourceMappingURL=settings.dto.js.map

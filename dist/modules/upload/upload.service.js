@@ -45,7 +45,8 @@ let UploadService = class UploadService {
                 ],
             }, (error, result) => {
                 if (error) {
-                    reject(new common_1.BadRequestException('Upload failed'));
+                    console.error('Cloudinary upload error:', error);
+                    reject(new common_1.BadRequestException(`Upload failed: ${error.message || 'Unknown error'}`));
                 }
                 else {
                     resolve(result.secure_url);

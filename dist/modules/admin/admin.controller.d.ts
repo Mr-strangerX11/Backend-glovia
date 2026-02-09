@@ -245,6 +245,15 @@ export declare class AdminController {
     }> & {
         __v: number;
     }>;
+    getCategories(): Promise<{
+        data: (import("../../database/schemas").Category & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        })[];
+        count: number;
+        message: string;
+    }>;
     initializeUsers(): Promise<{
         status: string;
         message: string;

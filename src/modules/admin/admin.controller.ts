@@ -247,14 +247,21 @@ export class AdminController {
 
   @Get('settings/discount')
   @ApiOperation({ summary: 'Get discount settings' })
-  getDiscountSettings() {
-    return this.adminService.getDiscountSettings();
+  async getDiscountSettings() {
+    const settings = await this.adminService.getDiscountSettings();
+    return settings;
   }
 
   @Put('settings/discount')
   @ApiOperation({ summary: 'Update discount settings' })
-  updateDiscountSettings(@Body() dto: UpdateDiscountSettingsDto) {
+  async updateDiscountSettings(@Body() dto: UpdateDiscountSettingsDto) {
     return this.adminService.updateDiscountSettings(dto);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Get all categories for product creation' })
+  async getCategories() {
+    return this.adminService.getAllCategories();
   }
 
   @Post('init')

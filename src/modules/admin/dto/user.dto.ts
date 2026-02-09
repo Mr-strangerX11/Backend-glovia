@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MinLength, IsEnum } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, IsEnum, IsNotEmpty } from 'class-validator';
 import { UserRole } from '../../../database/schemas/user.schema';
 
 export class CreateUserDto {
@@ -32,7 +32,8 @@ export class CreateUserDto {
 }
 
 export class UpdateUserRoleDto {
-  @ApiProperty({ enum: UserRole, example: 'VENDOR' })
-  @IsEnum(UserRole)
+  @ApiProperty({ enum: UserRole, example: 'VENDOR', description: 'New role for the user' })
+  @IsEnum(UserRole, { message: 'role must be a valid UserRole (CUSTOMER, ADMIN, SUPER_ADMIN, VENDOR)' })
+  @IsNotEmpty({ message: 'role is required' })
   role: UserRole;
 }

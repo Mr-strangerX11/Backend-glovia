@@ -40,7 +40,8 @@ export class UploadService {
         },
         (error, result) => {
           if (error) {
-            reject(new BadRequestException('Upload failed'));
+            console.error('Cloudinary upload error:', error);
+            reject(new BadRequestException(`Upload failed: ${error.message || 'Unknown error'}`));
           } else {
             resolve(result.secure_url);
           }

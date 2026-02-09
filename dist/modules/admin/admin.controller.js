@@ -147,11 +147,15 @@ let AdminController = class AdminController {
     updateAnnouncement(dto) {
         return this.adminService.updateAnnouncementBar(dto);
     }
-    getDiscountSettings() {
-        return this.adminService.getDiscountSettings();
+    async getDiscountSettings() {
+        const settings = await this.adminService.getDiscountSettings();
+        return settings;
     }
-    updateDiscountSettings(dto) {
+    async updateDiscountSettings(dto) {
         return this.adminService.updateDiscountSettings(dto);
+    }
+    async getCategories() {
+        return this.adminService.getAllCategories();
     }
     async initializeUsers() {
         try {
@@ -359,7 +363,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get discount settings' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getDiscountSettings", null);
 __decorate([
     (0, common_1.Put)('settings/discount'),
@@ -367,8 +371,15 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [settings_dto_1.UpdateDiscountSettingsDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateDiscountSettings", null);
+__decorate([
+    (0, common_1.Get)('categories'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all categories for product creation' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCategories", null);
 __decorate([
     (0, common_1.Post)('init'),
     (0, public_decorator_1.Public)(),

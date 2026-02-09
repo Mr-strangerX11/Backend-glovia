@@ -56,8 +56,9 @@ class UpdateUserRoleDto {
 }
 exports.UpdateUserRoleDto = UpdateUserRoleDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: user_schema_1.UserRole, example: 'VENDOR' }),
-    (0, class_validator_1.IsEnum)(user_schema_1.UserRole),
+    (0, swagger_1.ApiProperty)({ enum: user_schema_1.UserRole, example: 'VENDOR', description: 'New role for the user' }),
+    (0, class_validator_1.IsEnum)(user_schema_1.UserRole, { message: 'role must be a valid UserRole (CUSTOMER, ADMIN, SUPER_ADMIN, VENDOR)' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'role is required' }),
     __metadata("design:type", String)
 ], UpdateUserRoleDto.prototype, "role", void 0);
 //# sourceMappingURL=user.dto.js.map
