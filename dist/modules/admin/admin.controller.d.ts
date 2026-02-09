@@ -2,9 +2,9 @@ import { AdminService } from './admin.service';
 import { UserRole } from '../../database/schemas/user.schema';
 import { OrderStatus } from '../../database/schemas/order.schema';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, UpdateUserRoleDto } from './dto/user.dto';
 import { UpdateOrderDto } from './dto/order.dto';
-import { UpdateDeliverySettingsDto } from './dto/settings.dto';
+import { UpdateDeliverySettingsDto, UpdateDiscountSettingsDto } from './dto/settings.dto';
 import { UpdateAnnouncementDto } from './dto/announcement.dto';
 import { UploadService } from '../upload/upload.service';
 export declare class AdminController {
@@ -60,7 +60,7 @@ export declare class AdminController {
     }> & {
         __v: number;
     }>;
-    updateUserRole(id: string, role: UserRole, actorRole: UserRole): Promise<import("../../database/schemas/user.schema").User & Required<{
+    updateUserRole(id: string, dto: UpdateUserRoleDto, actorRole: UserRole): Promise<import("../../database/schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
@@ -147,6 +147,7 @@ export declare class AdminController {
     }>;
     getAllCustomers(page?: string, limit?: string): Promise<{
         data: {
+            id: string;
             orderCount: any;
             totalSpent: any;
             email: string;
@@ -225,14 +226,21 @@ export declare class AdminController {
     }> & {
         __v: number;
     }>;
-    getDeliverySettings(): Promise<number>;
-    updateDeliverySettings(dto: UpdateDeliverySettingsDto): Promise<import("../../database/schemas").Setting & Required<{
+    getDeliverySettings(): Promise<{
+        charge: number;
+    }>;
+    updateDeliverySettings(dto: UpdateDeliverySettingsDto): Promise<{
+        charge: number;
+        message: string;
+    }>;
+    getAnnouncement(): Promise<any>;
+    updateAnnouncement(dto: UpdateAnnouncementDto): Promise<import("../../database/schemas").Setting & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     }>;
-    getAnnouncement(): Promise<any>;
-    updateAnnouncement(dto: UpdateAnnouncementDto): Promise<import("../../database/schemas").Setting & Required<{
+    getDiscountSettings(): Promise<any>;
+    updateDiscountSettings(dto: UpdateDiscountSettingsDto): Promise<import("../../database/schemas").Setting & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
@@ -241,6 +249,27 @@ export declare class AdminController {
         status: string;
         message: string;
         data: any[];
+    } | {
+        status: string;
+        message: any;
+        data?: undefined;
+    }>;
+    fixSuperAdmin(): Promise<{
+        status: string;
+        message: string;
+        data: {
+            email: string;
+            role: UserRole.SUPER_ADMIN;
+            status: string;
+            oldRole?: undefined;
+            newRole?: undefined;
+        } | {
+            email: string;
+            oldRole: UserRole.CUSTOMER | UserRole.ADMIN | UserRole.VENDOR;
+            newRole: UserRole;
+            status: string;
+            role?: undefined;
+        };
     } | {
         status: string;
         message: any;

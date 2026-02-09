@@ -5,16 +5,19 @@ export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
     register(dto: RegisterDto, req: Request): Promise<{
+        success: boolean;
         message: string;
+        nextStep: string;
         userId: string;
         email: string;
         isEmailVerified: boolean;
     }>;
     verifyEmailOtp(dto: VerifyEmailOtpDto): Promise<{
         message: string;
-        user: any;
-        accessToken: string;
-        refreshToken: string;
+        success: boolean;
+        user?: any;
+        accessToken?: string;
+        refreshToken?: string;
     }>;
     resendVerificationOtp(dto: {
         email: string;

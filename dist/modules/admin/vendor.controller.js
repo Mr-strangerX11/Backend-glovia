@@ -174,7 +174,7 @@ exports.VendorController = VendorController = __decorate([
     (0, swagger_1.ApiTags)('Vendor'),
     (0, common_1.Controller)('vendor'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.VENDOR),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.VENDOR, user_schema_1.UserRole.SUPER_ADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [admin_service_1.AdminService,
         upload_service_1.UploadService])

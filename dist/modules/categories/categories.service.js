@@ -16,6 +16,7 @@ exports.CategoriesService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const schemas_1 = require("../../database/schemas");
 let CategoriesService = class CategoriesService {
     constructor(categoryModel, productModel, productImageModel) {
         this.categoryModel = categoryModel;
@@ -113,6 +114,69 @@ let CategoriesService = class CategoriesService {
             children,
             products: productsWithImages,
         };
+    }
+    async create(dto) {
+        const category = await this.categoryModel.create(dto);
+        return category;
+    }
+    async update(id, dto) {
+        const category = await this.categoryModel.findByIdAndUpdate(id, dto, { new: true });
+        if (!category) {
+            throw new common_1.NotFoundException('Category not found');
+        }
+        return category;
+    }
+    async remove(id) {
+        const category = await this.categoryModel.findByIdAndDelete(id);
+        if (!category) {
+            throw new common_1.NotFoundException('Category not found');
+        }
+        return { message: 'Category deleted successfully' };
+    }
+    async seedInitialCategories() {
+        const existingCount = await this.categoryModel.countDocuments();
+        if (existingCount > 0) {
+            return { message: 'Categories already exist', count: existingCount };
+        }
+        const categories = [
+            {
+                name: 'Skincare',
+                slug: 'skincare',
+                description: 'Skincare products for healthy and glowing skin',
+                type: schemas_1.ProductCategory.SKINCARE,
+                displayOrder: 1,
+            },
+            {
+                name: 'Haircare',
+                slug: 'haircare',
+                description: 'Haircare products for beautiful and healthy hair',
+                type: schemas_1.ProductCategory.HAIRCARE,
+                displayOrder: 2,
+            },
+            {
+                name: 'Makeup',
+                slug: 'makeup',
+                description: 'Makeup products for all your beauty needs',
+                type: schemas_1.ProductCategory.MAKEUP,
+                displayOrder: 3,
+            },
+            {
+                name: 'Organic',
+                slug: 'organic',
+                description: 'Natural and organic beauty products',
+                type: schemas_1.ProductCategory.ORGANIC,
+                displayOrder: 4,
+            },
+            {
+                name: 'Herbal',
+                slug: 'herbal',
+                description: 'Herbal beauty products with natural ingredients',
+                type: schemas_1.ProductCategory.HERBAL,
+                displayOrder: 5,
+            },
+        ];
+        const created = await this.categoryModel.insertMany(categories);
+        return { message: 'Categories seeded successfully', count: created.length, categories: created };
     }
 };
 exports.CategoriesService = CategoriesService;

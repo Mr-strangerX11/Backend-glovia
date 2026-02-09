@@ -133,8 +133,12 @@ let AdminService = class AdminService {
             this.userModel.find(filter).skip(skip).limit(limit).lean(),
             this.userModel.countDocuments(filter)
         ]);
+        const usersWithId = users.map((user) => ({
+            ...user,
+            id: user._id.toString()
+        }));
         return {
-            data: users,
+            data: usersWithId,
             meta: {
                 total,
                 page,
@@ -396,6 +400,7 @@ let AdminService = class AdminService {
         }, {});
         const customersWithStats = customers.map(customer => ({
             ...customer,
+            id: customer._id.toString(),
             orderCount: orderCountMap[customer._id.toString()]?.orderCount || 0,
             totalSpent: orderCountMap[customer._id.toString()]?.totalSpent || 0
         }));
@@ -568,10 +573,19 @@ let AdminService = class AdminService {
         for (const userData of users) {
             const existingUser = await this.userModel.findOne({ email: userData.email });
             if (existingUser) {
-                createdUsers.push({
-                    email: userData.email,
-                    status: 'already_exists',
-                });
+                if (existingUser.role !== userData.role && userData.role === user_schema_1.UserRole.SUPER_ADMIN) {
+                    await this.userModel.findByIdAndUpdate(existingUser._id, { role: userData.role });
+                    createdUsers.push({
+                        email: userData.email,
+                        status: 'role_updated_to_SUPER_ADMIN',
+                    });
+                }
+                else {
+                    createdUsers.push({
+                        email: userData.email,
+                        status: 'already_exists',
+                    });
+                }
                 continue;
             }
             const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -587,6 +601,17 @@ let AdminService = class AdminService {
             });
         }
         return createdUsers;
+    }
+    async fixSuperAdminRole() {
+        const superadmin = await this.userModel.findOne({ email: 'superadmin@glovia.com.np' });
+        if (!superadmin) {
+            throw new common_1.NotFoundException('SuperAdmin user not found');
+        }
+        if (superadmin.role === user_schema_1.UserRole.SUPER_ADMIN) {
+            return { email: superadmin.email, role: superadmin.role, status: 'already_correct' };
+        }
+        await this.userModel.findByIdAndUpdate(superadmin._id, { role: user_schema_1.UserRole.SUPER_ADMIN });
+        return { email: superadmin.email, oldRole: superadmin.role, newRole: user_schema_1.UserRole.SUPER_ADMIN, status: 'updated' };
     }
 };
 exports.AdminService = AdminService;

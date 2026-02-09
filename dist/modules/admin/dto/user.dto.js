@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateUserDto = void 0;
+exports.UpdateUserRoleDto = exports.CreateUserDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const user_schema_1 = require("../../../database/schemas/user.schema");
@@ -52,4 +52,12 @@ __decorate([
     (0, class_validator_1.IsEnum)(user_schema_1.UserRole),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
+class UpdateUserRoleDto {
+}
+exports.UpdateUserRoleDto = UpdateUserRoleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: user_schema_1.UserRole, example: 'VENDOR' }),
+    (0, class_validator_1.IsEnum)(user_schema_1.UserRole),
+    __metadata("design:type", String)
+], UpdateUserRoleDto.prototype, "role", void 0);
 //# sourceMappingURL=user.dto.js.map

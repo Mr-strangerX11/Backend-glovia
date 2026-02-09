@@ -81,8 +81,8 @@ let AdminController = class AdminController {
     createUser(dto) {
         return this.adminService.createUser(dto);
     }
-    updateUserRole(id, role, actorRole) {
-        return this.adminService.updateUserRole(id, role, actorRole);
+    updateUserRole(id, dto, actorRole) {
+        return this.adminService.updateUserRole(id, dto.role, actorRole);
     }
     deleteUser(id) {
         return this.adminService.deleteUser(id);
@@ -133,11 +133,13 @@ let AdminController = class AdminController {
     deleteReview(id) {
         return this.adminService.deleteReview(id);
     }
-    getDeliverySettings() {
-        return this.adminService.getDeliveryCharge();
+    async getDeliverySettings() {
+        const charge = await this.adminService.getDeliveryCharge();
+        return { charge };
     }
-    updateDeliverySettings(dto) {
-        return this.adminService.updateDeliveryCharge(dto.charge);
+    async updateDeliverySettings(dto) {
+        await this.adminService.updateDeliveryCharge(dto.charge);
+        return { charge: dto.charge, message: 'Delivery charge updated successfully' };
     }
     getAnnouncement() {
         return this.adminService.getAnnouncementBar();
@@ -145,12 +147,35 @@ let AdminController = class AdminController {
     updateAnnouncement(dto) {
         return this.adminService.updateAnnouncementBar(dto);
     }
+    getDiscountSettings() {
+        return this.adminService.getDiscountSettings();
+    }
+    updateDiscountSettings(dto) {
+        return this.adminService.updateDiscountSettings(dto);
+    }
     async initializeUsers() {
         try {
             const result = await this.adminService.seedInitialUsers();
             return {
                 status: 'success',
                 message: 'Initial users created successfully',
+                data: result,
+            };
+        }
+        catch (error) {
+            console.error('Init users failed:', error);
+            return {
+                status: 'error',
+                message: error?.message || 'Failed to initialize users',
+            };
+        }
+    }
+    async fixSuperAdmin() {
+        try {
+            const result = await this.adminService.fixSuperAdminRole();
+            return {
+                status: 'success',
+                message: 'SuperAdmin role fixed',
                 data: result,
             };
         }
@@ -183,10 +208,10 @@ __decorate([
     (0, common_1.Put)('users/:id/role'),
     (0, swagger_1.ApiOperation)({ summary: 'Update user role' }),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)('role')),
+    __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)('role')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, user_dto_1.UpdateUserRoleDto, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateUserRole", null);
 __decorate([
@@ -304,7 +329,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get delivery charge' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getDeliverySettings", null);
 __decorate([
     (0, common_1.Put)('settings/delivery'),
@@ -312,7 +337,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [settings_dto_1.UpdateDeliverySettingsDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateDeliverySettings", null);
 __decorate([
     (0, common_1.Get)('settings/announcement'),
@@ -330,6 +355,21 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateAnnouncement", null);
 __decorate([
+    (0, common_1.Get)('settings/discount'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get discount settings' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getDiscountSettings", null);
+__decorate([
+    (0, common_1.Put)('settings/discount'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update discount settings' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [settings_dto_1.UpdateDiscountSettingsDto]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "updateDiscountSettings", null);
+__decorate([
     (0, common_1.Post)('init'),
     (0, public_decorator_1.Public)(),
     (0, common_2.HttpCode)(200),
@@ -338,6 +378,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "initializeUsers", null);
+__decorate([
+    (0, common_1.Post)('fix-superadmin'),
+    (0, public_decorator_1.Public)(),
+    (0, common_2.HttpCode)(200),
+    (0, swagger_1.ApiOperation)({ summary: 'Fix SuperAdmin role (temporary endpoint)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "fixSuperAdmin", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin'),
     (0, common_1.Controller)('admin'),

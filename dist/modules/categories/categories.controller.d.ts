@@ -51,7 +51,7 @@ export declare class CategoriesController {
             weight?: number;
             categoryId: import("mongoose").Types.ObjectId;
             brandId?: import("mongoose").Types.ObjectId;
-            suitableFor: import("../../database/schemas").SkinType[];
+            suitableFor: import("../../database/schemas/user.schema").SkinType[];
             isActive: boolean;
             isFeatured: boolean;
             isBestSeller: boolean;
@@ -90,5 +90,43 @@ export declare class CategoriesController {
         isNew: boolean;
         schema: import("mongoose").Schema;
         __v: number;
+    }>;
+    create(dto: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Category, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Category & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    update(id: string, dto: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Category, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Category & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    remove(id: string): Promise<{
+        message: string;
+    }>;
+    seed(): Promise<{
+        message: string;
+        count: number;
+        categories?: undefined;
+    } | {
+        message: string;
+        count: number;
+        categories: import("mongoose").MergeType<import("mongoose").Document<unknown, {}, import("../../database/schemas").Category, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Category & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        }, Omit<{
+            name: string;
+            slug: string;
+            description: string;
+            type: import("../../database/schemas").ProductCategory;
+            displayOrder: number;
+        }, "_id">>[];
     }>;
 }

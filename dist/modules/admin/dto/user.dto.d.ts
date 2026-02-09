@@ -7,3 +7,6 @@ export declare class CreateUserDto {
     phone?: string;
     role?: UserRole;
 }
+export declare class UpdateUserRoleDto {
+    role: UserRole;
+}

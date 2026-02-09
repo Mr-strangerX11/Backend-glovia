@@ -70,11 +70,37 @@ export declare class AdminService {
         __v: number;
     }>;
     getAllUsers(page?: number, limit?: number, role?: UserRole): Promise<{
-        data: (User & Required<{
+        data: {
+            id: string;
+            email: string;
+            phone?: string;
+            password: string;
+            firstName: string;
+            lastName: string;
+            role: UserRole;
+            isEmailVerified: boolean;
+            isPhoneVerified: boolean;
+            skinType?: import("../../database/schemas/user.schema").SkinType;
+            profileImage?: string;
+            refreshToken?: string;
+            trustScore: number;
+            deviceFingerprint?: string;
+            ipAddress?: string;
+            failedAttempts: number;
+            isBlocked: boolean;
+            lastLoginAt?: Date;
             _id: Types.ObjectId;
-        }> & {
+            $locals: Record<string, unknown>;
+            $op: "save" | "validate" | "remove" | null;
+            $where: Record<string, unknown>;
+            baseModelName?: string;
+            collection: import("mongoose").Collection;
+            db: import("mongoose").Connection;
+            errors?: import("mongoose").Error.ValidationError;
+            isNew: boolean;
+            schema: import("mongoose").Schema;
             __v: number;
-        })[];
+        }[];
         meta: {
             total: number;
             page: number;
@@ -257,6 +283,7 @@ export declare class AdminService {
     }>;
     getAllCustomers(page?: number, limit?: number): Promise<{
         data: {
+            id: string;
             orderCount: any;
             totalSpent: any;
             email: string;
@@ -363,4 +390,17 @@ export declare class AdminService {
     }>;
     getDiscountSettings(): Promise<any>;
     seedInitialUsers(): Promise<any[]>;
+    fixSuperAdminRole(): Promise<{
+        email: string;
+        role: UserRole.SUPER_ADMIN;
+        status: string;
+        oldRole?: undefined;
+        newRole?: undefined;
+    } | {
+        email: string;
+        oldRole: UserRole.CUSTOMER | UserRole.ADMIN | UserRole.VENDOR;
+        newRole: UserRole;
+        status: string;
+        role?: undefined;
+    }>;
 }

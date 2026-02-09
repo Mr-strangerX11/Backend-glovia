@@ -1,5 +1,5 @@
 import { Model, Types } from 'mongoose';
-import { Category, Product, ProductImage } from '../../database/schemas';
+import { Category, Product, ProductImage, ProductCategory } from '../../database/schemas';
 export declare class CategoriesService {
     private categoryModel;
     private productModel;
@@ -14,7 +14,7 @@ export declare class CategoriesService {
         slug: string;
         description?: string;
         image?: string;
-        type: import("../../database/schemas").ProductCategory;
+        type: ProductCategory;
         parentId?: Types.ObjectId;
         isActive: boolean;
         displayOrder: number;
@@ -78,7 +78,7 @@ export declare class CategoriesService {
         slug: string;
         description?: string;
         image?: string;
-        type: import("../../database/schemas").ProductCategory;
+        type: ProductCategory;
         parentId?: Types.ObjectId;
         isActive: boolean;
         displayOrder: number;
@@ -93,5 +93,43 @@ export declare class CategoriesService {
         isNew: boolean;
         schema: import("mongoose").Schema;
         __v: number;
+    }>;
+    create(dto: any): Promise<import("mongoose").Document<unknown, {}, Category, {}, import("mongoose").DefaultSchemaOptions> & Category & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    update(id: string, dto: any): Promise<import("mongoose").Document<unknown, {}, Category, {}, import("mongoose").DefaultSchemaOptions> & Category & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    remove(id: string): Promise<{
+        message: string;
+    }>;
+    seedInitialCategories(): Promise<{
+        message: string;
+        count: number;
+        categories?: undefined;
+    } | {
+        message: string;
+        count: number;
+        categories: import("mongoose").MergeType<import("mongoose").Document<unknown, {}, Category, {}, import("mongoose").DefaultSchemaOptions> & Category & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        }, Omit<{
+            name: string;
+            slug: string;
+            description: string;
+            type: ProductCategory;
+            displayOrder: number;
+        }, "_id">>[];
     }>;
 }
