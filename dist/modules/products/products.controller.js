@@ -28,8 +28,8 @@ let ProductsController = class ProductsController {
             maxPrice: query.maxPrice ? Number(query.maxPrice) : undefined,
             page: query.page ? Number(query.page) : undefined,
             limit: query.limit ? Number(query.limit) : undefined,
-            isFeatured: query.isFeatured === 'true',
-            isBestSeller: query.isBestSeller === 'true',
+            isFeatured: query.isFeatured ? query.isFeatured === 'true' : undefined,
+            isBestSeller: query.isBestSeller ? query.isBestSeller === 'true' : undefined,
         });
     }
     getFeatured(limit) {
