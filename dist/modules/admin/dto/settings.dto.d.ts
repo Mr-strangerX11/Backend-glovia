@@ -1,5 +1,7 @@
 export declare class UpdateDeliverySettingsDto {
-    charge: number;
+    freeDeliveryThreshold: number;
+    valleyDeliveryCharge: number;
+    outsideValleyDeliveryCharge: number;
 }
 export declare class UpdateDiscountSettingsDto {
     enabled: boolean;

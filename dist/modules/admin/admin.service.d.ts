@@ -362,18 +362,19 @@ export declare class AdminService {
     }> & {
         __v: number;
     }>;
-    updateDeliveryCharge(charge: number): Promise<Setting & Required<{
+    updateDeliverySettings(data: {
+        freeDeliveryThreshold: number;
+        valleyDeliveryCharge: number;
+        outsideValleyDeliveryCharge: number;
+    }): Promise<Setting & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     }>;
-    getDeliveryCharge(): Promise<number>;
+    getDeliverySettings(): Promise<any>;
     updateAnnouncementBar(data: {
         enabled?: boolean;
-        isActive?: boolean;
         message?: string;
-        text?: string;
-        icon?: string;
         backgroundColor?: string;
         textColor?: string;
     }): Promise<Setting & Required<{

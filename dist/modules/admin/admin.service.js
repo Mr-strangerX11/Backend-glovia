@@ -470,26 +470,32 @@ let AdminService = class AdminService {
         }
         return review;
     }
-    async updateDeliveryCharge(charge) {
-        return this.settingModel.findOneAndUpdate({ key: 'deliveryCharge' }, {
-            key: 'deliveryCharge',
-            value: charge.toString()
+    async updateDeliverySettings(data) {
+        const settingsValue = JSON.stringify(data);
+        return this.settingModel.findOneAndUpdate({ key: 'deliverySettings' }, {
+            key: 'deliverySettings',
+            value: settingsValue
         }, { upsert: true, new: true }).lean();
     }
-    async getDeliveryCharge() {
-        const setting = await this.settingModel.findOne({ key: 'deliveryCharge' }).lean();
-        return setting ? parseFloat(setting.value) : 0;
+    async getDeliverySettings() {
+        const setting = await this.settingModel.findOne({ key: 'deliverySettings' }).lean();
+        if (!setting) {
+            return {
+                freeDeliveryThreshold: 2999,
+                valleyDeliveryCharge: 99,
+                outsideValleyDeliveryCharge: 149
+            };
+        }
+        return JSON.parse(setting.value);
     }
     async updateAnnouncementBar(data) {
-        const enabled = typeof data.enabled === 'boolean' ? data.enabled : data.isActive !== false;
-        const message = data.message ?? data.text ?? '';
-        const icon = data.icon ?? '🚚';
+        const enabled = typeof data.enabled === 'boolean' ? data.enabled : true;
+        const message = data.message ?? '';
         const updateValue = JSON.stringify({
             enabled,
             message,
-            icon,
-            backgroundColor: data.backgroundColor || '#000000',
-            textColor: data.textColor || '#ffffff'
+            backgroundColor: data.backgroundColor || '#FFD700',
+            textColor: data.textColor || '#000000'
         });
         return this.settingModel.findOneAndUpdate({ key: 'announcementBar' }, {
             key: 'announcementBar',

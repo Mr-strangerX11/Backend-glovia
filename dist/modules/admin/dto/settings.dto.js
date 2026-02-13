@@ -17,13 +17,29 @@ class UpdateDeliverySettingsDto {
 }
 exports.UpdateDeliverySettingsDto = UpdateDeliverySettingsDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Delivery charge in NPR', example: 150 }),
-    (0, class_validator_1.IsNotEmpty)({ message: 'Delivery charge is required' }),
-    (0, class_validator_1.IsNumber)({}, { message: 'charge must be a number conforming to the specified constraints' }),
+    (0, swagger_1.ApiProperty)({ description: 'Free delivery threshold in NPR', example: 2999 }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Free delivery threshold is required' }),
+    (0, class_validator_1.IsNumber)({}, { message: 'freeDeliveryThreshold must be a number conforming to the specified constraints' }),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.Min)(0, { message: 'charge must not be less than 0' }),
+    (0, class_validator_1.Min)(0, { message: 'freeDeliveryThreshold must not be less than 0' }),
     __metadata("design:type", Number)
-], UpdateDeliverySettingsDto.prototype, "charge", void 0);
+], UpdateDeliverySettingsDto.prototype, "freeDeliveryThreshold", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Valley delivery charge in NPR', example: 99 }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Valley delivery charge is required' }),
+    (0, class_validator_1.IsNumber)({}, { message: 'valleyDeliveryCharge must be a number conforming to the specified constraints' }),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.Min)(0, { message: 'valleyDeliveryCharge must not be less than 0' }),
+    __metadata("design:type", Number)
+], UpdateDeliverySettingsDto.prototype, "valleyDeliveryCharge", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Outside valley delivery charge in NPR', example: 149 }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Outside valley delivery charge is required' }),
+    (0, class_validator_1.IsNumber)({}, { message: 'outsideValleyDeliveryCharge must be a number conforming to the specified constraints' }),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.Min)(0, { message: 'outsideValleyDeliveryCharge must not be less than 0' }),
+    __metadata("design:type", Number)
+], UpdateDeliverySettingsDto.prototype, "outsideValleyDeliveryCharge", void 0);
 class UpdateDiscountSettingsDto {
 }
 exports.UpdateDiscountSettingsDto = UpdateDiscountSettingsDto;

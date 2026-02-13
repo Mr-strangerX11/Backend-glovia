@@ -16,47 +16,27 @@ class UpdateAnnouncementDto {
 }
 exports.UpdateAnnouncementDto = UpdateAnnouncementDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: true }),
+    (0, swagger_1.ApiProperty)({ required: false, example: true, description: 'Whether announcement bar is enabled' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateAnnouncementDto.prototype, "enabled", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], UpdateAnnouncementDto.prototype, "isActive", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!' }),
+    (0, swagger_1.ApiProperty)({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!', description: 'Announcement message text' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(500),
     __metadata("design:type", String)
 ], UpdateAnnouncementDto.prototype, "message", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(500),
-    __metadata("design:type", String)
-], UpdateAnnouncementDto.prototype, "text", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: '🚚' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(10),
-    __metadata("design:type", String)
-], UpdateAnnouncementDto.prototype, "icon", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: '#0066CC' }),
+    (0, swagger_1.ApiProperty)({ required: false, example: '#0066CC', description: 'Background color in hex format' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(7),
     __metadata("design:type", String)
 ], UpdateAnnouncementDto.prototype, "backgroundColor", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: '#FFFFFF' }),
+    (0, swagger_1.ApiProperty)({ required: false, example: '#FFFFFF', description: 'Text color in hex format' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(7),

@@ -55,6 +55,45 @@ export declare class AdminController {
         }[];
         revenueByMonth: any[];
     }>;
+    getAllUsers(page?: number, limit?: number, role?: UserRole): Promise<{
+        data: {
+            id: string;
+            email: string;
+            phone?: string;
+            password: string;
+            firstName: string;
+            lastName: string;
+            role: UserRole;
+            isEmailVerified: boolean;
+            isPhoneVerified: boolean;
+            skinType?: import("../../database/schemas/user.schema").SkinType;
+            profileImage?: string;
+            refreshToken?: string;
+            trustScore: number;
+            deviceFingerprint?: string;
+            ipAddress?: string;
+            failedAttempts: number;
+            isBlocked: boolean;
+            lastLoginAt?: Date;
+            _id: import("mongoose").Types.ObjectId;
+            $locals: Record<string, unknown>;
+            $op: "save" | "validate" | "remove" | null;
+            $where: Record<string, unknown>;
+            baseModelName?: string;
+            collection: import("mongoose").Collection;
+            db: import("mongoose").Connection;
+            errors?: import("mongoose").Error.ValidationError;
+            isNew: boolean;
+            schema: import("mongoose").Schema;
+            __v: number;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
     createUser(dto: CreateUserDto): Promise<import("../../database/schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
@@ -226,12 +265,12 @@ export declare class AdminController {
     }> & {
         __v: number;
     }>;
-    getDeliverySettings(): Promise<{
-        charge: number;
-    }>;
+    getDeliverySettings(): Promise<any>;
     updateDeliverySettings(dto: UpdateDeliverySettingsDto): Promise<{
-        charge: number;
         message: string;
+        freeDeliveryThreshold: number;
+        valleyDeliveryCharge: number;
+        outsideValleyDeliveryCharge: number;
     }>;
     getAnnouncement(): Promise<any>;
     updateAnnouncement(dto: UpdateAnnouncementDto): Promise<import("../../database/schemas").Setting & Required<{

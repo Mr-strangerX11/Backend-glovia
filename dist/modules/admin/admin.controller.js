@@ -78,6 +78,9 @@ let AdminController = class AdminController {
     getDashboard() {
         return this.adminService.getDashboard();
     }
+    getAllUsers(page, limit, role) {
+        return this.adminService.getAllUsers(page, limit, role);
+    }
     createUser(dto) {
         return this.adminService.createUser(dto);
     }
@@ -134,12 +137,11 @@ let AdminController = class AdminController {
         return this.adminService.deleteReview(id);
     }
     async getDeliverySettings() {
-        const charge = await this.adminService.getDeliveryCharge();
-        return { charge };
+        return this.adminService.getDeliverySettings();
     }
     async updateDeliverySettings(dto) {
-        await this.adminService.updateDeliveryCharge(dto.charge);
-        return { charge: dto.charge, message: 'Delivery charge updated successfully' };
+        await this.adminService.updateDeliverySettings(dto);
+        return { ...dto, message: 'Delivery settings updated successfully' };
     }
     getAnnouncement() {
         return this.adminService.getAnnouncementBar();
@@ -200,6 +202,16 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getDashboard", null);
+__decorate([
+    (0, common_1.Get)('users'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all users with pagination and optional role filter' }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('role')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getAllUsers", null);
 __decorate([
     (0, common_1.Post)('users'),
     (0, swagger_1.ApiOperation)({ summary: 'Create new user with role' }),
@@ -330,14 +342,14 @@ __decorate([
 ], AdminController.prototype, "deleteReview", null);
 __decorate([
     (0, common_1.Get)('settings/delivery'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get delivery charge' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get delivery settings' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getDeliverySettings", null);
 __decorate([
     (0, common_1.Put)('settings/delivery'),
-    (0, swagger_1.ApiOperation)({ summary: 'Update delivery charge' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Update delivery settings' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [settings_dto_1.UpdateDeliverySettingsDto]),
