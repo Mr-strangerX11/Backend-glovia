@@ -283,7 +283,7 @@ export class AdminService {
   }
 
   async createProduct(createProductDto: CreateProductDto) {
-    const { images, categoryId, brandId, ...productData } = createProductDto;
+    const { images, categoryId, brandId, isNew, ...productData } = createProductDto;
 
     // Validate categoryId
     if (!Types.ObjectId.isValid(categoryId)) {
@@ -306,11 +306,12 @@ export class AdminService {
       }
     }
 
-    // Create product
+    // Create product - map isNew to isNewProduct
     const product = new this.productModel({
       ...productData,
       categoryId: new Types.ObjectId(categoryId),
-      brandId: brandId ? new Types.ObjectId(brandId) : null
+      brandId: brandId ? new Types.ObjectId(brandId) : null,
+      isNewProduct: isNew !== undefined ? isNew : false,
     });
 
     const savedProduct = await product.save();

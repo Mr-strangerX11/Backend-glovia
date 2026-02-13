@@ -245,7 +245,7 @@ let AdminService = class AdminService {
         };
     }
     async createProduct(createProductDto) {
-        const { images, categoryId, brandId, ...productData } = createProductDto;
+        const { images, categoryId, brandId, isNew, ...productData } = createProductDto;
         if (!mongoose_2.Types.ObjectId.isValid(categoryId)) {
             throw new common_1.BadRequestException('Invalid category ID');
         }
@@ -265,7 +265,8 @@ let AdminService = class AdminService {
         const product = new this.productModel({
             ...productData,
             categoryId: new mongoose_2.Types.ObjectId(categoryId),
-            brandId: brandId ? new mongoose_2.Types.ObjectId(brandId) : null
+            brandId: brandId ? new mongoose_2.Types.ObjectId(brandId) : null,
+            isNewProduct: isNew !== undefined ? isNew : false,
         });
         const savedProduct = await product.save();
         if (images && Array.isArray(images) && images.length > 0) {
