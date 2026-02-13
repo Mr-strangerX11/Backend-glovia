@@ -481,9 +481,13 @@ let AdminService = class AdminService {
         return setting ? parseFloat(setting.value) : 0;
     }
     async updateAnnouncementBar(data) {
+        const enabled = typeof data.enabled === 'boolean' ? data.enabled : data.isActive !== false;
+        const message = data.message ?? data.text ?? '';
+        const icon = data.icon ?? '🚚';
         const updateValue = JSON.stringify({
-            enabled: data.enabled,
-            message: data.message || '',
+            enabled,
+            message,
+            icon,
             backgroundColor: data.backgroundColor || '#000000',
             textColor: data.textColor || '#ffffff'
         });
@@ -497,12 +501,21 @@ let AdminService = class AdminService {
         if (!setting) {
             return {
                 enabled: false,
+                isActive: false,
                 message: '',
+                text: '',
+                icon: '🚚',
                 backgroundColor: '#000000',
                 textColor: '#ffffff'
             };
         }
-        return JSON.parse(setting.value);
+        const parsed = JSON.parse(setting.value);
+        return {
+            ...parsed,
+            isActive: parsed.enabled,
+            text: parsed.message,
+            icon: parsed.icon || '🚚'
+        };
     }
     async updateDiscountSettings(data) {
         const updateValue = JSON.stringify({

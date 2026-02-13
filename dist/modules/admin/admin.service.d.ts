@@ -369,8 +369,11 @@ export declare class AdminService {
     }>;
     getDeliveryCharge(): Promise<number>;
     updateAnnouncementBar(data: {
-        enabled: boolean;
+        enabled?: boolean;
+        isActive?: boolean;
         message?: string;
+        text?: string;
+        icon?: string;
         backgroundColor?: string;
         textColor?: string;
     }): Promise<Setting & Required<{

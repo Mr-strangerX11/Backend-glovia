@@ -4,7 +4,7 @@ const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const config_1 = require("@nestjs/config");
-const compression_1 = require("compression");
+const compression = require("compression");
 const helmet_1 = require("helmet");
 const app_module_1 = require("./app.module");
 async function bootstrap() {
@@ -22,7 +22,7 @@ async function bootstrap() {
         origin: allowedOrigins,
         credentials: true,
     });
-    app.use((0, compression_1.default)());
+    app.use(compression());
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,

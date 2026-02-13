@@ -16,10 +16,17 @@ class UpdateAnnouncementDto {
 }
 exports.UpdateAnnouncementDto = UpdateAnnouncementDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: true }),
+    (0, swagger_1.ApiProperty)({ required: false, example: true }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateAnnouncementDto.prototype, "enabled", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, example: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateAnnouncementDto.prototype, "isActive", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!' }),
     (0, class_validator_1.IsOptional)(),
@@ -27,6 +34,20 @@ __decorate([
     (0, class_validator_1.MaxLength)(500),
     __metadata("design:type", String)
 ], UpdateAnnouncementDto.prototype, "message", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500),
+    __metadata("design:type", String)
+], UpdateAnnouncementDto.prototype, "text", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, example: '🚚' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(10),
+    __metadata("design:type", String)
+], UpdateAnnouncementDto.prototype, "icon", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, example: '#0066CC' }),
     (0, class_validator_1.IsOptional)(),
