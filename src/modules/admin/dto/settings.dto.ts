@@ -3,12 +3,26 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class UpdateDeliverySettingsDto {
-  @ApiProperty({ description: 'Delivery charge in NPR', example: 150 })
-  @IsNotEmpty({ message: 'Delivery charge is required' })
-  @IsNumber({}, { message: 'charge must be a number conforming to the specified constraints' })
+  @ApiProperty({ description: 'Free delivery threshold in NPR', example: 2999 })
+  @IsNotEmpty({ message: 'Free delivery threshold is required' })
+  @IsNumber({}, { message: 'freeDeliveryThreshold must be a number conforming to the specified constraints' })
   @Type(() => Number)
-  @Min(0, { message: 'charge must not be less than 0' })
-  charge: number;
+  @Min(0, { message: 'freeDeliveryThreshold must not be less than 0' })
+  freeDeliveryThreshold: number;
+
+  @ApiProperty({ description: 'Valley delivery charge in NPR', example: 99 })
+  @IsNotEmpty({ message: 'Valley delivery charge is required' })
+  @IsNumber({}, { message: 'valleyDeliveryCharge must be a number conforming to the specified constraints' })
+  @Type(() => Number)
+  @Min(0, { message: 'valleyDeliveryCharge must not be less than 0' })
+  valleyDeliveryCharge: number;
+
+  @ApiProperty({ description: 'Outside valley delivery charge in NPR', example: 149 })
+  @IsNotEmpty({ message: 'Outside valley delivery charge is required' })
+  @IsNumber({}, { message: 'outsideValleyDeliveryCharge must be a number conforming to the specified constraints' })
+  @Type(() => Number)
+  @Min(0, { message: 'outsideValleyDeliveryCharge must not be less than 0' })
+  outsideValleyDeliveryCharge: number;
 }
 
 export class UpdateDiscountSettingsDto {

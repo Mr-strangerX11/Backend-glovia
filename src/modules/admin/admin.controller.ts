@@ -220,17 +220,16 @@ export class AdminController {
   }
 
   @Get('settings/delivery')
-  @ApiOperation({ summary: 'Get delivery charge' })
+  @ApiOperation({ summary: 'Get delivery settings' })
   async getDeliverySettings() {
-    const charge = await this.adminService.getDeliveryCharge();
-    return { charge };
+    return this.adminService.getDeliverySettings();
   }
 
   @Put('settings/delivery')
-  @ApiOperation({ summary: 'Update delivery charge' })
+  @ApiOperation({ summary: 'Update delivery settings' })
   async updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto) {
-    await this.adminService.updateDeliveryCharge(dto.charge);
-    return { charge: dto.charge, message: 'Delivery charge updated successfully' };
+    await this.adminService.updateDeliverySettings(dto);
+    return { ...dto, message: 'Delivery settings updated successfully' };
   }
 
   @Get('settings/announcement')

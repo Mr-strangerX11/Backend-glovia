@@ -582,20 +582,28 @@ export class AdminService {
     return review;
   }
 
-  async updateDeliveryCharge(charge: number) {
+  async updateDeliverySettings(data: { freeDeliveryThreshold: number; valleyDeliveryCharge: number; outsideValleyDeliveryCharge: number }) {
+    const settingsValue = JSON.stringify(data);
     return this.settingModel.findOneAndUpdate(
-      { key: 'deliveryCharge' },
-      { 
-        key: 'deliveryCharge',
-        value: charge.toString()
+      { key: 'deliverySettings' },
+      {
+        key: 'deliverySettings',
+        value: settingsValue
       },
       { upsert: true, new: true }
     ).lean();
   }
 
-  async getDeliveryCharge() {
-    const setting = await this.settingModel.findOne({ key: 'deliveryCharge' }).lean();
-    return setting ? parseFloat(setting.value) : 0;
+  async getDeliverySettings() {
+    const setting = await this.settingModel.findOne({ key: 'deliverySettings' }).lean();
+    if (!setting) {
+      return { 
+        freeDeliveryThreshold: 2999,
+        valleyDeliveryCharge: 99,
+        outsideValleyDeliveryCharge: 149
+      };
+    }
+    return JSON.parse(setting.value);
   }
 
   async updateAnnouncementBar(data: { enabled?: boolean; message?: string; backgroundColor?: string; textColor?: string }) {
