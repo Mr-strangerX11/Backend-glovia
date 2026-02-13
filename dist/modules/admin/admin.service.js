@@ -288,8 +288,12 @@ let AdminService = class AdminService {
         if (!product) {
             throw new common_1.NotFoundException('Product not found');
         }
-        const { images, ...productData } = updateProductDto;
-        const updatedProduct = await this.productModel.findByIdAndUpdate(productId, productData, { new: true }).lean();
+        const { images, isNew, ...productData } = updateProductDto;
+        const updateData = { ...productData };
+        if (isNew !== undefined) {
+            updateData.isNewProduct = isNew;
+        }
+        const updatedProduct = await this.productModel.findByIdAndUpdate(productId, updateData, { new: true }).lean();
         if (images && Array.isArray(images)) {
             await this.productImageModel.deleteMany({ productId: new mongoose_2.Types.ObjectId(productId) });
             const newImages = images.map((img) => ({

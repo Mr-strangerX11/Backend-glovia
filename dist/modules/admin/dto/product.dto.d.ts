@@ -28,6 +28,7 @@ export declare class UpdateProductDto {
     isActive?: boolean;
     isFeatured?: boolean;
     isBestSeller?: boolean;
+    isNew?: boolean;
     images?: string[];
     discountPercentage?: number;
 }

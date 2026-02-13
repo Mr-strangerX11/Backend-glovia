@@ -341,12 +341,18 @@ export class AdminService {
       throw new NotFoundException('Product not found');
     }
 
-    const { images, ...productData } = updateProductDto;
+    const { images, isNew, ...productData } = updateProductDto;
+
+    // Map isNew to isNewProduct
+    const updateData: any = { ...productData };
+    if (isNew !== undefined) {
+      updateData.isNewProduct = isNew;
+    }
 
     // Update product
     const updatedProduct = await this.productModel.findByIdAndUpdate(
       productId,
-      productData,
+      updateData,
       { new: true }
     ).lean();
 

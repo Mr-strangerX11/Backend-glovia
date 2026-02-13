@@ -136,6 +136,11 @@ export class UpdateProductDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsBoolean()
+  isNew?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
