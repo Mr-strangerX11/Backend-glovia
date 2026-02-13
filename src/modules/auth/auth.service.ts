@@ -44,7 +44,7 @@ export class AuthService {
     });
 
     const otp = this.otpService.generateOtp();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
     await this.otpVerificationModel.create({
       userId: user._id,
@@ -204,7 +204,7 @@ export class AuthService {
     }
 
     const otp = this.otpService.generateOtp();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
     await this.otpVerificationModel.create({
       userId: user._id,
@@ -360,7 +360,7 @@ export class AuthService {
     }
 
     const otp = this.otpService.generateOtp();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
     await this.otpVerificationModel.create({
       userId: user._id,

@@ -22,8 +22,9 @@ __decorate([
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '9841234567' }),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Phone number is required' }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^[0-9]{10}$/, { message: 'Phone number must be exactly 10 digits' }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "phone", void 0);
 __decorate([

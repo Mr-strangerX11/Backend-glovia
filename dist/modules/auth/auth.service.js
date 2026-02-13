@@ -51,7 +51,7 @@ let AuthService = class AuthService {
             isEmailVerified: false,
         });
         const otp = this.otpService.generateOtp();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
         await this.otpVerificationModel.create({
             userId: user._id,
             phone: user.email,
@@ -161,7 +161,7 @@ let AuthService = class AuthService {
             throw new common_1.NotFoundException('User with this email not found');
         }
         const otp = this.otpService.generateOtp();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
         await this.otpVerificationModel.create({
             userId: user._id,
             phone: email,
@@ -267,7 +267,7 @@ let AuthService = class AuthService {
             throw new common_1.BadRequestException('Email already verified');
         }
         const otp = this.otpService.generateOtp();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
         await this.otpVerificationModel.create({
             userId: user._id,
             phone: user.email,
