@@ -2,41 +2,24 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, MaxLength } from 'class-validator';
 
 export class UpdateAnnouncementDto {
-  @ApiProperty({ required: false, example: true })
+  @ApiProperty({ required: false, example: true, description: 'Whether announcement bar is enabled' })
   @IsOptional()
   @IsBoolean()
   enabled?: boolean;
 
-  @ApiProperty({ required: false, example: true })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
-
-  @ApiProperty({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!' })
+  @ApiProperty({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!', description: 'Announcement message text' })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   message?: string;
 
-  @ApiProperty({ required: false, example: '🚚 Express Delivery: We deliver within 60 minutes!' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  text?: string;
-
-  @ApiProperty({ required: false, example: '🚚' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(10)
-  icon?: string;
-
-  @ApiProperty({ required: false, example: '#0066CC' })
+  @ApiProperty({ required: false, example: '#0066CC', description: 'Background color in hex format' })
   @IsOptional()
   @IsString()
   @MaxLength(7)
   backgroundColor?: string;
 
-  @ApiProperty({ required: false, example: '#FFFFFF' })
+  @ApiProperty({ required: false, example: '#FFFFFF', description: 'Text color in hex format' })
   @IsOptional()
   @IsString()
   @MaxLength(7)

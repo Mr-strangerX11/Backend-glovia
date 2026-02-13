@@ -598,16 +598,14 @@ export class AdminService {
     return setting ? parseFloat(setting.value) : 0;
   }
 
-  async updateAnnouncementBar(data: { enabled?: boolean; isActive?: boolean; message?: string; text?: string; icon?: string; backgroundColor?: string; textColor?: string }) {
-    const enabled = typeof data.enabled === 'boolean' ? data.enabled : data.isActive !== false;
-    const message = data.message ?? data.text ?? '';
-    const icon = data.icon ?? '🚚';
+  async updateAnnouncementBar(data: { enabled?: boolean; message?: string; backgroundColor?: string; textColor?: string }) {
+    const enabled = typeof data.enabled === 'boolean' ? data.enabled : true;
+    const message = data.message ?? '';
     const updateValue = JSON.stringify({
       enabled,
       message,
-      icon,
-      backgroundColor: data.backgroundColor || '#000000',
-      textColor: data.textColor || '#ffffff'
+      backgroundColor: data.backgroundColor || '#FFD700',
+      textColor: data.textColor || '#000000'
     });
 
     return this.settingModel.findOneAndUpdate(
