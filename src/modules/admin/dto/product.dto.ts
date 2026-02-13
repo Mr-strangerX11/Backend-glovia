@@ -89,7 +89,7 @@ export class CreateProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  isNew?: boolean;
+  isNewProduct?: boolean;
 
   @ApiProperty({ required: false, description: 'Discount percentage (0-100)' })
   @IsOptional()
@@ -107,7 +107,27 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  slug?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   description?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  ingredients?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  benefits?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  howToUse?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -117,7 +137,33 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
+  compareAtPrice?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  sku?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
   stockQuantity?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  brandId?: string;
+
+  @ApiProperty({ required: false, enum: SkinType, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(SkinType, { each: true })
+  suitableFor?: SkinType[];
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -136,9 +182,20 @@ export class UpdateProductDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsBoolean()
+  isNewProduct?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 
   @ApiProperty({ required: false, description: 'Discount percentage (0-100)' })
   @IsOptional()
