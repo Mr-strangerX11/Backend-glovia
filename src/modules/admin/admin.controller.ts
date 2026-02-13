@@ -86,6 +86,16 @@ export class AdminController {
     return this.adminService.getDashboard();
   }
 
+  @Get('users')
+  @ApiOperation({ summary: 'Get all users with pagination and optional role filter' })
+  getAllUsers(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('role') role?: UserRole,
+  ) {
+    return this.adminService.getAllUsers(page, limit, role);
+  }
+
   @Post('users')
   @ApiOperation({ summary: 'Create new user with role' })
   createUser(@Body() dto: CreateUserDto) {
