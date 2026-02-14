@@ -14,6 +14,14 @@ export class UploadService {
   }
 
   async uploadImage(file: Express.Multer.File, folder: string = 'glovia'): Promise<string> {
+    const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
+    const apiKey = this.configService.get('CLOUDINARY_API_KEY');
+    const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      throw new BadRequestException('Image upload is not configured. Set Cloudinary credentials.');
+    }
+
     if (!file) {
       throw new BadRequestException('No file provided');
     }
@@ -22,11 +30,7 @@ export class UploadService {
     if (!allowedTypes.includes(file.mimetype)) {
       throw new BadRequestException('Invalid file type. Only JPEG, PNG, and WebP allowed');
     }
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      throw new BadRequestException('File too large. Maximum size is 5MB');
-    }
+    // No file size limit here; Cloudinary and server memory limits will apply
 
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -40,7 +44,7 @@ export class UploadService {
         },
         (error, result) => {
           if (error) {
-            reject(new BadRequestException('Upload failed'));
+            reject(new BadRequestException(error?.message || 'Upload failed'));
           } else {
             resolve(result.secure_url);
           }
