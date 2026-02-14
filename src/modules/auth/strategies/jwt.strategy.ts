@@ -33,12 +33,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       return null;
     }
 
+    // Remove _id from user object and use id instead
+    const { _id, ...userWithoutId } = user as any;
     const result = {
-      id: user._id?.toString(),
-      ...user,
+      id: _id?.toString() || payload.sub,
+      ...userWithoutId,
     };
     
-    console.log('JwtStrategy: returning user:', result);
+    console.log('JwtStrategy: returning user with id:', result.id);
     return result;
   }
 }
