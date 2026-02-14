@@ -27,8 +27,13 @@ export class UploadController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    const url = await this.uploadService.uploadImage(file);
-    return { url };
+    try {
+      const url = await this.uploadService.uploadImage(file);
+      return { url };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      throw new BadRequestException(message);
+    }
   }
 
   @Post('images')
@@ -39,7 +44,12 @@ export class UploadController {
     if (!files || files.length === 0) {
       throw new BadRequestException('No files uploaded');
     }
-    const urls = await this.uploadService.uploadMultiple(files);
-    return { urls };
+    try {
+      const urls = await this.uploadService.uploadMultiple(files);
+      return { urls };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      throw new BadRequestException(message);
+    }
   }
 }
