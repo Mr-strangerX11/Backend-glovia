@@ -13,6 +13,8 @@ import { Category, CategorySchema } from '../../database/schemas/category.schema
 import { Brand, BrandSchema } from '../../database/schemas/brand.schema';
 import { ProductImage, ProductImageSchema } from '../../database/schemas/product-image.schema';
 import { Setting, SettingSchema } from '../../database/schemas/setting.schema';
+import { Address, AddressSchema } from '../../database/schemas/address.schema';
+import { EmailNotificationService } from '../../common/services/email-notification.service';
 
 @Module({
   imports: [
@@ -26,10 +28,11 @@ import { Setting, SettingSchema } from '../../database/schemas/setting.schema';
       { name: Brand.name, schema: BrandSchema },
       { name: ProductImage.name, schema: ProductImageSchema },
       { name: Setting.name, schema: SettingSchema },
+      { name: Address.name, schema: AddressSchema },
     ]),
     UploadModule,
   ],
   controllers: [AdminController, VendorController],
-  providers: [AdminService],
+  providers: [AdminService, EmailNotificationService],
 })
 export class AdminModule {}

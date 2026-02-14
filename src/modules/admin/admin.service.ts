@@ -11,8 +11,10 @@ import { Category } from '../../database/schemas/category.schema';
 import { Brand } from '../../database/schemas/brand.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
 import { Setting } from '../../database/schemas/setting.schema';
+import { Address } from '../../database/schemas/address.schema';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateProductDto, CreateProductDto } from './dto/product.dto';
+import { EmailNotificationService } from '../../common/services/email-notification.service';
 
 @Injectable()
 export class AdminService {
@@ -26,6 +28,8 @@ export class AdminService {
     @InjectModel(Brand.name) private brandModel: Model<Brand>,
     @InjectModel(ProductImage.name) private productImageModel: Model<ProductImage>,
     @InjectModel(Setting.name) private settingModel: Model<Setting>,
+    @InjectModel(Address.name) private addressModel: Model<Address>,
+    private emailNotificationService: EmailNotificationService,
   ) {}
 
   async getDashboard() {
@@ -457,11 +461,75 @@ export class AdminService {
       updateData.cancelledAt = new Date();
     }
 
-    return this.orderModel.findByIdAndUpdate(
+    const updatedOrder = await this.orderModel.findByIdAndUpdate(
       orderId,
       updateData,
       { new: true }
     ).lean();
+
+    if (status === OrderStatus.CONFIRMED) {
+      await this.sendOrderConfirmationEmail(orderId);
+    }
+
+    return updatedOrder;
+  }
+
+  private async sendOrderConfirmationEmail(orderId: string): Promise<void> {
+    try {
+      const order = await this.orderModel.findById(orderId).lean();
+      if (!order) return;
+
+      const user = await this.userModel.findById(order.userId).lean();
+      if (!user?.email) return;
+
+      const address = await this.addressModel.findById(order.addressId).lean();
+      const items = await this.orderItemModel.find({ orderId: order._id }).lean();
+      const productIds = items.map((item) => item.productId);
+      const products = await this.productModel.find({ _id: { $in: productIds } }).lean();
+      const productMap = products.reduce((acc, product) => {
+        acc[product._id.toString()] = product;
+        return acc;
+      }, {} as Record<string, any>);
+
+      const emailItems = items.map((item) => {
+        const product = productMap[item.productId.toString()];
+        return {
+          name: product?.name || 'Product',
+          quantity: item.quantity,
+          price: Number(item.price),
+          total: Number(item.total),
+        };
+      });
+
+      const adminEmail = process.env.ADMIN_ORDER_EMAIL || process.env.ADMIN_EMAIL;
+
+      await this.emailNotificationService.sendOrderConfirmedEmail(
+        {
+          orderNumber: order.orderNumber,
+          total: Number(order.total),
+          subtotal: Number(order.subtotal),
+          discount: Number(order.discount),
+          deliveryCharge: Number(order.deliveryCharge),
+          paymentMethod: order.paymentMethod,
+          customerName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer',
+          customerEmail: user.email,
+          items: emailItems,
+          address: {
+            fullName: address?.fullName || 'Customer',
+            phone: address?.phone || '',
+            province: address?.province || '',
+            district: address?.district || '',
+            municipality: address?.municipality || '',
+            wardNo: address?.wardNo || 0,
+            area: address?.area || '',
+            landmark: address?.landmark || undefined,
+          },
+        },
+        adminEmail,
+      );
+    } catch (error) {
+      // Do not block order update on email failure
+    }
   }
 
   async getAllCustomers(page: number = 1, limit: number = 10) {
