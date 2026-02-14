@@ -22,6 +22,8 @@ const category_schema_1 = require("../../database/schemas/category.schema");
 const brand_schema_1 = require("../../database/schemas/brand.schema");
 const product_image_schema_1 = require("../../database/schemas/product-image.schema");
 const setting_schema_1 = require("../../database/schemas/setting.schema");
+const address_schema_1 = require("../../database/schemas/address.schema");
+const email_notification_service_1 = require("../../common/services/email-notification.service");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
@@ -38,11 +40,12 @@ exports.AdminModule = AdminModule = __decorate([
                 { name: brand_schema_1.Brand.name, schema: brand_schema_1.BrandSchema },
                 { name: product_image_schema_1.ProductImage.name, schema: product_image_schema_1.ProductImageSchema },
                 { name: setting_schema_1.Setting.name, schema: setting_schema_1.SettingSchema },
+                { name: address_schema_1.Address.name, schema: address_schema_1.AddressSchema },
             ]),
             upload_module_1.UploadModule,
         ],
         controllers: [admin_controller_1.AdminController, vendor_controller_1.VendorController],
-        providers: [admin_service_1.AdminService],
+        providers: [admin_service_1.AdminService, email_notification_service_1.EmailNotificationService],
     })
 ], AdminModule);
 //# sourceMappingURL=admin.module.js.map

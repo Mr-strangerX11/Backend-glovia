@@ -356,6 +356,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateDeliverySettings", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('settings/announcement'),
     (0, swagger_1.ApiOperation)({ summary: 'Get announcement bar settings' }),
     __metadata("design:type", Function),

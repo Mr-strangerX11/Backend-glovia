@@ -25,7 +25,7 @@ let ProductsService = class ProductsService {
         this.reviewModel = reviewModel;
     }
     async findAll(filters) {
-        const { search, categoryId, brandId, skinType, minPrice, maxPrice, isFeatured, isBestSeller, isNew, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', } = filters || {};
+        const { search, categoryId, category, brandId, brand, skinType, minPrice, maxPrice, isFeatured, isBestSeller, isNew, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', } = filters || {};
         const where = {
             isActive: true,
         };
@@ -37,11 +37,37 @@ let ProductsService = class ProductsService {
                 { tags: search },
             ];
         }
-        if (categoryId) {
-            where.categoryId = new mongoose_2.Types.ObjectId(categoryId);
+        let resolvedCategoryId;
+        if (categoryId && mongoose_2.Types.ObjectId.isValid(categoryId)) {
+            resolvedCategoryId = new mongoose_2.Types.ObjectId(categoryId);
         }
-        if (brandId) {
-            where.brandId = new mongoose_2.Types.ObjectId(brandId);
+        else if (category) {
+            const categoryRecord = await this.categoryModel
+                .findOne({ slug: category, isActive: true })
+                .select('_id')
+                .lean();
+            if (categoryRecord?._id) {
+                resolvedCategoryId = new mongoose_2.Types.ObjectId(categoryRecord._id);
+            }
+        }
+        if (resolvedCategoryId) {
+            where.categoryId = resolvedCategoryId;
+        }
+        let resolvedBrandId;
+        if (brandId && mongoose_2.Types.ObjectId.isValid(brandId)) {
+            resolvedBrandId = new mongoose_2.Types.ObjectId(brandId);
+        }
+        else if (brand) {
+            const brandRecord = await this.brandModel
+                .findOne({ slug: brand })
+                .select('_id')
+                .lean();
+            if (brandRecord?._id) {
+                resolvedBrandId = new mongoose_2.Types.ObjectId(brandRecord._id);
+            }
+        }
+        if (resolvedBrandId) {
+            where.brandId = resolvedBrandId;
         }
         if (skinType) {
             where.suitableFor = skinType;

@@ -26,8 +26,10 @@ const category_schema_1 = require("../../database/schemas/category.schema");
 const brand_schema_1 = require("../../database/schemas/brand.schema");
 const product_image_schema_1 = require("../../database/schemas/product-image.schema");
 const setting_schema_1 = require("../../database/schemas/setting.schema");
+const address_schema_1 = require("../../database/schemas/address.schema");
+const email_notification_service_1 = require("../../common/services/email-notification.service");
 let AdminService = class AdminService {
-    constructor(userModel, productModel, orderModel, orderItemModel, reviewModel, categoryModel, brandModel, productImageModel, settingModel) {
+    constructor(userModel, productModel, orderModel, orderItemModel, reviewModel, categoryModel, brandModel, productImageModel, settingModel, addressModel, emailNotificationService) {
         this.userModel = userModel;
         this.productModel = productModel;
         this.orderModel = orderModel;
@@ -37,6 +39,8 @@ let AdminService = class AdminService {
         this.brandModel = brandModel;
         this.productImageModel = productImageModel;
         this.settingModel = settingModel;
+        this.addressModel = addressModel;
+        this.emailNotificationService = emailNotificationService;
     }
     async getDashboard() {
         const totalOrders = await this.orderModel.countDocuments();
@@ -375,7 +379,62 @@ let AdminService = class AdminService {
         else if (status === order_schema_1.OrderStatus.CANCELLED) {
             updateData.cancelledAt = new Date();
         }
-        return this.orderModel.findByIdAndUpdate(orderId, updateData, { new: true }).lean();
+        const updatedOrder = await this.orderModel.findByIdAndUpdate(orderId, updateData, { new: true }).lean();
+        if (status === order_schema_1.OrderStatus.CONFIRMED) {
+            await this.sendOrderConfirmationEmail(orderId);
+        }
+        return updatedOrder;
+    }
+    async sendOrderConfirmationEmail(orderId) {
+        try {
+            const order = await this.orderModel.findById(orderId).lean();
+            if (!order)
+                return;
+            const user = await this.userModel.findById(order.userId).lean();
+            if (!user?.email)
+                return;
+            const address = await this.addressModel.findById(order.addressId).lean();
+            const items = await this.orderItemModel.find({ orderId: order._id }).lean();
+            const productIds = items.map((item) => item.productId);
+            const products = await this.productModel.find({ _id: { $in: productIds } }).lean();
+            const productMap = products.reduce((acc, product) => {
+                acc[product._id.toString()] = product;
+                return acc;
+            }, {});
+            const emailItems = items.map((item) => {
+                const product = productMap[item.productId.toString()];
+                return {
+                    name: product?.name || 'Product',
+                    quantity: item.quantity,
+                    price: Number(item.price),
+                    total: Number(item.total),
+                };
+            });
+            const adminEmail = process.env.ADMIN_ORDER_EMAIL || process.env.ADMIN_EMAIL;
+            await this.emailNotificationService.sendOrderConfirmedEmail({
+                orderNumber: order.orderNumber,
+                total: Number(order.total),
+                subtotal: Number(order.subtotal),
+                discount: Number(order.discount),
+                deliveryCharge: Number(order.deliveryCharge),
+                paymentMethod: order.paymentMethod,
+                customerName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer',
+                customerEmail: user.email,
+                items: emailItems,
+                address: {
+                    fullName: address?.fullName || 'Customer',
+                    phone: address?.phone || '',
+                    province: address?.province || '',
+                    district: address?.district || '',
+                    municipality: address?.municipality || '',
+                    wardNo: address?.wardNo || 0,
+                    area: address?.area || '',
+                    landmark: address?.landmark || undefined,
+                },
+            }, adminEmail);
+        }
+        catch (error) {
+        }
     }
     async getAllCustomers(page = 1, limit = 10) {
         const skip = (page - 1) * limit;
@@ -681,6 +740,7 @@ exports.AdminService = AdminService = __decorate([
     __param(6, (0, mongoose_1.InjectModel)(brand_schema_1.Brand.name)),
     __param(7, (0, mongoose_1.InjectModel)(product_image_schema_1.ProductImage.name)),
     __param(8, (0, mongoose_1.InjectModel)(setting_schema_1.Setting.name)),
+    __param(9, (0, mongoose_1.InjectModel)(address_schema_1.Address.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
@@ -689,6 +749,8 @@ exports.AdminService = AdminService = __decorate([
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
-        mongoose_2.Model])
+        mongoose_2.Model,
+        mongoose_2.Model,
+        email_notification_service_1.EmailNotificationService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

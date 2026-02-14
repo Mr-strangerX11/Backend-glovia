@@ -10,7 +10,9 @@ export declare class ProductsService {
     findAll(filters?: {
         search?: string;
         categoryId?: string;
+        category?: string;
         brandId?: string;
+        brand?: string;
         skinType?: SkinType;
         minPrice?: number;
         maxPrice?: number;

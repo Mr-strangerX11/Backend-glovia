@@ -8,8 +8,10 @@ import { Category } from '../../database/schemas/category.schema';
 import { Brand } from '../../database/schemas/brand.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
 import { Setting } from '../../database/schemas/setting.schema';
+import { Address } from '../../database/schemas/address.schema';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateProductDto, CreateProductDto } from './dto/product.dto';
+import { EmailNotificationService } from '../../common/services/email-notification.service';
 export declare class AdminService {
     private userModel;
     private productModel;
@@ -20,7 +22,9 @@ export declare class AdminService {
     private brandModel;
     private productImageModel;
     private settingModel;
-    constructor(userModel: Model<User>, productModel: Model<Product>, orderModel: Model<Order>, orderItemModel: Model<OrderItem>, reviewModel: Model<Review>, categoryModel: Model<Category>, brandModel: Model<Brand>, productImageModel: Model<ProductImage>, settingModel: Model<Setting>);
+    private addressModel;
+    private emailNotificationService;
+    constructor(userModel: Model<User>, productModel: Model<Product>, orderModel: Model<Order>, orderItemModel: Model<OrderItem>, reviewModel: Model<Review>, categoryModel: Model<Category>, brandModel: Model<Brand>, productImageModel: Model<ProductImage>, settingModel: Model<Setting>, addressModel: Model<Address>, emailNotificationService: EmailNotificationService);
     getDashboard(): Promise<{
         totalOrders: number;
         totalRevenue: any;
@@ -281,6 +285,7 @@ export declare class AdminService {
     }> & {
         __v: number;
     }>;
+    private sendOrderConfirmationEmail;
     getAllCustomers(page?: number, limit?: number): Promise<{
         data: {
             id: string;
