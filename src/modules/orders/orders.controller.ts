@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreateOrderDto } from './dto/orders.dto';
 import { OrderStatus } from '../../database/schemas/order.schema';
+import { TrustScoreGuard } from '../../common/guards/trust-score.guard';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -24,6 +25,7 @@ export class OrdersController {
 
   @Post()
   @ApiOperation({ summary: 'Create new order' })
+  @UseGuards(TrustScoreGuard)
   create(@CurrentUser('id') userId: string, @Body() dto: CreateOrderDto) {
     return this.ordersService.create(userId, dto);
   }

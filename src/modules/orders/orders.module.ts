@@ -1,9 +1,9 @@
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { PaymentsModule } from '../payments/payments.module';
-import { TrustScoreMiddleware } from '../../common/middleware/trust-score.middleware';
+import { TrustScoreGuard } from '../../common/guards/trust-score.guard';
 import { Order, OrderSchema } from '../../database/schemas/order.schema';
 import { OrderItem, OrderItemSchema } from '../../database/schemas/order-item.schema';
 import { Product, ProductSchema } from '../../database/schemas/product.schema';
@@ -30,13 +30,7 @@ import { User, UserSchema } from '../../database/schemas/user.schema';
     PaymentsModule,
   ],
   controllers: [OrdersController],
-  providers: [OrdersService, TrustScoreMiddleware],
+  providers: [OrdersService, TrustScoreGuard],
   exports: [OrdersService],
 })
-export class OrdersModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TrustScoreMiddleware)
-      .forRoutes({ path: 'orders', method: RequestMethod.POST });
-  }
-}
+export class OrdersModule {}
