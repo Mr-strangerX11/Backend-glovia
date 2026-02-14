@@ -12,6 +12,8 @@ import { Payment } from '../../database/schemas/payment.schema';
 import { CartItem } from '../../database/schemas/cart-item.schema';
 import { Coupon } from '../../database/schemas/coupon.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
+import { EmailNotificationService } from '../../common/services/email-notification.service';
+import { User } from '../../database/schemas/user.schema';
 
 @Injectable()
 export class OrdersService {
@@ -24,7 +26,9 @@ export class OrdersService {
     @InjectModel(CartItem.name) private cartItemModel: Model<CartItem>,
     @InjectModel(Coupon.name) private couponModel: Model<Coupon>,
     @InjectModel(ProductImage.name) private productImageModel: Model<ProductImage>,
+    @InjectModel(User.name) private userModel: Model<User>,
     private configService: ConfigService,
+    private readonly emailNotificationService: EmailNotificationService,
   ) {}
 
   async create(userId: string, dto: CreateOrderDto) {
@@ -137,6 +141,42 @@ export class OrdersService {
       await this.cartItemModel.deleteMany({
         userId: new Types.ObjectId(userId)
       });
+    }
+
+    // Send order confirmation email to customer and admin
+    try {
+      const user = await this.userModel.findById(userId).lean();
+      if (user && user.email) {
+        const payload = {
+          orderNumber,
+          total,
+          subtotal,
+          discount,
+          deliveryCharge,
+          paymentMethod: dto.paymentMethod || PaymentMethod.CASH_ON_DELIVERY,
+          customerName: user.firstName + ' ' + user.lastName,
+          customerEmail: user.email,
+          items: items.map(item => ({
+            name: item.productId.toString(), // You can populate product name if needed
+            quantity: item.quantity,
+            price: item.price,
+            total: item.total,
+          })),
+          address: {
+            fullName: user.firstName + ' ' + user.lastName,
+            phone: user.phone || '',
+            province: address.province,
+            district: address.district,
+            municipality: address.municipality,
+            wardNo: address.wardNo,
+            area: address.area,
+            landmark: address.landmark,
+          },
+        };
+        await this.emailNotificationService.sendOrderConfirmedEmail(payload, 'glovianepal@gmail.com');
+      }
+    } catch (e) {
+      console.error('Failed to send order confirmation email:', e);
     }
 
     return this.findOne(userId, savedOrder._id.toString());
