@@ -17,20 +17,38 @@ export class TrustScoreGuard implements CanActivate {
     console.log('TrustScoreGuard: user.id value:', user?.id);
     console.log('TrustScoreGuard: user._id value:', user?._id);
 
+    // Check for user existence - be more flexible with id detection
     if (!user) {
       console.log('TrustScoreGuard: No user found in request');
-      throw new ForbiddenException('Authentication required - no user');
+      throw new ForbiddenException('Authentication required. Please login to place orders.');
     }
 
-    if (!user.id && !user._id) {
-      console.log('TrustScoreGuard: No user.id or user._id found');
-      throw new ForbiddenException('Authentication required - no user id');
+    // Try multiple ways to get user ID
+    let userId: string | undefined;
+    
+    if (user.id) {
+      userId = typeof user.id === 'string' ? user.id : String(user.id);
+    } else if (user._id) {
+      userId = typeof user._id === 'string' ? user._id : String(user._id);
+    } else if (user.sub) {
+      // Fallback to JWT subject claim
+      userId = typeof user.sub === 'string' ? user.sub : String(user.sub);
     }
 
-    const userId = user.id || user._id?.toString() || user._id;
-    console.log('TrustScoreGuard: Using userId:', userId);
+    console.log('TrustScoreGuard: Extracted userId:', userId);
+
+    if (!userId) {
+      console.log('TrustScoreGuard: No user.id, user._id, or user.sub found');
+      throw new ForbiddenException('Authentication incomplete. Please logout and login again.');
+    }
 
     try {
+      // Validate userId is a valid ObjectId format
+      if (!Types.ObjectId.isValid(userId)) {
+        console.log('TrustScoreGuard: Invalid userId format:', userId);
+        throw new ForbiddenException('Invalid user session. Please logout and login again.');
+      }
+
       const userRecord = await this.userModel.findById(new Types.ObjectId(userId))
         .select('trustScore isEmailVerified isPhoneVerified isBlocked')
         .lean();
@@ -39,15 +57,15 @@ export class TrustScoreGuard implements CanActivate {
 
       if (!userRecord) {
         console.log('TrustScoreGuard: User not found in database');
-        throw new ForbiddenException('User not found');
+        throw new ForbiddenException('User account not found. Please login again.');
       }
 
       if (userRecord.isBlocked) {
         console.log('TrustScoreGuard: User is blocked');
-        throw new ForbiddenException('Account blocked. Contact support.');
+        throw new ForbiddenException('Account blocked. Contact support for assistance.');
       }
 
-      // Temporarily relaxed: only require email verification
+      // Require email verification to place orders
       if (!userRecord.isEmailVerified) {
         console.log('TrustScoreGuard: Email not verified, user:', userRecord);
         throw new ForbiddenException({
@@ -59,25 +77,13 @@ export class TrustScoreGuard implements CanActivate {
       console.log('TrustScoreGuard: ✅ All checks passed, allowing request');
       return true;
     } catch (error) {
+      // Don't re-throw generic errors as ForbiddenException
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
       console.error('TrustScoreGuard: ERROR occurred:', error);
-      throw error;
+      // Re-throw as a more generic error
+      throw new ForbiddenException('Unable to verify account. Please try again or contact support.');
     }
-
-    // Phone verification check disabled for now
-    // if (userRecord.trustScore < 60) {
-    //   const missing = [];
-    //   if (!userRecord.isEmailVerified) missing.push('email verification');
-    //   if (!userRecord.isPhoneVerified) missing.push('phone verification');
-
-    //   throw new ForbiddenException({
-    //     message: 'Insufficient verification to place orders',
-    //     trustScore: userRecord.trustScore,
-    //     required: 60,
-    //     missing,
-    //     hint: 'Complete email and phone verification to proceed',
-    //   });
-    // }
-
-    return true;
   }
 }
