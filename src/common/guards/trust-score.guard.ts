@@ -31,19 +31,28 @@ export class TrustScoreGuard implements CanActivate {
       throw new ForbiddenException('Account blocked. Contact support.');
     }
 
-    if (userRecord.trustScore < 60) {
-      const missing = [];
-      if (!userRecord.isEmailVerified) missing.push('email verification');
-      if (!userRecord.isPhoneVerified) missing.push('phone verification');
-
+    // Temporarily relaxed: only require email verification
+    if (!userRecord.isEmailVerified) {
       throw new ForbiddenException({
-        message: 'Insufficient verification to place orders',
-        trustScore: userRecord.trustScore,
-        required: 60,
-        missing,
-        hint: 'Complete email and phone verification to proceed',
+        message: 'Email verification required to place orders',
+        hint: 'Please verify your email address to proceed',
       });
     }
+
+    // Phone verification check disabled for now
+    // if (userRecord.trustScore < 60) {
+    //   const missing = [];
+    //   if (!userRecord.isEmailVerified) missing.push('email verification');
+    //   if (!userRecord.isPhoneVerified) missing.push('phone verification');
+
+    //   throw new ForbiddenException({
+    //     message: 'Insufficient verification to place orders',
+    //     trustScore: userRecord.trustScore,
+    //     required: 60,
+    //     missing,
+    //     hint: 'Complete email and phone verification to proceed',
+    //   });
+    // }
 
     return true;
   }
