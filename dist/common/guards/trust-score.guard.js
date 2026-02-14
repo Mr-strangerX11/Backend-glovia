@@ -24,7 +24,9 @@ let TrustScoreGuard = class TrustScoreGuard {
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
         const user = request.user;
+        console.log('TrustScoreGuard: user in request:', user);
         if (!user || !user.id) {
+            console.log('TrustScoreGuard: No user or user.id found, rejecting with Authentication required');
             throw new common_1.ForbiddenException('Authentication required');
         }
         const userRecord = await this.userModel.findById(new mongoose_2.Types.ObjectId(user.id))

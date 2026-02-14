@@ -11,7 +11,11 @@ export class TrustScoreGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
+    // Debug logging
+    console.log('TrustScoreGuard: user in request:', user);
+
     if (!user || !user.id) {
+      console.log('TrustScoreGuard: No user or user.id found, rejecting with Authentication required');
       throw new ForbiddenException('Authentication required');
     }
 
