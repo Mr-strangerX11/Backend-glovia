@@ -242,9 +242,9 @@ export class AdminController {
     return { ...dto, message: 'Delivery settings updated successfully' };
   }
 
+  @Public()
   @Get('settings/announcement')
   @ApiOperation({ summary: 'Get announcement bar settings' })
-  @Public()
   getAnnouncement() {
     return this.adminService.getAnnouncementBar();
   }
