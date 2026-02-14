@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { PaymentsModule } from '../payments/payments.module';
+import { EmailNotificationModule } from '../../common/services/email-notification.module';
 import { TrustScoreGuard } from '../../common/guards/trust-score.guard';
 import { Order, OrderSchema } from '../../database/schemas/order.schema';
 import { OrderItem, OrderItemSchema } from '../../database/schemas/order-item.schema';
@@ -28,6 +29,8 @@ import { User, UserSchema } from '../../database/schemas/user.schema';
       { name: User.name, schema: UserSchema },
     ]),
     PaymentsModule,
+    ,
+    EmailNotificationModule
   ],
   controllers: [OrdersController],
   providers: [OrdersService, TrustScoreGuard],
