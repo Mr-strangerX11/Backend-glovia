@@ -13,15 +13,25 @@ export class TrustScoreGuard implements CanActivate {
 
     // Debug logging
     console.log('=== TrustScoreGuard ENTERED ===');
-    console.log('TrustScoreGuard: user in request:', JSON.stringify(user));
+    console.log('TrustScoreGuard: Full user object:', JSON.stringify(user, null, 2));
+    console.log('TrustScoreGuard: user.id value:', user?.id);
+    console.log('TrustScoreGuard: user._id value:', user?._id);
 
-    if (!user || !user.id) {
-      console.log('TrustScoreGuard: No user or user.id found, rejecting with Authentication required');
-      throw new ForbiddenException('Authentication required');
+    if (!user) {
+      console.log('TrustScoreGuard: No user found in request');
+      throw new ForbiddenException('Authentication required - no user');
     }
 
+    if (!user.id && !user._id) {
+      console.log('TrustScoreGuard: No user.id or user._id found');
+      throw new ForbiddenException('Authentication required - no user id');
+    }
+
+    const userId = user.id || user._id?.toString() || user._id;
+    console.log('TrustScoreGuard: Using userId:', userId);
+
     try {
-      const userRecord = await this.userModel.findById(new Types.ObjectId(user.id))
+      const userRecord = await this.userModel.findById(new Types.ObjectId(userId))
         .select('trustScore isEmailVerified isPhoneVerified isBlocked')
         .lean();
 

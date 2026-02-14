@@ -9,7 +9,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  canActivate(context: any) {
+  async canActivate(context: any) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -19,7 +19,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
-    return super.canActivate(context);
+    const result = await super.canActivate(context);
+    const request = context.switchToHttp().getRequest();
+    console.log('JwtAuthGuard: result:', result);
+    console.log('JwtAuthGuard: user attached to request:', JSON.stringify(request.user));
+    return result;
   }
 }
 
