@@ -29,7 +29,6 @@ import { User, UserSchema } from '../../database/schemas/user.schema';
       { name: User.name, schema: UserSchema },
     ]),
     PaymentsModule,
-    ,
     EmailNotificationModule
   ],
   controllers: [OrdersController],
