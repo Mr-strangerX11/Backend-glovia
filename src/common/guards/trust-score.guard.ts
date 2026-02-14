@@ -12,6 +12,7 @@ export class TrustScoreGuard implements CanActivate {
     const user = request.user;
 
     // Debug logging
+    console.log('=== TrustScoreGuard ENTERED ===');
     console.log('TrustScoreGuard: user in request:', JSON.stringify(user));
 
     if (!user || !user.id) {
@@ -19,33 +20,38 @@ export class TrustScoreGuard implements CanActivate {
       throw new ForbiddenException('Authentication required');
     }
 
-    const userRecord = await this.userModel.findById(new Types.ObjectId(user.id))
-      .select('trustScore isEmailVerified isPhoneVerified isBlocked')
-      .lean();
+    try {
+      const userRecord = await this.userModel.findById(new Types.ObjectId(user.id))
+        .select('trustScore isEmailVerified isPhoneVerified isBlocked')
+        .lean();
 
-    console.log('TrustScoreGuard: userRecord:', JSON.stringify(userRecord));
+      console.log('TrustScoreGuard: userRecord from DB:', JSON.stringify(userRecord));
 
-    if (!userRecord) {
-      console.log('TrustScoreGuard: User not found in database');
-      throw new ForbiddenException('User not found');
+      if (!userRecord) {
+        console.log('TrustScoreGuard: User not found in database');
+        throw new ForbiddenException('User not found');
+      }
+
+      if (userRecord.isBlocked) {
+        console.log('TrustScoreGuard: User is blocked');
+        throw new ForbiddenException('Account blocked. Contact support.');
+      }
+
+      // Temporarily relaxed: only require email verification
+      if (!userRecord.isEmailVerified) {
+        console.log('TrustScoreGuard: Email not verified, user:', userRecord);
+        throw new ForbiddenException({
+          message: 'Email verification required to place orders',
+          hint: 'Please verify your email address to proceed',
+        });
+      }
+
+      console.log('TrustScoreGuard: ✅ All checks passed, allowing request');
+      return true;
+    } catch (error) {
+      console.error('TrustScoreGuard: ERROR occurred:', error);
+      throw error;
     }
-
-    if (userRecord.isBlocked) {
-      console.log('TrustScoreGuard: User is blocked');
-      throw new ForbiddenException('Account blocked. Contact support.');
-    }
-
-    // Temporarily relaxed: only require email verification
-    if (!userRecord.isEmailVerified) {
-      console.log('TrustScoreGuard: Email not verified');
-      throw new ForbiddenException({
-        message: 'Email verification required to place orders',
-        hint: 'Please verify your email address to proceed',
-      });
-    }
-
-    console.log('TrustScoreGuard: All checks passed, allowing request');
-    return true;
 
     // Phone verification check disabled for now
     // if (userRecord.trustScore < 60) {

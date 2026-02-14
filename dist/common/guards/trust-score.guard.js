@@ -24,7 +24,7 @@ let TrustScoreGuard = class TrustScoreGuard {
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
         const user = request.user;
-        console.log('TrustScoreGuard: user in request:', user);
+        console.log('TrustScoreGuard: user in request:', JSON.stringify(user));
         if (!user || !user.id) {
             console.log('TrustScoreGuard: No user or user.id found, rejecting with Authentication required');
             throw new common_1.ForbiddenException('Authentication required');
@@ -32,26 +32,24 @@ let TrustScoreGuard = class TrustScoreGuard {
         const userRecord = await this.userModel.findById(new mongoose_2.Types.ObjectId(user.id))
             .select('trustScore isEmailVerified isPhoneVerified isBlocked')
             .lean();
+        console.log('TrustScoreGuard: userRecord:', JSON.stringify(userRecord));
         if (!userRecord) {
+            console.log('TrustScoreGuard: User not found in database');
             throw new common_1.ForbiddenException('User not found');
         }
         if (userRecord.isBlocked) {
+            console.log('TrustScoreGuard: User is blocked');
             throw new common_1.ForbiddenException('Account blocked. Contact support.');
         }
-        if (userRecord.trustScore < 60) {
-            const missing = [];
-            if (!userRecord.isEmailVerified)
-                missing.push('email verification');
-            if (!userRecord.isPhoneVerified)
-                missing.push('phone verification');
+        if (!userRecord.isEmailVerified) {
+            console.log('TrustScoreGuard: Email not verified');
             throw new common_1.ForbiddenException({
-                message: 'Insufficient verification to place orders',
-                trustScore: userRecord.trustScore,
-                required: 60,
-                missing,
-                hint: 'Complete email and phone verification to proceed',
+                message: 'Email verification required to place orders',
+                hint: 'Please verify your email address to proceed',
             });
         }
+        console.log('TrustScoreGuard: All checks passed, allowing request');
+        return true;
         return true;
     }
 };
