@@ -244,6 +244,7 @@ export class AdminController {
 
   @Get('settings/announcement')
   @ApiOperation({ summary: 'Get announcement bar settings' })
+  @Public()
   getAnnouncement() {
     return this.adminService.getAnnouncementBar();
   }

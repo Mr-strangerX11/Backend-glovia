@@ -23,7 +23,9 @@ export class ProductsService {
   async findAll(filters?: {
     search?: string;
     categoryId?: string;
+    category?: string;
     brandId?: string;
+    brand?: string;
     skinType?: SkinType;
     minPrice?: number;
     maxPrice?: number;
@@ -38,7 +40,9 @@ export class ProductsService {
     const {
       search,
       categoryId,
+      category,
       brandId,
+      brand,
       skinType,
       minPrice,
       maxPrice,
@@ -64,12 +68,38 @@ export class ProductsService {
       ];
     }
 
-    if (categoryId) {
-      where.categoryId = new Types.ObjectId(categoryId);
+    let resolvedCategoryId: Types.ObjectId | undefined;
+    if (categoryId && Types.ObjectId.isValid(categoryId)) {
+      resolvedCategoryId = new Types.ObjectId(categoryId);
+    } else if (category) {
+      const categoryRecord = await this.categoryModel
+        .findOne({ slug: category, isActive: true })
+        .select('_id')
+        .lean();
+      if (categoryRecord?._id) {
+        resolvedCategoryId = new Types.ObjectId(categoryRecord._id);
+      }
     }
 
-    if (brandId) {
-      where.brandId = new Types.ObjectId(brandId);
+    if (resolvedCategoryId) {
+      where.categoryId = resolvedCategoryId;
+    }
+
+    let resolvedBrandId: Types.ObjectId | undefined;
+    if (brandId && Types.ObjectId.isValid(brandId)) {
+      resolvedBrandId = new Types.ObjectId(brandId);
+    } else if (brand) {
+      const brandRecord = await this.brandModel
+        .findOne({ slug: brand })
+        .select('_id')
+        .lean();
+      if (brandRecord?._id) {
+        resolvedBrandId = new Types.ObjectId(brandRecord._id);
+      }
+    }
+
+    if (resolvedBrandId) {
+      where.brandId = resolvedBrandId;
     }
 
     if (skinType) {
