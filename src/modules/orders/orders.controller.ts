@@ -25,7 +25,7 @@ export class OrdersController {
 
   @Post()
   @ApiOperation({ summary: 'Create new order' })
-  @UseGuards(TrustScoreGuard)
+  @UseGuards(JwtAuthGuard, TrustScoreGuard)
   create(@CurrentUser('id') userId: string, @Body() dto: CreateOrderDto) {
     return this.ordersService.create(userId, dto);
   }
