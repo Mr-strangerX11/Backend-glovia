@@ -10,6 +10,8 @@ import { Payment } from '../../database/schemas/payment.schema';
 import { CartItem } from '../../database/schemas/cart-item.schema';
 import { Coupon } from '../../database/schemas/coupon.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
+import { EmailNotificationService } from '../../common/services/email-notification.service';
+import { User } from '../../database/schemas/user.schema';
 export declare class OrdersService {
     private orderModel;
     private orderItemModel;
@@ -19,8 +21,10 @@ export declare class OrdersService {
     private cartItemModel;
     private couponModel;
     private productImageModel;
+    private userModel;
     private configService;
-    constructor(orderModel: Model<Order>, orderItemModel: Model<OrderItem>, productModel: Model<Product>, addressModel: Model<Address>, paymentModel: Model<Payment>, cartItemModel: Model<CartItem>, couponModel: Model<Coupon>, productImageModel: Model<ProductImage>, configService: ConfigService);
+    private readonly emailNotificationService;
+    constructor(orderModel: Model<Order>, orderItemModel: Model<OrderItem>, productModel: Model<Product>, addressModel: Model<Address>, paymentModel: Model<Payment>, cartItemModel: Model<CartItem>, couponModel: Model<Coupon>, productImageModel: Model<ProductImage>, userModel: Model<User>, configService: ConfigService, emailNotificationService: EmailNotificationService);
     create(userId: string, dto: CreateOrderDto): Promise<{
         items: {
             images: any[];

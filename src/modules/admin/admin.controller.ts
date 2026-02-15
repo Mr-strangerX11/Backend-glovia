@@ -188,10 +188,22 @@ export class AdminController {
     );
   }
 
+  @Get('orders/:id')
+  @ApiOperation({ summary: 'Get order details by ID' })
+  getOrder(@Param('id') id: string) {
+    return this.adminService.getOrderDetails(id);
+  }
+
   @Put('orders/:id')
   @ApiOperation({ summary: 'Update order status' })
   updateOrder(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return this.adminService.updateOrderStatus(id, dto.status);
+  }
+
+  @Delete('orders/:id')
+  @ApiOperation({ summary: 'Delete order' })
+  deleteOrder(@Param('id') id: string) {
+    return this.adminService.deleteOrder(id);
   }
 
   @Get('customers')

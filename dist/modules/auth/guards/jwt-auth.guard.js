@@ -27,7 +27,29 @@ let JwtAuthGuard = class JwtAuthGuard extends (0, passport_1.AuthGuard)('jwt') {
         if (isPublic) {
             return true;
         }
-        return super.canActivate(context);
+        const result = super.canActivate(context);
+        const request = context.switchToHttp().getRequest();
+        if (result instanceof Promise) {
+            return result.then(res => {
+                console.log('JwtAuthGuard: result:', res);
+                console.log('JwtAuthGuard: user attached to request:', JSON.stringify(request.user));
+                return res;
+            });
+        }
+        else {
+            console.log('JwtAuthGuard: result:', result);
+            console.log('JwtAuthGuard: user attached to request:', JSON.stringify(request.user));
+            return result;
+        }
+    }
+    handleRequest(err, user, info) {
+        if (err || !user) {
+            if (info?.message?.includes('jwt')) {
+                throw new common_1.UnauthorizedException('Session expired. Please login again.');
+            }
+            throw new common_1.UnauthorizedException('Authentication required. Please login.');
+        }
+        return user;
     }
 };
 exports.JwtAuthGuard = JwtAuthGuard;

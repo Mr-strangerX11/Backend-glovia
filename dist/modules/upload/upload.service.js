@@ -31,10 +31,6 @@ let UploadService = class UploadService {
         if (!allowedTypes.includes(file.mimetype)) {
             throw new common_1.BadRequestException('Invalid file type. Only JPEG, PNG, and WebP allowed');
         }
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            throw new common_1.BadRequestException('File too large. Maximum size is 5MB');
-        }
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary_1.v2.uploader.upload_stream({
                 folder,

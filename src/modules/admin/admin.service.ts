@@ -395,6 +395,29 @@ export class AdminService {
     return product;
   }
 
+  async getOrderDetails(orderId: string) {
+    if (!Types.ObjectId.isValid(orderId)) {
+      throw new BadRequestException('Invalid order ID');
+    }
+
+    const order = await this.orderModel.findById(orderId).lean();
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Get user details
+    const user = await this.userModel.findById(order.userId).lean();
+
+    // Get order items
+    const orderItems = await this.orderItemModel.find({ orderId: order._id }).lean();
+
+    return {
+      ...order,
+      user: user || null,
+      items: orderItems || []
+    };
+  }
+
   async getAllOrders(page: number = 1, limit: number = 10, status?: OrderStatus) {
     const skip = (page - 1) * limit;
     const filter = status ? { status } : {};
@@ -472,6 +495,28 @@ export class AdminService {
     }
 
     return updatedOrder;
+  }
+
+  async deleteOrder(orderId: string) {
+    if (!Types.ObjectId.isValid(orderId)) {
+      throw new BadRequestException('Invalid order ID');
+    }
+
+    const order = await this.orderModel.findById(orderId);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Delete associated order items first
+    await this.orderItemModel.deleteMany({ orderId: order._id });
+
+    // Delete the order
+    await this.orderModel.findByIdAndDelete(orderId);
+
+    return {
+      message: 'Order deleted successfully',
+      deletedOrderId: orderId
+    };
   }
 
   private async sendOrderConfirmationEmail(orderId: string): Promise<void> {

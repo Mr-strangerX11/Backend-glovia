@@ -24,33 +24,63 @@ let TrustScoreGuard = class TrustScoreGuard {
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
         const user = request.user;
-        console.log('TrustScoreGuard: user in request:', JSON.stringify(user));
-        if (!user || !user.id) {
-            console.log('TrustScoreGuard: No user or user.id found, rejecting with Authentication required');
-            throw new common_1.ForbiddenException('Authentication required');
+        console.log('=== TrustScoreGuard ENTERED ===');
+        console.log('TrustScoreGuard: Full user object:', JSON.stringify(user, null, 2));
+        console.log('TrustScoreGuard: user.id value:', user?.id);
+        console.log('TrustScoreGuard: user._id value:', user?._id);
+        if (!user) {
+            console.log('TrustScoreGuard: No user found in request');
+            throw new common_1.ForbiddenException('Authentication required. Please login to place orders.');
         }
-        const userRecord = await this.userModel.findById(new mongoose_2.Types.ObjectId(user.id))
-            .select('trustScore isEmailVerified isPhoneVerified isBlocked')
-            .lean();
-        console.log('TrustScoreGuard: userRecord:', JSON.stringify(userRecord));
-        if (!userRecord) {
-            console.log('TrustScoreGuard: User not found in database');
-            throw new common_1.ForbiddenException('User not found');
+        let userId;
+        if (user.id) {
+            userId = typeof user.id === 'string' ? user.id : String(user.id);
         }
-        if (userRecord.isBlocked) {
-            console.log('TrustScoreGuard: User is blocked');
-            throw new common_1.ForbiddenException('Account blocked. Contact support.');
+        else if (user._id) {
+            userId = typeof user._id === 'string' ? user._id : String(user._id);
         }
-        if (!userRecord.isEmailVerified) {
-            console.log('TrustScoreGuard: Email not verified');
-            throw new common_1.ForbiddenException({
-                message: 'Email verification required to place orders',
-                hint: 'Please verify your email address to proceed',
-            });
+        else if (user.sub) {
+            userId = typeof user.sub === 'string' ? user.sub : String(user.sub);
         }
-        console.log('TrustScoreGuard: All checks passed, allowing request');
-        return true;
-        return true;
+        console.log('TrustScoreGuard: Extracted userId:', userId);
+        if (!userId) {
+            console.log('TrustScoreGuard: No user.id, user._id, or user.sub found');
+            throw new common_1.ForbiddenException('Authentication incomplete. Please logout and login again.');
+        }
+        try {
+            if (!mongoose_2.Types.ObjectId.isValid(userId)) {
+                console.log('TrustScoreGuard: Invalid userId format:', userId);
+                throw new common_1.ForbiddenException('Invalid user session. Please logout and login again.');
+            }
+            const userRecord = await this.userModel.findById(new mongoose_2.Types.ObjectId(userId))
+                .select('trustScore isEmailVerified isPhoneVerified isBlocked')
+                .lean();
+            console.log('TrustScoreGuard: userRecord from DB:', JSON.stringify(userRecord));
+            if (!userRecord) {
+                console.log('TrustScoreGuard: User not found in database');
+                throw new common_1.ForbiddenException('User account not found. Please login again.');
+            }
+            if (userRecord.isBlocked) {
+                console.log('TrustScoreGuard: User is blocked');
+                throw new common_1.ForbiddenException('Account blocked. Contact support for assistance.');
+            }
+            if (!userRecord.isEmailVerified) {
+                console.log('TrustScoreGuard: Email not verified, user:', userRecord);
+                throw new common_1.ForbiddenException({
+                    message: 'Email verification required to place orders',
+                    hint: 'Please verify your email address to proceed',
+                });
+            }
+            console.log('TrustScoreGuard: ✅ All checks passed, allowing request');
+            return true;
+        }
+        catch (error) {
+            if (error instanceof common_1.ForbiddenException) {
+                throw error;
+            }
+            console.error('TrustScoreGuard: ERROR occurred:', error);
+            throw new common_1.ForbiddenException('Unable to verify account. Please try again or contact support.');
+        }
     }
 };
 exports.TrustScoreGuard = TrustScoreGuard;

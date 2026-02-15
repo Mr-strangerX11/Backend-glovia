@@ -26,8 +26,10 @@ const payment_schema_1 = require("../../database/schemas/payment.schema");
 const cart_item_schema_1 = require("../../database/schemas/cart-item.schema");
 const coupon_schema_1 = require("../../database/schemas/coupon.schema");
 const product_image_schema_1 = require("../../database/schemas/product-image.schema");
+const email_notification_service_1 = require("../../common/services/email-notification.service");
+const user_schema_1 = require("../../database/schemas/user.schema");
 let OrdersService = class OrdersService {
-    constructor(orderModel, orderItemModel, productModel, addressModel, paymentModel, cartItemModel, couponModel, productImageModel, configService) {
+    constructor(orderModel, orderItemModel, productModel, addressModel, paymentModel, cartItemModel, couponModel, productImageModel, userModel, configService, emailNotificationService) {
         this.orderModel = orderModel;
         this.orderItemModel = orderItemModel;
         this.productModel = productModel;
@@ -36,7 +38,9 @@ let OrdersService = class OrdersService {
         this.cartItemModel = cartItemModel;
         this.couponModel = couponModel;
         this.productImageModel = productImageModel;
+        this.userModel = userModel;
         this.configService = configService;
+        this.emailNotificationService = emailNotificationService;
     }
     async create(userId, dto) {
         if (!mongoose_2.Types.ObjectId.isValid(dto.addressId)) {
@@ -115,6 +119,41 @@ let OrdersService = class OrdersService {
             await this.cartItemModel.deleteMany({
                 userId: new mongoose_2.Types.ObjectId(userId)
             });
+        }
+        try {
+            const user = await this.userModel.findById(userId).lean();
+            if (user && user.email) {
+                const payload = {
+                    orderNumber,
+                    total,
+                    subtotal,
+                    discount,
+                    deliveryCharge,
+                    paymentMethod: dto.paymentMethod || order_schema_1.PaymentMethod.CASH_ON_DELIVERY,
+                    customerName: user.firstName + ' ' + user.lastName,
+                    customerEmail: user.email,
+                    items: items.map(item => ({
+                        name: item.productId.toString(),
+                        quantity: item.quantity,
+                        price: item.price,
+                        total: item.total,
+                    })),
+                    address: {
+                        fullName: user.firstName + ' ' + user.lastName,
+                        phone: user.phone || '',
+                        province: address.province,
+                        district: address.district,
+                        municipality: address.municipality,
+                        wardNo: address.wardNo,
+                        area: address.area,
+                        landmark: address.landmark,
+                    },
+                };
+                await this.emailNotificationService.sendOrderConfirmedEmail(payload, 'glovianepal@gmail.com');
+            }
+        }
+        catch (e) {
+            console.error('Failed to send order confirmation email:', e);
         }
         return this.findOne(userId, savedOrder._id.toString());
     }
@@ -288,6 +327,7 @@ exports.OrdersService = OrdersService = __decorate([
     __param(5, (0, mongoose_1.InjectModel)(cart_item_schema_1.CartItem.name)),
     __param(6, (0, mongoose_1.InjectModel)(coupon_schema_1.Coupon.name)),
     __param(7, (0, mongoose_1.InjectModel)(product_image_schema_1.ProductImage.name)),
+    __param(8, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
@@ -296,6 +336,8 @@ exports.OrdersService = OrdersService = __decorate([
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
-        config_1.ConfigService])
+        mongoose_2.Model,
+        config_1.ConfigService,
+        email_notification_service_1.EmailNotificationService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

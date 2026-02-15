@@ -40,11 +40,12 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             console.log('JwtStrategy: user not found, returning null');
             return null;
         }
+        const { _id, ...userWithoutId } = user;
         const result = {
-            id: user._id?.toString(),
-            ...user,
+            id: _id?.toString() || payload.sub,
+            ...userWithoutId,
         };
-        console.log('JwtStrategy: returning user:', result);
+        console.log('JwtStrategy: returning user with id:', result.id);
         return result;
     }
 };

@@ -4,5 +4,6 @@ export declare class JwtAuthGuard extends JwtAuthGuard_base {
     private reflector;
     constructor(reflector: Reflector);
     canActivate(context: any): boolean | Promise<boolean> | import("rxjs").Observable<boolean>;
+    handleRequest(err: any, user: any, info: any): any;
 }
 export {};

@@ -20,12 +20,12 @@ const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const orders_dto_1 = require("./dto/orders.dto");
 const order_schema_1 = require("../../database/schemas/order.schema");
-const trust_score_guard_1 = require("../../common/guards/trust-score.guard");
 let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
     }
     create(userId, dto) {
+        console.log('OrdersController: userId received:', userId);
         return this.ordersService.create(userId, dto);
     }
     findAll(userId, status) {
@@ -42,7 +42,7 @@ exports.OrdersController = OrdersController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new order' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, trust_score_guard_1.TrustScoreGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),

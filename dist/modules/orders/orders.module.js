@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const orders_service_1 = require("./orders.service");
 const orders_controller_1 = require("./orders.controller");
 const payments_module_1 = require("../payments/payments.module");
+const email_notification_module_1 = require("../../common/services/email-notification.module");
 const trust_score_guard_1 = require("../../common/guards/trust-score.guard");
 const order_schema_1 = require("../../database/schemas/order.schema");
 const order_item_schema_1 = require("../../database/schemas/order-item.schema");
@@ -40,6 +41,7 @@ exports.OrdersModule = OrdersModule = __decorate([
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
             ]),
             payments_module_1.PaymentsModule,
+            email_notification_module_1.EmailNotificationModule
         ],
         controllers: [orders_controller_1.OrdersController],
         providers: [orders_service_1.OrdersService, trust_score_guard_1.TrustScoreGuard],
