@@ -64,6 +64,16 @@ export declare class AdminController {
             firstName: string;
             lastName: string;
             role: UserRole;
+            permissions: {
+                canEditProducts?: boolean;
+                canViewOrders?: boolean;
+                canManageUsers?: boolean;
+                canManageBanners?: boolean;
+                canViewAnalytics?: boolean;
+                canManagePromos?: boolean;
+                canViewAuditLogs?: boolean;
+                [key: string]: boolean | undefined;
+            };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
             skinType?: import("../../database/schemas/user.schema").SkinType;
@@ -179,10 +189,55 @@ export declare class AdminController {
             totalPages: number;
         };
     }>;
+    getOrder(id: string): Promise<{
+        user: import("../../database/schemas/user.schema").User & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        items: (import("../../database/schemas").OrderItem & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        })[];
+        orderNumber: string;
+        userId: import("mongoose").Types.ObjectId;
+        addressId: import("mongoose").Types.ObjectId;
+        subtotal: number;
+        discount: number;
+        deliveryCharge: number;
+        total: number;
+        status: OrderStatus;
+        paymentStatus: import("../../database/schemas/order.schema").PaymentStatus;
+        paymentMethod: import("../../database/schemas/order.schema").PaymentMethod;
+        customerNote?: string;
+        adminNote?: string;
+        trackingNumber?: string;
+        deliveryPartner?: string;
+        confirmedAt?: Date;
+        shippedAt?: Date;
+        deliveredAt?: Date;
+        cancelledAt?: Date;
+        _id: import("mongoose").Types.ObjectId;
+        $locals: Record<string, unknown>;
+        $op: "save" | "validate" | "remove" | null;
+        $where: Record<string, unknown>;
+        baseModelName?: string;
+        collection: import("mongoose").Collection;
+        db: import("mongoose").Connection;
+        errors?: import("mongoose").Error.ValidationError;
+        isNew: boolean;
+        schema: import("mongoose").Schema;
+        __v: number;
+    }>;
     updateOrder(id: string, dto: UpdateOrderDto): Promise<import("../../database/schemas/order.schema").Order & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
+    }>;
+    deleteOrder(id: string): Promise<{
+        message: string;
+        deletedOrderId: string;
     }>;
     getAllCustomers(page?: string, limit?: string): Promise<{
         data: {
@@ -195,6 +250,16 @@ export declare class AdminController {
             firstName: string;
             lastName: string;
             role: UserRole;
+            permissions: {
+                canEditProducts?: boolean;
+                canViewOrders?: boolean;
+                canManageUsers?: boolean;
+                canManageBanners?: boolean;
+                canViewAnalytics?: boolean;
+                canManagePromos?: boolean;
+                canViewAuditLogs?: boolean;
+                [key: string]: boolean | undefined;
+            };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
             skinType?: import("../../database/schemas/user.schema").SkinType;
@@ -266,20 +331,20 @@ export declare class AdminController {
         __v: number;
     }>;
     getDeliverySettings(): Promise<any>;
-    updateDeliverySettings(dto: UpdateDeliverySettingsDto): Promise<{
+    updateDeliverySettings(dto: UpdateDeliverySettingsDto, user: any): Promise<{
         message: string;
         freeDeliveryThreshold: number;
         valleyDeliveryCharge: number;
         outsideValleyDeliveryCharge: number;
     }>;
     getAnnouncement(): Promise<any>;
-    updateAnnouncement(dto: UpdateAnnouncementDto): Promise<import("../../database/schemas").Setting & Required<{
+    updateAnnouncement(dto: UpdateAnnouncementDto, user: any): Promise<import("../../database/schemas").Setting & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     }>;
     getDiscountSettings(): Promise<any>;
-    updateDiscountSettings(dto: UpdateDiscountSettingsDto): Promise<import("../../database/schemas").Setting & Required<{
+    updateDiscountSettings(dto: UpdateDiscountSettingsDto, user: any): Promise<import("../../database/schemas").Setting & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
@@ -313,7 +378,7 @@ export declare class AdminController {
             newRole?: undefined;
         } | {
             email: string;
-            oldRole: UserRole.CUSTOMER | UserRole.ADMIN | UserRole.VENDOR;
+            oldRole: UserRole.CUSTOMER | UserRole.ADMIN | UserRole.VENDOR | UserRole.EDITOR | UserRole.MARKETING | UserRole.AUDITOR;
             newRole: UserRole;
             status: string;
             role?: undefined;

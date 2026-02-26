@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
+const auditlog_module_1 = require("./modules/auditlog/auditlog.module");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const throttler_1 = require("@nestjs/throttler");
@@ -19,6 +20,7 @@ const categories_module_1 = require("./modules/categories/categories.module");
 const orders_module_1 = require("./modules/orders/orders.module");
 const payments_module_1 = require("./modules/payments/payments.module");
 const admin_module_1 = require("./modules/admin/admin.module");
+const health_module_1 = require("./modules/health/health.module");
 const cart_module_1 = require("./modules/cart/cart.module");
 const wishlist_module_1 = require("./modules/wishlist/wishlist.module");
 const reviews_module_1 = require("./modules/reviews/reviews.module");
@@ -27,6 +29,9 @@ const blogs_module_1 = require("./modules/blogs/blogs.module");
 const upload_module_1 = require("./modules/upload/upload.module");
 const verification_module_1 = require("./modules/verification/verification.module");
 const brands_module_1 = require("./modules/brands/brands.module");
+const promocodes_module_1 = require("./modules/promocodes/promocodes.module");
+const popups_module_1 = require("./modules/popups/popups.module");
+const analytics_module_1 = require("./modules/analytics/analytics.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -49,6 +54,9 @@ exports.AppModule = AppModule = __decorate([
             categories_module_1.CategoriesModule,
             brands_module_1.BrandsModule,
             orders_module_1.OrdersModule,
+            promocodes_module_1.PromoCodesModule,
+            popups_module_1.PopupsModule,
+            auditlog_module_1.AuditLogModule,
             payments_module_1.PaymentsModule,
             admin_module_1.AdminModule,
             cart_module_1.CartModule,
@@ -58,6 +66,8 @@ exports.AppModule = AppModule = __decorate([
             blogs_module_1.BlogsModule,
             upload_module_1.UploadModule,
             verification_module_1.VerificationModule,
+            health_module_1.HealthModule,
+            analytics_module_1.AnalyticsModule,
         ],
     })
 ], AppModule);

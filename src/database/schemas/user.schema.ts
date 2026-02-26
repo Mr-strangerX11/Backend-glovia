@@ -6,6 +6,9 @@ export enum UserRole {
   ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER_ADMIN',
   VENDOR = 'VENDOR',
+  EDITOR = 'EDITOR',
+  MARKETING = 'MARKETING',
+  AUDITOR = 'AUDITOR',
 }
 
 export enum SkinType {
@@ -33,8 +36,32 @@ export class User extends Document {
   @Prop({ required: true })
   lastName: string;
 
+
   @Prop({ type: String, enum: UserRole, default: UserRole.CUSTOMER })
   role: UserRole;
+
+  @Prop({
+    type: Object,
+    default: {
+      canEditProducts: false,
+      canViewOrders: false,
+      canManageUsers: false,
+      canManageBanners: false,
+      canViewAnalytics: false,
+      canManagePromos: false,
+      canViewAuditLogs: false,
+    },
+  })
+  permissions: {
+    canEditProducts?: boolean;
+    canViewOrders?: boolean;
+    canManageUsers?: boolean;
+    canManageBanners?: boolean;
+    canViewAnalytics?: boolean;
+    canManagePromos?: boolean;
+    canViewAuditLogs?: boolean;
+    [key: string]: boolean | undefined;
+  };
 
   @Prop({ default: false })
   isEmailVerified: boolean;

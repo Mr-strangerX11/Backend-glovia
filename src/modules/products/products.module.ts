@@ -9,6 +9,7 @@ import {
   BrandSchema,
   ReviewSchema,
   UserSchema,
+  ProductVariantSchema,
 } from '../../database/schemas';
 
 @Module({
@@ -20,6 +21,7 @@ import {
       { name: 'Brand', schema: BrandSchema },
       { name: 'Review', schema: ReviewSchema },
       { name: 'User', schema: UserSchema },
+      { name: 'ProductVariant', schema: ProductVariantSchema },
     ]),
   ],
   controllers: [ProductsController],

@@ -25,6 +25,7 @@ exports.ProductsModule = ProductsModule = __decorate([
                 { name: 'Brand', schema: schemas_1.BrandSchema },
                 { name: 'Review', schema: schemas_1.ReviewSchema },
                 { name: 'User', schema: schemas_1.UserSchema },
+                { name: 'ProductVariant', schema: schemas_1.ProductVariantSchema },
             ]),
         ],
         controllers: [products_controller_1.ProductsController],

@@ -35,7 +35,7 @@ export declare const CategorySchema: import("mongoose").Schema<Category, import(
 }, "id"> & {
     id: string;
 }, {
-    name?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
+    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Category, Document<unknown, {}, Category, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
         _id: Types.ObjectId;
@@ -44,7 +44,7 @@ export declare const CategorySchema: import("mongoose").Schema<Category, import(
     }, "id"> & {
         id: string;
     }>;
-    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Category, Document<unknown, {}, Category, {
+    name?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
         _id: Types.ObjectId;
@@ -80,24 +80,6 @@ export declare const CategorySchema: import("mongoose").Schema<Category, import(
     }, "id"> & {
         id: string;
     }>;
-    image?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    parentId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
     isActive?: import("mongoose").SchemaDefinitionProperty<boolean, Category, Document<unknown, {}, Category, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
@@ -108,6 +90,24 @@ export declare const CategorySchema: import("mongoose").Schema<Category, import(
         id: string;
     }>;
     displayOrder?: import("mongoose").SchemaDefinitionProperty<number, Category, Document<unknown, {}, Category, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    image?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    parentId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Category, Document<unknown, {}, Category, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Category & Required<{
         _id: Types.ObjectId;

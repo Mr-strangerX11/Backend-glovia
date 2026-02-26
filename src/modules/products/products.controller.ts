@@ -1,37 +1,73 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+
+import { Controller, Get, Param, Query, UseGuards, Post, Body, Put, Delete, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
+import { AuditLogService } from '../auditlog/auditlog.service';
 import { SkinType } from '../../database/schemas/user.schema';
+import { Permissions } from '../../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
 
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) {}
+  constructor(
+    private productsService: ProductsService,
+    private auditLogService: AuditLogService,
+  ) {}
+
+  // Product Variant Endpoints
+  @Get(':productId/variants')
+  @ApiOperation({ summary: 'Get all variants for a product' })
+  getVariants(@Param('productId') productId: string) {
+    return this.productsService.getVariants(productId);
+  }
+
+  @Post(':productId/variants')
+  @ApiOperation({ summary: 'Create a variant for a product' })
+  createVariant(@Param('productId') productId: string, @Body() dto: any, @Req() req: any) {
+    // Optionally, add admin guard here
+    return this.productsService.createVariant(productId, dto, req.user);
+  }
+
+  @Put(':productId/variants/:variantId')
+  @ApiOperation({ summary: 'Update a product variant' })
+  updateVariant(
+    @Param('productId') productId: string,
+    @Param('variantId') variantId: string,
+    @Body() dto: any,
+    @Req() req: any,
+  ) {
+    return this.productsService.updateVariant(productId, variantId, dto, req.user);
+
+  @Delete(':productId/variants/:variantId')
+  @ApiOperation({ summary: 'Delete a product variant' })
+  async deleteVariant(
+    @Param('productId') productId: string,
+    @Param('variantId') variantId: string,
+    @Req() req: any,
+  ) {
+    const result = await this.productsService.deleteVariant(productId, variantId, req.user);
+    // Audit log
+    const admin = req.user;
+    await this.auditLogService.log(
+      'DELETE_PRODUCT_VARIANT',
+      admin._id,
+      admin.email,
+      productId,
+      { variantId }
+    );
+    return result;
+  }
 
   @Get()
   @ApiOperation({ summary: 'Get all products with filters' })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
-  @ApiQuery({ name: 'category', required: false })
-  @ApiQuery({ name: 'brandId', required: false })
-  @ApiQuery({ name: 'brand', required: false })
-  @ApiQuery({ name: 'skinType', required: false, enum: SkinType })
-  @ApiQuery({ name: 'minPrice', required: false })
-  @ApiQuery({ name: 'maxPrice', required: false })
-  @ApiQuery({ name: 'isFeatured', required: false })
-  @ApiQuery({ name: 'isBestSeller', required: false })
-  @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @UseGuards(PermissionsGuard)
+  @Permissions('canViewProducts')
   findAll(@Query() query: any) {
-    return this.productsService.findAll({
-      ...query,
-      minPrice: query.minPrice ? Number(query.minPrice) : undefined,
-      maxPrice: query.maxPrice ? Number(query.maxPrice) : undefined,
-      page: query.page ? Number(query.page) : undefined,
-      limit: query.limit ? Number(query.limit) : undefined,
-      isFeatured: query.isFeatured ? query.isFeatured === 'true' : undefined,
-      isBestSeller: query.isBestSeller ? query.isBestSeller === 'true' : undefined,
-    });
+    return this.productsService.findAll(query);
   }
 
   @Get('featured')

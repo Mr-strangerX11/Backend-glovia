@@ -8,6 +8,7 @@ import {
   Brand,
   Review,
   SkinType,
+  ProductVariant,
 } from '../../database/schemas';
 
 @Injectable()
@@ -18,7 +19,35 @@ export class ProductsService {
     @InjectModel('Category') private categoryModel: Model<Category>,
     @InjectModel('Brand') private brandModel: Model<Brand>,
     @InjectModel('Review') private reviewModel: Model<Review>,
+    @InjectModel('ProductVariant') private productVariantModel: Model<ProductVariant>,
   ) {}
+  // Product Variant Methods
+  async getVariants(productId: string) {
+    return this.productVariantModel.find({ productId }).lean();
+  }
+
+  async createVariant(productId: string, dto: any, user: any) {
+    // Optionally, add audit log here
+    return this.productVariantModel.create({ ...dto, productId });
+  }
+
+  async updateVariant(productId: string, variantId: string, dto: any, user: any) {
+    // Optionally, add audit log here
+    const variant = await this.productVariantModel.findOneAndUpdate(
+      { _id: variantId, productId },
+      dto,
+      { new: true }
+    );
+    if (!variant) throw new NotFoundException('Variant not found');
+    return variant;
+  }
+
+  async deleteVariant(productId: string, variantId: string, user: any) {
+    // Optionally, add audit log here
+    const variant = await this.productVariantModel.findOneAndDelete({ _id: variantId, productId });
+    if (!variant) throw new NotFoundException('Variant not found');
+    return { message: 'Variant deleted successfully' };
+  }
 
   async findAll(filters?: {
     search?: string;

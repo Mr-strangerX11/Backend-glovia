@@ -33,6 +33,24 @@ export declare const AddressSchema: import("mongoose").Schema<Address, import("m
 }, "id"> & {
     id: string;
 }, {
+    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Address, Document<unknown, {}, Address, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    isVerified?: import("mongoose").SchemaDefinitionProperty<boolean, Address, Document<unknown, {}, Address, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
     _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Address, Document<unknown, {}, Address, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
@@ -43,15 +61,6 @@ export declare const AddressSchema: import("mongoose").Schema<Address, import("m
         id: string;
     }>;
     phone?: import("mongoose").SchemaDefinitionProperty<string, Address, Document<unknown, {}, Address, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Address, Document<unknown, {}, Address, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
         _id: Types.ObjectId;
@@ -142,15 +151,6 @@ export declare const AddressSchema: import("mongoose").Schema<Address, import("m
         id: string;
     }>;
     longitude?: import("mongoose").SchemaDefinitionProperty<number, Address, Document<unknown, {}, Address, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    isVerified?: import("mongoose").SchemaDefinitionProperty<boolean, Address, Document<unknown, {}, Address, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Address & Required<{
         _id: Types.ObjectId;

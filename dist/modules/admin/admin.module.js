@@ -24,6 +24,8 @@ const product_image_schema_1 = require("../../database/schemas/product-image.sch
 const setting_schema_1 = require("../../database/schemas/setting.schema");
 const address_schema_1 = require("../../database/schemas/address.schema");
 const email_notification_service_1 = require("../../common/services/email-notification.service");
+const audit_schema_1 = require("../../database/schemas/audit.schema");
+const setting_version_schema_1 = require("../../database/schemas/setting-version.schema");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
@@ -41,6 +43,8 @@ exports.AdminModule = AdminModule = __decorate([
                 { name: product_image_schema_1.ProductImage.name, schema: product_image_schema_1.ProductImageSchema },
                 { name: setting_schema_1.Setting.name, schema: setting_schema_1.SettingSchema },
                 { name: address_schema_1.Address.name, schema: address_schema_1.AddressSchema },
+                { name: audit_schema_1.AuditLog.name, schema: audit_schema_1.AuditLogSchema },
+                { name: setting_version_schema_1.SettingVersion.name, schema: setting_version_schema_1.SettingVersionSchema },
             ]),
             upload_module_1.UploadModule,
         ],

@@ -24,25 +24,16 @@ export declare const ProductImageSchema: import("mongoose").Schema<ProductImage,
 }, "id"> & {
     id: string;
 }, {
-    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, ProductImage, Document<unknown, {}, ProductImage, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductImage & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    displayOrder?: import("mongoose").SchemaDefinitionProperty<number, ProductImage, Document<unknown, {}, ProductImage, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductImage & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
     productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, ProductImage, Document<unknown, {}, ProductImage, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductImage & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, ProductImage, Document<unknown, {}, ProductImage, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductImage & Required<{
         _id: Types.ObjectId;
@@ -61,6 +52,15 @@ export declare const ProductImageSchema: import("mongoose").Schema<ProductImage,
         id: string;
     }>;
     altText?: import("mongoose").SchemaDefinitionProperty<string, ProductImage, Document<unknown, {}, ProductImage, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductImage & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    displayOrder?: import("mongoose").SchemaDefinitionProperty<number, ProductImage, Document<unknown, {}, ProductImage, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductImage & Required<{
         _id: Types.ObjectId;

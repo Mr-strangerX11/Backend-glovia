@@ -15,6 +15,8 @@ import { ProductImage, ProductImageSchema } from '../../database/schemas/product
 import { Setting, SettingSchema } from '../../database/schemas/setting.schema';
 import { Address, AddressSchema } from '../../database/schemas/address.schema';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
+import { AuditLog, AuditLogSchema } from '../../database/schemas/audit.schema';
+import { SettingVersion, SettingVersionSchema } from '../../database/schemas/setting-version.schema';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { EmailNotificationService } from '../../common/services/email-notificati
       { name: ProductImage.name, schema: ProductImageSchema },
       { name: Setting.name, schema: SettingSchema },
       { name: Address.name, schema: AddressSchema },
+      { name: AuditLog.name, schema: AuditLogSchema },
+      { name: SettingVersion.name, schema: SettingVersionSchema },
     ]),
     UploadModule,
   ],

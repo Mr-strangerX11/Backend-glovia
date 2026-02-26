@@ -27,7 +27,7 @@ export declare const BannerSchema: import("mongoose").Schema<Banner, import("mon
 }, "id"> & {
     id: string;
 }, {
-    link?: import("mongoose").SchemaDefinitionProperty<string, Banner, Document<unknown, {}, Banner, {
+    title?: import("mongoose").SchemaDefinitionProperty<string, Banner, Document<unknown, {}, Banner, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Banner & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -45,7 +45,7 @@ export declare const BannerSchema: import("mongoose").Schema<Banner, import("mon
     }, "id"> & {
         id: string;
     }>;
-    image?: import("mongoose").SchemaDefinitionProperty<string, Banner, Document<unknown, {}, Banner, {
+    link?: import("mongoose").SchemaDefinitionProperty<string, Banner, Document<unknown, {}, Banner, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Banner & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -72,7 +72,7 @@ export declare const BannerSchema: import("mongoose").Schema<Banner, import("mon
     }, "id"> & {
         id: string;
     }>;
-    title?: import("mongoose").SchemaDefinitionProperty<string, Banner, Document<unknown, {}, Banner, {
+    image?: import("mongoose").SchemaDefinitionProperty<string, Banner, Document<unknown, {}, Banner, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Banner & Required<{
         _id: import("mongoose").Types.ObjectId;

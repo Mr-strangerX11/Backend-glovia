@@ -19,6 +19,7 @@ const platform_express_1 = require("@nestjs/platform-express");
 const admin_service_1 = require("./admin.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
+const admin_ip_allowlist_guard_1 = require("../../common/guards/admin-ip-allowlist.guard");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
 const common_2 = require("@nestjs/common");
@@ -121,8 +122,14 @@ let AdminController = class AdminController {
     getAllOrders(status, page, limit) {
         return this.adminService.getAllOrders(page ? Number(page) : 1, limit ? Number(limit) : 10, status);
     }
+    getOrder(id) {
+        return this.adminService.getOrderDetails(id);
+    }
     updateOrder(id, dto) {
         return this.adminService.updateOrderStatus(id, dto.status);
+    }
+    deleteOrder(id) {
+        return this.adminService.deleteOrder(id);
     }
     getAllCustomers(page, limit) {
         return this.adminService.getAllCustomers(page ? Number(page) : 1, limit ? Number(limit) : 10);
@@ -139,22 +146,22 @@ let AdminController = class AdminController {
     async getDeliverySettings() {
         return this.adminService.getDeliverySettings();
     }
-    async updateDeliverySettings(dto) {
-        await this.adminService.updateDeliverySettings(dto);
+    async updateDeliverySettings(dto, user) {
+        await this.adminService.updateDeliverySettings(dto, { userId: user?._id?.toString() || user?.id, username: user?.email || user?.username });
         return { ...dto, message: 'Delivery settings updated successfully' };
     }
     getAnnouncement() {
         return this.adminService.getAnnouncementBar();
     }
-    updateAnnouncement(dto) {
-        return this.adminService.updateAnnouncementBar(dto);
+    updateAnnouncement(dto, user) {
+        return this.adminService.updateAnnouncementBar(dto, { userId: user?._id?.toString() || user?.id, username: user?.email || user?.username });
     }
     async getDiscountSettings() {
         const settings = await this.adminService.getDiscountSettings();
         return settings;
     }
-    async updateDiscountSettings(dto) {
-        return this.adminService.updateDiscountSettings(dto);
+    async updateDiscountSettings(dto, user) {
+        return this.adminService.updateDiscountSettings(dto, { userId: user?._id?.toString() || user?.id, username: user?.email || user?.username });
     }
     async getCategories() {
         return this.adminService.getAllCategories();
@@ -297,6 +304,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getAllOrders", null);
 __decorate([
+    (0, common_1.Get)('orders/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get order details by ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getOrder", null);
+__decorate([
     (0, common_1.Put)('orders/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update order status' }),
     __param(0, (0, common_1.Param)('id')),
@@ -305,6 +320,14 @@ __decorate([
     __metadata("design:paramtypes", [String, order_dto_1.UpdateOrderDto]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateOrder", null);
+__decorate([
+    (0, common_1.Delete)('orders/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete order' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "deleteOrder", null);
 __decorate([
     (0, common_1.Get)('customers'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all customers' }),
@@ -351,8 +374,9 @@ __decorate([
     (0, common_1.Put)('settings/delivery'),
     (0, swagger_1.ApiOperation)({ summary: 'Update delivery settings' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [settings_dto_1.UpdateDeliverySettingsDto]),
+    __metadata("design:paramtypes", [settings_dto_1.UpdateDeliverySettingsDto, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateDeliverySettings", null);
 __decorate([
@@ -367,8 +391,9 @@ __decorate([
     (0, common_1.Put)('settings/announcement'),
     (0, swagger_1.ApiOperation)({ summary: 'Update announcement bar' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [announcement_dto_1.UpdateAnnouncementDto]),
+    __metadata("design:paramtypes", [announcement_dto_1.UpdateAnnouncementDto, Object]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateAnnouncement", null);
 __decorate([
@@ -382,8 +407,9 @@ __decorate([
     (0, common_1.Put)('settings/discount'),
     (0, swagger_1.ApiOperation)({ summary: 'Update discount settings' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [settings_dto_1.UpdateDiscountSettingsDto]),
+    __metadata("design:paramtypes", [settings_dto_1.UpdateDiscountSettingsDto, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateDiscountSettings", null);
 __decorate([
@@ -414,7 +440,7 @@ __decorate([
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin'),
     (0, common_1.Controller)('admin'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard, admin_ip_allowlist_guard_1.AdminIpAllowlistGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [admin_service_1.AdminService,

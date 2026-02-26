@@ -10,15 +10,20 @@ import {
   Inject,
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
+import { AuditLogService } from '../auditlog/auditlog.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../database/schemas/user.schema';
 
+
 @Controller('brands')
 export class BrandsController {
-  constructor(private readonly brandsService: BrandsService) {}
+  constructor(
+    private readonly brandsService: BrandsService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   // Public endpoints
   @Get()
@@ -68,8 +73,17 @@ export class BrandsController {
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  async updateBrand(@Param('id') id: string, @Body() dto: UpdateBrandDto) {
+  async updateBrand(@Param('id') id: string, @Body() dto: UpdateBrandDto, @Req() req: any) {
     const brand = await this.brandsService.updateBrand(id, dto);
+    // Audit log
+    const admin = req.user;
+    await this.auditLogService.log(
+      'UPDATE_BRAND',
+      admin._id,
+      admin.email,
+      id,
+      { dto }
+    );
     return {
       success: true,
       message: 'Brand updated successfully',
@@ -80,8 +94,17 @@ export class BrandsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  async deleteBrand(@Param('id') id: string) {
+  async deleteBrand(@Param('id') id: string, @Req() req: any) {
     await this.brandsService.deleteBrand(id);
+    // Audit log
+    const admin = req.user;
+    await this.auditLogService.log(
+      'DELETE_BRAND',
+      admin._id,
+      admin.email,
+      id,
+      {}
+    );
     return {
       success: true,
       message: 'Brand deleted successfully',

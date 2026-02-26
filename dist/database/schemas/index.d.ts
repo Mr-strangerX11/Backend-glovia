@@ -15,3 +15,4 @@ export * from './banner.schema';
 export * from './blog.schema';
 export * from './otp-verification.schema';
 export * from './setting.schema';
+export * from './product-variant.schema';

@@ -13,6 +13,7 @@ export declare class Product extends Document {
     sku: string;
     barcode?: string;
     stockQuantity: number;
+    quantityMl?: number;
     lowStockThreshold: number;
     weight?: number;
     categoryId: Types.ObjectId;
@@ -45,7 +46,7 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
 }, "id"> & {
     id: string;
 }, {
-    name?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {
+    tags?: import("mongoose").SchemaDefinitionProperty<string[], Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
         _id: Types.ObjectId;
@@ -55,6 +56,24 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         id: string;
     }>;
     _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Product, Document<unknown, {}, Product, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    name?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    price?: import("mongoose").SchemaDefinitionProperty<number, Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
         _id: Types.ObjectId;
@@ -73,15 +92,6 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         id: string;
     }>;
     slug?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
         _id: Types.ObjectId;
@@ -109,15 +119,6 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         id: string;
     }>;
     howToUse?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    price?: import("mongoose").SchemaDefinitionProperty<number, Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
         _id: Types.ObjectId;
@@ -171,6 +172,15 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
     }, "id"> & {
         id: string;
     }>;
+    quantityMl?: import("mongoose").SchemaDefinitionProperty<number, Product, Document<unknown, {}, Product, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
     lowStockThreshold?: import("mongoose").SchemaDefinitionProperty<number, Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
@@ -216,6 +226,15 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
     }, "id"> & {
         id: string;
     }>;
+    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, Product, Document<unknown, {}, Product, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
     isFeatured?: import("mongoose").SchemaDefinitionProperty<boolean, Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
@@ -253,15 +272,6 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         id: string;
     }>;
     metaDescription?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    tags?: import("mongoose").SchemaDefinitionProperty<string[], Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
         _id: Types.ObjectId;

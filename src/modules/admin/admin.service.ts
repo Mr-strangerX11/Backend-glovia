@@ -11,7 +11,9 @@ import { Category } from '../../database/schemas/category.schema';
 import { Brand } from '../../database/schemas/brand.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
 import { Setting } from '../../database/schemas/setting.schema';
+import { AuditLog } from '../../database/schemas/audit.schema';
 import { Address } from '../../database/schemas/address.schema';
+import { SettingVersion } from '../../database/schemas/setting-version.schema';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateProductDto, CreateProductDto } from './dto/product.dto';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
@@ -29,6 +31,8 @@ export class AdminService {
     @InjectModel(ProductImage.name) private productImageModel: Model<ProductImage>,
     @InjectModel(Setting.name) private settingModel: Model<Setting>,
     @InjectModel(Address.name) private addressModel: Model<Address>,
+    @InjectModel(AuditLog.name) private auditLogModel: Model<AuditLog>,
+    @InjectModel(SettingVersion.name) private settingVersionModel: Model<SettingVersion>,
     private emailNotificationService: EmailNotificationService,
   ) {}
 
@@ -125,6 +129,12 @@ export class AdminService {
     const existingUser = await this.userModel.findOne({ email: createUserDto.email }).lean();
     if (existingUser) {
       throw new BadRequestException('User with this email already exists');
+    }
+
+    // Enforce strong password for ADMIN, SUPER_ADMIN, VENDOR
+    const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+    if ((createUserDto.role === UserRole.ADMIN || createUserDto.role === UserRole.SUPER_ADMIN || createUserDto.role === UserRole.VENDOR) && !strong.test(createUserDto.password)) {
+      throw new BadRequestException('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -288,51 +298,65 @@ export class AdminService {
 
   async createProduct(createProductDto: CreateProductDto) {
     const { images, categoryId, brandId, isNew, ...productData } = createProductDto;
-
-    // Validate categoryId
-    if (!Types.ObjectId.isValid(categoryId)) {
-      throw new BadRequestException('Invalid category ID');
-    }
-
-    const category = await this.categoryModel.findById(categoryId).lean();
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
-
-    // Validate brandId if provided
-    if (brandId) {
-      if (!Types.ObjectId.isValid(brandId)) {
-        throw new BadRequestException('Invalid brand ID');
+    const sanitize = (str: any) => typeof str === 'string' ? str.replace(/[<>"'`;]/g, '') : str;
+    try {
+      // Validate categoryId
+      if (!Types.ObjectId.isValid(categoryId)) {
+        throw new BadRequestException('Invalid category ID');
       }
-      const brand = await this.brandModel.findById(brandId).lean();
-      if (!brand) {
-        throw new NotFoundException('Brand not found');
+      const category = await this.categoryModel.findById(categoryId).lean();
+      if (!category) {
+        throw new NotFoundException('Category not found');
       }
+      // Validate brandId if provided
+      if (brandId) {
+        if (!Types.ObjectId.isValid(brandId)) {
+          throw new BadRequestException('Invalid brand ID');
+        }
+        const brand = await this.brandModel.findById(brandId).lean();
+        if (!brand) {
+          throw new NotFoundException('Brand not found');
+        }
+      }
+      // Check for unique SKU
+      const existingSku = await this.productModel.findOne({ sku: productData.sku });
+      if (existingSku) {
+        throw new BadRequestException('SKU must be unique');
+      }
+      // Check for unique slug
+      const existingSlug = await this.productModel.findOne({ slug: productData.slug });
+      if (existingSlug) {
+        throw new BadRequestException('Slug must be unique');
+      }
+      // Sanitize string fields
+      const sanitizedData: any = {};
+      for (const key in productData) {
+        sanitizedData[key] = sanitize(productData[key]);
+      }
+      // Create product - map isNew to isNewProduct
+      const product = new this.productModel({
+        ...sanitizedData,
+        categoryId: new Types.ObjectId(categoryId),
+        brandId: brandId ? new Types.ObjectId(brandId) : null,
+        isNewProduct: isNew !== undefined ? isNew : false,
+      });
+      const savedProduct = await product.save();
+      // Create images if provided
+      if (images && Array.isArray(images) && images.length > 0) {
+        const imageDocuments = images.map((url: string, index: number) => ({
+          productId: savedProduct._id,
+          url: sanitize(url),
+          isPrimary: index === 0,
+          altText: null
+        }));
+        await this.productImageModel.insertMany(imageDocuments);
+      }
+      return savedProduct;
+    } catch (error) {
+      // Log error for monitoring
+      console.error('Product creation failed:', error?.message || error);
+      throw error;
     }
-
-    // Create product - map isNew to isNewProduct
-    const product = new this.productModel({
-      ...productData,
-      categoryId: new Types.ObjectId(categoryId),
-      brandId: brandId ? new Types.ObjectId(brandId) : null,
-      isNewProduct: isNew !== undefined ? isNew : false,
-    });
-
-    const savedProduct = await product.save();
-
-    // Create images if provided
-    if (images && Array.isArray(images) && images.length > 0) {
-      const imageDocuments = images.map((url: string, index: number) => ({
-        productId: savedProduct._id,
-        url,
-        isPrimary: index === 0,
-        altText: null
-      }));
-
-      await this.productImageModel.insertMany(imageDocuments);
-    }
-
-    return savedProduct;
   }
 
   async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
@@ -702,9 +726,22 @@ export class AdminService {
     return review;
   }
 
-  async updateDeliverySettings(data: { freeDeliveryThreshold: number; valleyDeliveryCharge: number; outsideValleyDeliveryCharge: number }) {
+  async updateDeliverySettings(data: { freeDeliveryThreshold: number; valleyDeliveryCharge: number; outsideValleyDeliveryCharge: number }, user?: { userId?: string, username?: string }) {
+    const prev = await this.settingModel.findOne({ key: 'deliverySettings' }).lean();
     const settingsValue = JSON.stringify(data);
-    return this.settingModel.findOneAndUpdate(
+    // Versioning: Save previous version if exists
+    if (prev) {
+      const lastVersion = await this.settingVersionModel.find({ key: 'deliverySettings' }).sort({ version: -1 }).limit(1).lean();
+      const nextVersion = lastVersion.length > 0 ? lastVersion[0].version + 1 : 1;
+      await this.settingVersionModel.create({
+        key: 'deliverySettings',
+        value: prev.value,
+        userId: user?.userId,
+        username: user?.username,
+        version: nextVersion
+      });
+    }
+    const updated = await this.settingModel.findOneAndUpdate(
       { key: 'deliverySettings' },
       {
         key: 'deliverySettings',
@@ -712,6 +749,15 @@ export class AdminService {
       },
       { upsert: true, new: true }
     ).lean();
+    await this.auditLogModel.create({
+      action: 'update',
+      entity: 'deliverySettings',
+      userId: user?.userId,
+      username: user?.username,
+      before: prev ? prev.value : '',
+      after: settingsValue
+    });
+    return updated;
   }
 
   async getDeliverySettings() {
@@ -726,7 +772,8 @@ export class AdminService {
     return JSON.parse(setting.value);
   }
 
-  async updateAnnouncementBar(data: { enabled?: boolean; message?: string; backgroundColor?: string; textColor?: string }) {
+  async updateAnnouncementBar(data: { enabled?: boolean; message?: string; backgroundColor?: string; textColor?: string }, user?: { userId?: string, username?: string }) {
+    const prev = await this.settingModel.findOne({ key: 'announcementBar' }).lean();
     const enabled = typeof data.enabled === 'boolean' ? data.enabled : true;
     const message = data.message ?? '';
     const updateValue = JSON.stringify({
@@ -735,8 +782,19 @@ export class AdminService {
       backgroundColor: data.backgroundColor || '#FFD700',
       textColor: data.textColor || '#000000'
     });
-
-    return this.settingModel.findOneAndUpdate(
+    // Versioning: Save previous version if exists
+    if (prev) {
+      const lastVersion = await this.settingVersionModel.find({ key: 'announcementBar' }).sort({ version: -1 }).limit(1).lean();
+      const nextVersion = lastVersion.length > 0 ? lastVersion[0].version + 1 : 1;
+      await this.settingVersionModel.create({
+        key: 'announcementBar',
+        value: prev.value,
+        userId: user?.userId,
+        username: user?.username,
+        version: nextVersion
+      });
+    }
+    const updated = await this.settingModel.findOneAndUpdate(
       { key: 'announcementBar' },
       {
         key: 'announcementBar',
@@ -744,6 +802,15 @@ export class AdminService {
       },
       { upsert: true, new: true }
     ).lean();
+    await this.auditLogModel.create({
+      action: 'update',
+      entity: 'announcementBar',
+      userId: user?.userId,
+      username: user?.username,
+      before: prev ? prev.value : '',
+      after: updateValue
+    });
+    return updated;
   }
 
   async getAnnouncementBar() {
@@ -769,14 +836,26 @@ export class AdminService {
     };
   }
 
-  async updateDiscountSettings(data: { enabled: boolean; percentage?: number; minOrderAmount?: number }) {
+  async updateDiscountSettings(data: { enabled: boolean; percentage?: number; minOrderAmount?: number }, user?: { userId?: string, username?: string }) {
+    const prev = await this.settingModel.findOne({ key: 'discountSettings' }).lean();
     const updateValue = JSON.stringify({
       enabled: data.enabled,
       percentage: data.percentage || 0,
       minOrderAmount: data.minOrderAmount || 0
     });
-
-    return this.settingModel.findOneAndUpdate(
+    // Versioning: Save previous version if exists
+    if (prev) {
+      const lastVersion = await this.settingVersionModel.find({ key: 'discountSettings' }).sort({ version: -1 }).limit(1).lean();
+      const nextVersion = lastVersion.length > 0 ? lastVersion[0].version + 1 : 1;
+      await this.settingVersionModel.create({
+        key: 'discountSettings',
+        value: prev.value,
+        userId: user?.userId,
+        username: user?.username,
+        version: nextVersion
+      });
+    }
+    const updated = await this.settingModel.findOneAndUpdate(
       { key: 'discountSettings' },
       {
         key: 'discountSettings',
@@ -784,6 +863,15 @@ export class AdminService {
       },
       { upsert: true, new: true }
     ).lean();
+    await this.auditLogModel.create({
+      action: 'update',
+      entity: 'discountSettings',
+      userId: user?.userId,
+      username: user?.username,
+      before: prev ? prev.value : '',
+      after: updateValue
+    });
+    return updated;
   }
 
   async getDiscountSettings() {

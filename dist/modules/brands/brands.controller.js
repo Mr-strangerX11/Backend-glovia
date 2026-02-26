@@ -15,14 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BrandsController = void 0;
 const common_1 = require("@nestjs/common");
 const brands_service_1 = require("./brands.service");
+const auditlog_service_1 = require("../auditlog/auditlog.service");
 const brand_dto_1 = require("./dto/brand.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const user_schema_1 = require("../../database/schemas/user.schema");
 let BrandsController = class BrandsController {
-    constructor(brandsService) {
+    constructor(brandsService, auditLogService) {
         this.brandsService = brandsService;
+        this.auditLogService = auditLogService;
     }
     async getAllBrands() {
         return {
@@ -57,16 +59,20 @@ let BrandsController = class BrandsController {
             data: brand,
         };
     }
-    async updateBrand(id, dto) {
+    async updateBrand(id, dto, req) {
         const brand = await this.brandsService.updateBrand(id, dto);
+        const admin = req.user;
+        await this.auditLogService.log('UPDATE_BRAND', admin._id, admin.email, id, { dto });
         return {
             success: true,
             message: 'Brand updated successfully',
             data: brand,
         };
     }
-    async deleteBrand(id) {
+    async deleteBrand(id, req) {
         await this.brandsService.deleteBrand(id);
+        const admin = req.user;
+        await this.auditLogService.log('DELETE_BRAND', admin._id, admin.email, id, {});
         return {
             success: true,
             message: 'Brand deleted successfully',
@@ -115,8 +121,9 @@ __decorate([
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, Req()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, brand_dto_1.UpdateBrandDto]),
+    __metadata("design:paramtypes", [String, brand_dto_1.UpdateBrandDto, Object]),
     __metadata("design:returntype", Promise)
 ], BrandsController.prototype, "updateBrand", null);
 __decorate([
@@ -124,8 +131,9 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, Req()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], BrandsController.prototype, "deleteBrand", null);
 __decorate([
@@ -138,6 +146,7 @@ __decorate([
 ], BrandsController.prototype, "getBrandAnalytics", null);
 exports.BrandsController = BrandsController = __decorate([
     (0, common_1.Controller)('brands'),
-    __metadata("design:paramtypes", [brands_service_1.BrandsService])
+    __metadata("design:paramtypes", [brands_service_1.BrandsService,
+        auditlog_service_1.AuditLogService])
 ], BrandsController);
 //# sourceMappingURL=brands.controller.js.map

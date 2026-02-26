@@ -1,12 +1,35 @@
 import { Model, Types } from 'mongoose';
-import { Product, ProductImage, Category, Brand, Review, SkinType } from '../../database/schemas';
+import { Product, ProductImage, Category, Brand, Review, SkinType, ProductVariant } from '../../database/schemas';
 export declare class ProductsService {
     private productModel;
     private productImageModel;
     private categoryModel;
     private brandModel;
     private reviewModel;
-    constructor(productModel: Model<Product>, productImageModel: Model<ProductImage>, categoryModel: Model<Category>, brandModel: Model<Brand>, reviewModel: Model<Review>);
+    private productVariantModel;
+    constructor(productModel: Model<Product>, productImageModel: Model<ProductImage>, categoryModel: Model<Category>, brandModel: Model<Brand>, reviewModel: Model<Review>, productVariantModel: Model<ProductVariant>);
+    getVariants(productId: string): Promise<(ProductVariant & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
+    createVariant(productId: string, dto: any, user: any): Promise<import("mongoose").Document<unknown, {}, ProductVariant, {}, import("mongoose").DefaultSchemaOptions> & ProductVariant & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    updateVariant(productId: string, variantId: string, dto: any, user: any): Promise<import("mongoose").Document<unknown, {}, ProductVariant, {}, import("mongoose").DefaultSchemaOptions> & ProductVariant & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    deleteVariant(productId: string, variantId: string, user: any): Promise<{
+        message: string;
+    }>;
     findAll(filters?: {
         search?: string;
         categoryId?: string;
@@ -42,6 +65,7 @@ export declare class ProductsService {
             sku: string;
             barcode?: string;
             stockQuantity: number;
+            quantityMl?: number;
             lowStockThreshold: number;
             weight?: number;
             categoryId: Types.ObjectId;
@@ -124,6 +148,7 @@ export declare class ProductsService {
         sku: string;
         barcode?: string;
         stockQuantity: number;
+        quantityMl?: number;
         lowStockThreshold: number;
         weight?: number;
         categoryId: Types.ObjectId;
@@ -163,6 +188,7 @@ export declare class ProductsService {
         sku: string;
         barcode?: string;
         stockQuantity: number;
+        quantityMl?: number;
         lowStockThreshold: number;
         weight?: number;
         categoryId: Types.ObjectId;
@@ -201,6 +227,7 @@ export declare class ProductsService {
         sku: string;
         barcode?: string;
         stockQuantity: number;
+        quantityMl?: number;
         lowStockThreshold: number;
         weight?: number;
         categoryId: Types.ObjectId;
@@ -239,6 +266,7 @@ export declare class ProductsService {
         sku: string;
         barcode?: string;
         stockQuantity: number;
+        quantityMl?: number;
         lowStockThreshold: number;
         weight?: number;
         categoryId: Types.ObjectId;

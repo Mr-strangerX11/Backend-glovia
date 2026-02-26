@@ -26,10 +26,12 @@ const category_schema_1 = require("../../database/schemas/category.schema");
 const brand_schema_1 = require("../../database/schemas/brand.schema");
 const product_image_schema_1 = require("../../database/schemas/product-image.schema");
 const setting_schema_1 = require("../../database/schemas/setting.schema");
+const audit_schema_1 = require("../../database/schemas/audit.schema");
 const address_schema_1 = require("../../database/schemas/address.schema");
+const setting_version_schema_1 = require("../../database/schemas/setting-version.schema");
 const email_notification_service_1 = require("../../common/services/email-notification.service");
 let AdminService = class AdminService {
-    constructor(userModel, productModel, orderModel, orderItemModel, reviewModel, categoryModel, brandModel, productImageModel, settingModel, addressModel, emailNotificationService) {
+    constructor(userModel, productModel, orderModel, orderItemModel, reviewModel, categoryModel, brandModel, productImageModel, settingModel, addressModel, auditLogModel, settingVersionModel, emailNotificationService) {
         this.userModel = userModel;
         this.productModel = productModel;
         this.orderModel = orderModel;
@@ -40,6 +42,8 @@ let AdminService = class AdminService {
         this.productImageModel = productImageModel;
         this.settingModel = settingModel;
         this.addressModel = addressModel;
+        this.auditLogModel = auditLogModel;
+        this.settingVersionModel = settingVersionModel;
         this.emailNotificationService = emailNotificationService;
     }
     async getDashboard() {
@@ -122,6 +126,10 @@ let AdminService = class AdminService {
         const existingUser = await this.userModel.findOne({ email: createUserDto.email }).lean();
         if (existingUser) {
             throw new common_1.BadRequestException('User with this email already exists');
+        }
+        const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if ((createUserDto.role === user_schema_1.UserRole.ADMIN || createUserDto.role === user_schema_1.UserRole.SUPER_ADMIN || createUserDto.role === user_schema_1.UserRole.VENDOR) && !strong.test(createUserDto.password)) {
+            throw new common_1.BadRequestException('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
         }
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         const user = await this.userModel.create({
@@ -250,39 +258,58 @@ let AdminService = class AdminService {
     }
     async createProduct(createProductDto) {
         const { images, categoryId, brandId, isNew, ...productData } = createProductDto;
-        if (!mongoose_2.Types.ObjectId.isValid(categoryId)) {
-            throw new common_1.BadRequestException('Invalid category ID');
-        }
-        const category = await this.categoryModel.findById(categoryId).lean();
-        if (!category) {
-            throw new common_1.NotFoundException('Category not found');
-        }
-        if (brandId) {
-            if (!mongoose_2.Types.ObjectId.isValid(brandId)) {
-                throw new common_1.BadRequestException('Invalid brand ID');
+        const sanitize = (str) => typeof str === 'string' ? str.replace(/[<>"'`;]/g, '') : str;
+        try {
+            if (!mongoose_2.Types.ObjectId.isValid(categoryId)) {
+                throw new common_1.BadRequestException('Invalid category ID');
             }
-            const brand = await this.brandModel.findById(brandId).lean();
-            if (!brand) {
-                throw new common_1.NotFoundException('Brand not found');
+            const category = await this.categoryModel.findById(categoryId).lean();
+            if (!category) {
+                throw new common_1.NotFoundException('Category not found');
             }
+            if (brandId) {
+                if (!mongoose_2.Types.ObjectId.isValid(brandId)) {
+                    throw new common_1.BadRequestException('Invalid brand ID');
+                }
+                const brand = await this.brandModel.findById(brandId).lean();
+                if (!brand) {
+                    throw new common_1.NotFoundException('Brand not found');
+                }
+            }
+            const existingSku = await this.productModel.findOne({ sku: productData.sku });
+            if (existingSku) {
+                throw new common_1.BadRequestException('SKU must be unique');
+            }
+            const existingSlug = await this.productModel.findOne({ slug: productData.slug });
+            if (existingSlug) {
+                throw new common_1.BadRequestException('Slug must be unique');
+            }
+            const sanitizedData = {};
+            for (const key in productData) {
+                sanitizedData[key] = sanitize(productData[key]);
+            }
+            const product = new this.productModel({
+                ...sanitizedData,
+                categoryId: new mongoose_2.Types.ObjectId(categoryId),
+                brandId: brandId ? new mongoose_2.Types.ObjectId(brandId) : null,
+                isNewProduct: isNew !== undefined ? isNew : false,
+            });
+            const savedProduct = await product.save();
+            if (images && Array.isArray(images) && images.length > 0) {
+                const imageDocuments = images.map((url, index) => ({
+                    productId: savedProduct._id,
+                    url: sanitize(url),
+                    isPrimary: index === 0,
+                    altText: null
+                }));
+                await this.productImageModel.insertMany(imageDocuments);
+            }
+            return savedProduct;
         }
-        const product = new this.productModel({
-            ...productData,
-            categoryId: new mongoose_2.Types.ObjectId(categoryId),
-            brandId: brandId ? new mongoose_2.Types.ObjectId(brandId) : null,
-            isNewProduct: isNew !== undefined ? isNew : false,
-        });
-        const savedProduct = await product.save();
-        if (images && Array.isArray(images) && images.length > 0) {
-            const imageDocuments = images.map((url, index) => ({
-                productId: savedProduct._id,
-                url,
-                isPrimary: index === 0,
-                altText: null
-            }));
-            await this.productImageModel.insertMany(imageDocuments);
+        catch (error) {
+            console.error('Product creation failed:', error?.message || error);
+            throw error;
         }
-        return savedProduct;
     }
     async updateProduct(productId, updateProductDto) {
         if (!mongoose_2.Types.ObjectId.isValid(productId)) {
@@ -320,6 +347,22 @@ let AdminService = class AdminService {
         }
         await this.productImageModel.deleteMany({ productId: new mongoose_2.Types.ObjectId(productId) });
         return product;
+    }
+    async getOrderDetails(orderId) {
+        if (!mongoose_2.Types.ObjectId.isValid(orderId)) {
+            throw new common_1.BadRequestException('Invalid order ID');
+        }
+        const order = await this.orderModel.findById(orderId).lean();
+        if (!order) {
+            throw new common_1.NotFoundException('Order not found');
+        }
+        const user = await this.userModel.findById(order.userId).lean();
+        const orderItems = await this.orderItemModel.find({ orderId: order._id }).lean();
+        return {
+            ...order,
+            user: user || null,
+            items: orderItems || []
+        };
     }
     async getAllOrders(page = 1, limit = 10, status) {
         const skip = (page - 1) * limit;
@@ -384,6 +427,21 @@ let AdminService = class AdminService {
             await this.sendOrderConfirmationEmail(orderId);
         }
         return updatedOrder;
+    }
+    async deleteOrder(orderId) {
+        if (!mongoose_2.Types.ObjectId.isValid(orderId)) {
+            throw new common_1.BadRequestException('Invalid order ID');
+        }
+        const order = await this.orderModel.findById(orderId);
+        if (!order) {
+            throw new common_1.NotFoundException('Order not found');
+        }
+        await this.orderItemModel.deleteMany({ orderId: order._id });
+        await this.orderModel.findByIdAndDelete(orderId);
+        return {
+            message: 'Order deleted successfully',
+            deletedOrderId: orderId
+        };
     }
     async sendOrderConfirmationEmail(orderId) {
         try {
@@ -534,12 +592,33 @@ let AdminService = class AdminService {
         }
         return review;
     }
-    async updateDeliverySettings(data) {
+    async updateDeliverySettings(data, user) {
+        const prev = await this.settingModel.findOne({ key: 'deliverySettings' }).lean();
         const settingsValue = JSON.stringify(data);
-        return this.settingModel.findOneAndUpdate({ key: 'deliverySettings' }, {
+        if (prev) {
+            const lastVersion = await this.settingVersionModel.find({ key: 'deliverySettings' }).sort({ version: -1 }).limit(1).lean();
+            const nextVersion = lastVersion.length > 0 ? lastVersion[0].version + 1 : 1;
+            await this.settingVersionModel.create({
+                key: 'deliverySettings',
+                value: prev.value,
+                userId: user?.userId,
+                username: user?.username,
+                version: nextVersion
+            });
+        }
+        const updated = await this.settingModel.findOneAndUpdate({ key: 'deliverySettings' }, {
             key: 'deliverySettings',
             value: settingsValue
         }, { upsert: true, new: true }).lean();
+        await this.auditLogModel.create({
+            action: 'update',
+            entity: 'deliverySettings',
+            userId: user?.userId,
+            username: user?.username,
+            before: prev ? prev.value : '',
+            after: settingsValue
+        });
+        return updated;
     }
     async getDeliverySettings() {
         const setting = await this.settingModel.findOne({ key: 'deliverySettings' }).lean();
@@ -552,7 +631,8 @@ let AdminService = class AdminService {
         }
         return JSON.parse(setting.value);
     }
-    async updateAnnouncementBar(data) {
+    async updateAnnouncementBar(data, user) {
+        const prev = await this.settingModel.findOne({ key: 'announcementBar' }).lean();
         const enabled = typeof data.enabled === 'boolean' ? data.enabled : true;
         const message = data.message ?? '';
         const updateValue = JSON.stringify({
@@ -561,10 +641,30 @@ let AdminService = class AdminService {
             backgroundColor: data.backgroundColor || '#FFD700',
             textColor: data.textColor || '#000000'
         });
-        return this.settingModel.findOneAndUpdate({ key: 'announcementBar' }, {
+        if (prev) {
+            const lastVersion = await this.settingVersionModel.find({ key: 'announcementBar' }).sort({ version: -1 }).limit(1).lean();
+            const nextVersion = lastVersion.length > 0 ? lastVersion[0].version + 1 : 1;
+            await this.settingVersionModel.create({
+                key: 'announcementBar',
+                value: prev.value,
+                userId: user?.userId,
+                username: user?.username,
+                version: nextVersion
+            });
+        }
+        const updated = await this.settingModel.findOneAndUpdate({ key: 'announcementBar' }, {
             key: 'announcementBar',
             value: updateValue
         }, { upsert: true, new: true }).lean();
+        await this.auditLogModel.create({
+            action: 'update',
+            entity: 'announcementBar',
+            userId: user?.userId,
+            username: user?.username,
+            before: prev ? prev.value : '',
+            after: updateValue
+        });
+        return updated;
     }
     async getAnnouncementBar() {
         const setting = await this.settingModel.findOne({ key: 'announcementBar' }).lean();
@@ -587,16 +687,37 @@ let AdminService = class AdminService {
             icon: parsed.icon || '🚚'
         };
     }
-    async updateDiscountSettings(data) {
+    async updateDiscountSettings(data, user) {
+        const prev = await this.settingModel.findOne({ key: 'discountSettings' }).lean();
         const updateValue = JSON.stringify({
             enabled: data.enabled,
             percentage: data.percentage || 0,
             minOrderAmount: data.minOrderAmount || 0
         });
-        return this.settingModel.findOneAndUpdate({ key: 'discountSettings' }, {
+        if (prev) {
+            const lastVersion = await this.settingVersionModel.find({ key: 'discountSettings' }).sort({ version: -1 }).limit(1).lean();
+            const nextVersion = lastVersion.length > 0 ? lastVersion[0].version + 1 : 1;
+            await this.settingVersionModel.create({
+                key: 'discountSettings',
+                value: prev.value,
+                userId: user?.userId,
+                username: user?.username,
+                version: nextVersion
+            });
+        }
+        const updated = await this.settingModel.findOneAndUpdate({ key: 'discountSettings' }, {
             key: 'discountSettings',
             value: updateValue
         }, { upsert: true, new: true }).lean();
+        await this.auditLogModel.create({
+            action: 'update',
+            entity: 'discountSettings',
+            userId: user?.userId,
+            username: user?.username,
+            before: prev ? prev.value : '',
+            after: updateValue
+        });
+        return updated;
     }
     async getDiscountSettings() {
         const setting = await this.settingModel.findOne({ key: 'discountSettings' }).lean();
@@ -741,7 +862,11 @@ exports.AdminService = AdminService = __decorate([
     __param(7, (0, mongoose_1.InjectModel)(product_image_schema_1.ProductImage.name)),
     __param(8, (0, mongoose_1.InjectModel)(setting_schema_1.Setting.name)),
     __param(9, (0, mongoose_1.InjectModel)(address_schema_1.Address.name)),
+    __param(10, (0, mongoose_1.InjectModel)(audit_schema_1.AuditLog.name)),
+    __param(11, (0, mongoose_1.InjectModel)(setting_version_schema_1.SettingVersion.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,

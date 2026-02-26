@@ -23,6 +23,7 @@ export declare class VendorController {
             sku: string;
             barcode?: string;
             stockQuantity: number;
+            quantityMl?: number;
             lowStockThreshold: number;
             weight?: number;
             categoryId: import("mongoose").Types.ObjectId;
@@ -82,6 +83,7 @@ export declare class VendorController {
         sku: string;
         barcode?: string;
         stockQuantity: number;
+        quantityMl?: number;
         lowStockThreshold: number;
         weight?: number;
         categoryId: import("mongoose").Types.ObjectId;

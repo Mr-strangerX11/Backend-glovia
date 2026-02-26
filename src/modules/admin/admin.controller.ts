@@ -17,6 +17,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { AdminIpAllowlistGuard } from '../../common/guards/admin-ip-allowlist.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { HttpCode } from '@nestjs/common';
@@ -32,7 +33,7 @@ import { UploadService } from '../upload/upload.service';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, AdminIpAllowlistGuard)
 @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 @ApiBearerAuth()
 export class AdminController {
@@ -249,8 +250,8 @@ export class AdminController {
 
   @Put('settings/delivery')
   @ApiOperation({ summary: 'Update delivery settings' })
-  async updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto) {
-    await this.adminService.updateDeliverySettings(dto);
+  async updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto, @CurrentUser() user: any) {
+    await this.adminService.updateDeliverySettings(dto, { userId: user?._id?.toString() || user?.id, username: user?.email || user?.username });
     return { ...dto, message: 'Delivery settings updated successfully' };
   }
 
@@ -263,8 +264,8 @@ export class AdminController {
 
   @Put('settings/announcement')
   @ApiOperation({ summary: 'Update announcement bar' })
-  updateAnnouncement(@Body() dto: UpdateAnnouncementDto) {
-    return this.adminService.updateAnnouncementBar(dto);
+  updateAnnouncement(@Body() dto: UpdateAnnouncementDto, @CurrentUser() user: any) {
+    return this.adminService.updateAnnouncementBar(dto, { userId: user?._id?.toString() || user?.id, username: user?.email || user?.username });
   }
 
   @Get('settings/discount')
@@ -276,8 +277,8 @@ export class AdminController {
 
   @Put('settings/discount')
   @ApiOperation({ summary: 'Update discount settings' })
-  async updateDiscountSettings(@Body() dto: UpdateDiscountSettingsDto) {
-    return this.adminService.updateDiscountSettings(dto);
+  async updateDiscountSettings(@Body() dto: UpdateDiscountSettingsDto, @CurrentUser() user: any) {
+    return this.adminService.updateDiscountSettings(dto, { userId: user?._id?.toString() || user?.id, username: user?.email || user?.username });
   }
 
   @Get('categories')

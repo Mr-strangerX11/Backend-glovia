@@ -27,7 +27,10 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Password@123' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters' }),
+    (0, class_validator_1.Matches)(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/, {
+        message: 'Password must include uppercase, lowercase, number, and special character.'
+    }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
 __decorate([

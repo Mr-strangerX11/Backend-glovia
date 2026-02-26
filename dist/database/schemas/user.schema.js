@@ -18,6 +18,9 @@ var UserRole;
     UserRole["ADMIN"] = "ADMIN";
     UserRole["SUPER_ADMIN"] = "SUPER_ADMIN";
     UserRole["VENDOR"] = "VENDOR";
+    UserRole["EDITOR"] = "EDITOR";
+    UserRole["MARKETING"] = "MARKETING";
+    UserRole["AUDITOR"] = "AUDITOR";
 })(UserRole || (exports.UserRole = UserRole = {}));
 var SkinType;
 (function (SkinType) {
@@ -54,6 +57,21 @@ __decorate([
     (0, mongoose_1.Prop)({ type: String, enum: UserRole, default: UserRole.CUSTOMER }),
     __metadata("design:type", String)
 ], User.prototype, "role", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: Object,
+        default: {
+            canEditProducts: false,
+            canViewOrders: false,
+            canManageUsers: false,
+            canManageBanners: false,
+            canViewAnalytics: false,
+            canManagePromos: false,
+            canViewAuditLogs: false,
+        },
+    }),
+    __metadata("design:type", Object)
+], User.prototype, "permissions", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)

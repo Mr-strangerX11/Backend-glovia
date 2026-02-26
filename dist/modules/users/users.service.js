@@ -13,6 +13,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
+async;
+updateUserPermissions(userId, string, permissions, (Record));
+{
+    const user = await this.userModel.findByIdAndUpdate(userId, { permissions }, { new: true }).lean();
+    if (!user) {
+        throw new common_1.NotFoundException('User not found');
+    }
+    return user;
+}
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");

@@ -1,7 +1,9 @@
 import { CategoriesService } from './categories.service';
+import { AuditLogService } from '../auditlog/auditlog.service';
 export declare class CategoriesController {
     private categoriesService;
-    constructor(categoriesService: CategoriesService);
+    private auditLogService;
+    constructor(categoriesService: CategoriesService, auditLogService: AuditLogService);
     findAll(): Promise<{
         children: any[];
         _count: {
@@ -47,6 +49,7 @@ export declare class CategoriesController {
             sku: string;
             barcode?: string;
             stockQuantity: number;
+            quantityMl?: number;
             lowStockThreshold: number;
             weight?: number;
             categoryId: import("mongoose").Types.ObjectId;
@@ -98,14 +101,14 @@ export declare class CategoriesController {
     } & {
         id: string;
     }>;
-    update(id: string, dto: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Category, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Category & Required<{
+    update(id: string, dto: any, req: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Category, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Category & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
     }>;
-    remove(id: string): Promise<{
+    remove(id: string, req: any): Promise<{
         message: string;
     }>;
     seed(): Promise<{

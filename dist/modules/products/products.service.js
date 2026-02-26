@@ -17,12 +17,31 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 let ProductsService = class ProductsService {
-    constructor(productModel, productImageModel, categoryModel, brandModel, reviewModel) {
+    constructor(productModel, productImageModel, categoryModel, brandModel, reviewModel, productVariantModel) {
         this.productModel = productModel;
         this.productImageModel = productImageModel;
         this.categoryModel = categoryModel;
         this.brandModel = brandModel;
         this.reviewModel = reviewModel;
+        this.productVariantModel = productVariantModel;
+    }
+    async getVariants(productId) {
+        return this.productVariantModel.find({ productId }).lean();
+    }
+    async createVariant(productId, dto, user) {
+        return this.productVariantModel.create({ ...dto, productId });
+    }
+    async updateVariant(productId, variantId, dto, user) {
+        const variant = await this.productVariantModel.findOneAndUpdate({ _id: variantId, productId }, dto, { new: true });
+        if (!variant)
+            throw new common_1.NotFoundException('Variant not found');
+        return variant;
+    }
+    async deleteVariant(productId, variantId, user) {
+        const variant = await this.productVariantModel.findOneAndDelete({ _id: variantId, productId });
+        if (!variant)
+            throw new common_1.NotFoundException('Variant not found');
+        return { message: 'Variant deleted successfully' };
     }
     async findAll(filters) {
         const { search, categoryId, category, brandId, brand, skinType, minPrice, maxPrice, isFeatured, isBestSeller, isNew, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', } = filters || {};
@@ -313,7 +332,9 @@ exports.ProductsService = ProductsService = __decorate([
     __param(2, (0, mongoose_1.InjectModel)('Category')),
     __param(3, (0, mongoose_1.InjectModel)('Brand')),
     __param(4, (0, mongoose_1.InjectModel)('Review')),
+    __param(5, (0, mongoose_1.InjectModel)('ProductVariant')),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,

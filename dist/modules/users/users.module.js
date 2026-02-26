@@ -11,7 +11,9 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
+const users_admin_controller_1 = require("./users.admin.controller");
 const schemas_1 = require("../../database/schemas");
+const auditlog_module_1 = require("../auditlog/auditlog.module");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
@@ -23,8 +25,9 @@ exports.UsersModule = UsersModule = __decorate([
                 { name: 'Address', schema: schemas_1.AddressSchema },
                 { name: 'Order', schema: schemas_1.OrderSchema },
             ]),
+            auditlog_module_1.AuditLogModule,
         ],
-        controllers: [users_controller_1.UsersController],
+        controllers: [users_controller_1.UsersController, users_admin_controller_1.AdminUsersController],
         providers: [users_service_1.UsersService],
         exports: [users_service_1.UsersService],
     })

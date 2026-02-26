@@ -1,8 +1,10 @@
 import { BrandsService } from './brands.service';
+import { AuditLogService } from '../auditlog/auditlog.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 export declare class BrandsController {
     private readonly brandsService;
-    constructor(brandsService: BrandsService);
+    private readonly auditLogService;
+    constructor(brandsService: BrandsService, auditLogService: AuditLogService);
     getAllBrands(): Promise<{
         success: boolean;
         data: (import("../../database/schemas").Brand & Required<{
@@ -63,6 +65,7 @@ export declare class BrandsController {
                 sku: string;
                 barcode?: string;
                 stockQuantity: number;
+                quantityMl?: number;
                 lowStockThreshold: number;
                 weight?: number;
                 categoryId: import("mongoose").Types.ObjectId;
@@ -117,7 +120,7 @@ export declare class BrandsController {
             id: string;
         };
     }>;
-    updateBrand(id: string, dto: UpdateBrandDto): Promise<{
+    updateBrand(id: string, dto: UpdateBrandDto, req: any): Promise<{
         success: boolean;
         message: string;
         data: import("mongoose").Document<unknown, {}, import("../../database/schemas").Brand, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Brand & Required<{
@@ -128,7 +131,7 @@ export declare class BrandsController {
             id: string;
         };
     }>;
-    deleteBrand(id: string): Promise<{
+    deleteBrand(id: string, req: any): Promise<{
         success: boolean;
         message: string;
     }>;

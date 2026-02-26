@@ -50,6 +50,7 @@ export declare class CategoriesService {
             sku: string;
             barcode?: string;
             stockQuantity: number;
+            quantityMl?: number;
             lowStockThreshold: number;
             weight?: number;
             categoryId: Types.ObjectId;

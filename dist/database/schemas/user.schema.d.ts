@@ -3,7 +3,10 @@ export declare enum UserRole {
     CUSTOMER = "CUSTOMER",
     ADMIN = "ADMIN",
     SUPER_ADMIN = "SUPER_ADMIN",
-    VENDOR = "VENDOR"
+    VENDOR = "VENDOR",
+    EDITOR = "EDITOR",
+    MARKETING = "MARKETING",
+    AUDITOR = "AUDITOR"
 }
 export declare enum SkinType {
     DRY = "DRY",
@@ -19,6 +22,16 @@ export declare class User extends Document {
     firstName: string;
     lastName: string;
     role: UserRole;
+    permissions: {
+        canEditProducts?: boolean;
+        canViewOrders?: boolean;
+        canManageUsers?: boolean;
+        canManageBanners?: boolean;
+        canViewAnalytics?: boolean;
+        canManagePromos?: boolean;
+        canViewAuditLogs?: boolean;
+        [key: string]: boolean | undefined;
+    };
     isEmailVerified: boolean;
     isPhoneVerified: boolean;
     skinType?: SkinType;
@@ -105,6 +118,24 @@ export declare const UserSchema: import("mongoose").Schema<User, import("mongoos
         id: string;
     }>;
     role?: import("mongoose").SchemaDefinitionProperty<UserRole, User, Document<unknown, {}, User, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<User & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    permissions?: import("mongoose").SchemaDefinitionProperty<{
+        [key: string]: boolean;
+        canEditProducts?: boolean;
+        canViewOrders?: boolean;
+        canManageUsers?: boolean;
+        canManageBanners?: boolean;
+        canViewAnalytics?: boolean;
+        canManagePromos?: boolean;
+        canViewAuditLogs?: boolean;
+    }, User, Document<unknown, {}, User, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<User & Required<{
         _id: Types.ObjectId;

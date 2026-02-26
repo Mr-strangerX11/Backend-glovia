@@ -22,22 +22,51 @@ let UploadController = class UploadController {
     constructor(uploadService) {
         this.uploadService = uploadService;
     }
+    getUploadImageInfo() {
+        return {
+            message: 'Use POST /upload/image with multipart/form-data and a "file" field.',
+        };
+    }
     async uploadImage(file) {
         if (!file) {
             throw new common_1.BadRequestException('No file uploaded');
         }
-        const url = await this.uploadService.uploadImage(file);
-        return { url };
+        try {
+            const url = await this.uploadService.uploadImage(file);
+            return { url };
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Upload failed';
+            throw new common_1.BadRequestException(message);
+        }
+    }
+    getUploadImagesInfo() {
+        return {
+            message: 'Use POST /upload/images with multipart/form-data and "files" fields.',
+        };
     }
     async uploadImages(files) {
         if (!files || files.length === 0) {
             throw new common_1.BadRequestException('No files uploaded');
         }
-        const urls = await this.uploadService.uploadMultiple(files);
-        return { urls };
+        try {
+            const urls = await this.uploadService.uploadMultiple(files);
+            return { urls };
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Upload failed';
+            throw new common_1.BadRequestException(message);
+        }
     }
 };
 exports.UploadController = UploadController;
+__decorate([
+    (0, common_1.Get)('image'),
+    (0, swagger_1.ApiOperation)({ summary: 'Upload single image (POST only)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UploadController.prototype, "getUploadImageInfo", null);
 __decorate([
     (0, common_1.Post)('image'),
     (0, swagger_1.ApiOperation)({ summary: 'Upload single image' }),
@@ -48,6 +77,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadController.prototype, "uploadImage", null);
+__decorate([
+    (0, common_1.Get)('images'),
+    (0, swagger_1.ApiOperation)({ summary: 'Upload multiple images (POST only)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UploadController.prototype, "getUploadImagesInfo", null);
 __decorate([
     (0, common_1.Post)('images'),
     (0, swagger_1.ApiOperation)({ summary: 'Upload multiple images' }),

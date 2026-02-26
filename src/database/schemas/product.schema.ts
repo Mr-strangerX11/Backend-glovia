@@ -40,6 +40,9 @@ export class Product extends Document {
   @Prop({ default: 0 })
   stockQuantity: number;
 
+  @Prop({ default: 0 })
+  quantityMl?: number;
+
   @Prop({ default: 10 })
   lowStockThreshold: number;
 

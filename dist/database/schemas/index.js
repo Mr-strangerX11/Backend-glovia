@@ -31,4 +31,5 @@ __exportStar(require("./banner.schema"), exports);
 __exportStar(require("./blog.schema"), exports);
 __exportStar(require("./otp-verification.schema"), exports);
 __exportStar(require("./setting.schema"), exports);
+__exportStar(require("./product-variant.schema"), exports);
 //# sourceMappingURL=index.js.map

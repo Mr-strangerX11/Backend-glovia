@@ -22,7 +22,7 @@ export declare const WishlistItemSchema: import("mongoose").Schema<WishlistItem,
 }, "id"> & {
     id: string;
 }, {
-    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, WishlistItem, Document<unknown, {}, WishlistItem, {
+    productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, WishlistItem, Document<unknown, {}, WishlistItem, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<WishlistItem & Required<{
         _id: Types.ObjectId;
@@ -40,7 +40,7 @@ export declare const WishlistItemSchema: import("mongoose").Schema<WishlistItem,
     }, "id"> & {
         id: string;
     }>;
-    productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, WishlistItem, Document<unknown, {}, WishlistItem, {
+    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, WishlistItem, Document<unknown, {}, WishlistItem, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<WishlistItem & Required<{
         _id: Types.ObjectId;

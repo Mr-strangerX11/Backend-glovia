@@ -24,6 +24,12 @@ let UploadService = class UploadService {
         });
     }
     async uploadImage(file, folder = 'glovia') {
+        const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
+        const apiKey = this.configService.get('CLOUDINARY_API_KEY');
+        const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
+        if (!cloudName || !apiKey || !apiSecret) {
+            throw new common_1.BadRequestException('Image upload is not configured. Set Cloudinary credentials.');
+        }
         if (!file) {
             throw new common_1.BadRequestException('No file provided');
         }
@@ -41,7 +47,7 @@ let UploadService = class UploadService {
                 ],
             }, (error, result) => {
                 if (error) {
-                    reject(new common_1.BadRequestException('Upload failed'));
+                    reject(new common_1.BadRequestException(error?.message || 'Upload failed'));
                 }
                 else {
                     resolve(result.secure_url);

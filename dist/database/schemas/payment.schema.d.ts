@@ -28,6 +28,15 @@ export declare const PaymentSchema: import("mongoose").Schema<Payment, import("m
 }, "id"> & {
     id: string;
 }, {
+    status?: import("mongoose").SchemaDefinitionProperty<PaymentStatus, Payment, Document<unknown, {}, Payment, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Payment & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
     _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Payment, Document<unknown, {}, Payment, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Payment & Required<{
@@ -38,15 +47,6 @@ export declare const PaymentSchema: import("mongoose").Schema<Payment, import("m
         id: string;
     }>;
     method?: import("mongoose").SchemaDefinitionProperty<PaymentMethod, Payment, Document<unknown, {}, Payment, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Payment & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    status?: import("mongoose").SchemaDefinitionProperty<PaymentStatus, Payment, Document<unknown, {}, Payment, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Payment & Required<{
         _id: Types.ObjectId;

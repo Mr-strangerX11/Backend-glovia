@@ -9,6 +9,9 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Exception Filter for improved error handling and logging
+  const { AllExceptionsFilter } = await import('./common/filters/http-exception.filter');
+  app.useGlobalFilters(new AllExceptionsFilter());
   const configService = app.get(ConfigService);
 
   // Increase payload size limit for product images (50MB)

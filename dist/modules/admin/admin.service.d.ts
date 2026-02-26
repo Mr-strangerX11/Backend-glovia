@@ -8,7 +8,9 @@ import { Category } from '../../database/schemas/category.schema';
 import { Brand } from '../../database/schemas/brand.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
 import { Setting } from '../../database/schemas/setting.schema';
+import { AuditLog } from '../../database/schemas/audit.schema';
 import { Address } from '../../database/schemas/address.schema';
+import { SettingVersion } from '../../database/schemas/setting-version.schema';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateProductDto, CreateProductDto } from './dto/product.dto';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
@@ -23,8 +25,10 @@ export declare class AdminService {
     private productImageModel;
     private settingModel;
     private addressModel;
+    private auditLogModel;
+    private settingVersionModel;
     private emailNotificationService;
-    constructor(userModel: Model<User>, productModel: Model<Product>, orderModel: Model<Order>, orderItemModel: Model<OrderItem>, reviewModel: Model<Review>, categoryModel: Model<Category>, brandModel: Model<Brand>, productImageModel: Model<ProductImage>, settingModel: Model<Setting>, addressModel: Model<Address>, emailNotificationService: EmailNotificationService);
+    constructor(userModel: Model<User>, productModel: Model<Product>, orderModel: Model<Order>, orderItemModel: Model<OrderItem>, reviewModel: Model<Review>, categoryModel: Model<Category>, brandModel: Model<Brand>, productImageModel: Model<ProductImage>, settingModel: Model<Setting>, addressModel: Model<Address>, auditLogModel: Model<AuditLog>, settingVersionModel: Model<SettingVersion>, emailNotificationService: EmailNotificationService);
     getDashboard(): Promise<{
         totalOrders: number;
         totalRevenue: any;
@@ -82,6 +86,16 @@ export declare class AdminService {
             firstName: string;
             lastName: string;
             role: UserRole;
+            permissions: {
+                canEditProducts?: boolean;
+                canViewOrders?: boolean;
+                canManageUsers?: boolean;
+                canManageBanners?: boolean;
+                canViewAnalytics?: boolean;
+                canManagePromos?: boolean;
+                canViewAuditLogs?: boolean;
+                [key: string]: boolean | undefined;
+            };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
             skinType?: import("../../database/schemas/user.schema").SkinType;
@@ -139,6 +153,7 @@ export declare class AdminService {
             sku: string;
             barcode?: string;
             stockQuantity: number;
+            quantityMl?: number;
             lowStockThreshold: number;
             weight?: number;
             categoryId: Types.ObjectId;
@@ -198,6 +213,7 @@ export declare class AdminService {
         sku: string;
         barcode?: string;
         stockQuantity: number;
+        quantityMl?: number;
         lowStockThreshold: number;
         weight?: number;
         categoryId: Types.ObjectId;
@@ -237,6 +253,47 @@ export declare class AdminService {
     deleteProduct(productId: string): Promise<Product & Required<{
         _id: Types.ObjectId;
     }> & {
+        __v: number;
+    }>;
+    getOrderDetails(orderId: string): Promise<{
+        user: User & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        items: (OrderItem & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        })[];
+        orderNumber: string;
+        userId: Types.ObjectId;
+        addressId: Types.ObjectId;
+        subtotal: number;
+        discount: number;
+        deliveryCharge: number;
+        total: number;
+        status: OrderStatus;
+        paymentStatus: import("../../database/schemas/order.schema").PaymentStatus;
+        paymentMethod: import("../../database/schemas/order.schema").PaymentMethod;
+        customerNote?: string;
+        adminNote?: string;
+        trackingNumber?: string;
+        deliveryPartner?: string;
+        confirmedAt?: Date;
+        shippedAt?: Date;
+        deliveredAt?: Date;
+        cancelledAt?: Date;
+        _id: Types.ObjectId;
+        $locals: Record<string, unknown>;
+        $op: "save" | "validate" | "remove" | null;
+        $where: Record<string, unknown>;
+        baseModelName?: string;
+        collection: import("mongoose").Collection;
+        db: import("mongoose").Connection;
+        errors?: import("mongoose").Error.ValidationError;
+        isNew: boolean;
+        schema: import("mongoose").Schema;
         __v: number;
     }>;
     getAllOrders(page?: number, limit?: number, status?: OrderStatus): Promise<{
@@ -285,6 +342,10 @@ export declare class AdminService {
     }> & {
         __v: number;
     }>;
+    deleteOrder(orderId: string): Promise<{
+        message: string;
+        deletedOrderId: string;
+    }>;
     private sendOrderConfirmationEmail;
     getAllCustomers(page?: number, limit?: number): Promise<{
         data: {
@@ -297,6 +358,16 @@ export declare class AdminService {
             firstName: string;
             lastName: string;
             role: UserRole;
+            permissions: {
+                canEditProducts?: boolean;
+                canViewOrders?: boolean;
+                canManageUsers?: boolean;
+                canManageBanners?: boolean;
+                canViewAnalytics?: boolean;
+                canManagePromos?: boolean;
+                canViewAuditLogs?: boolean;
+                [key: string]: boolean | undefined;
+            };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
             skinType?: import("../../database/schemas/user.schema").SkinType;
@@ -371,6 +442,9 @@ export declare class AdminService {
         freeDeliveryThreshold: number;
         valleyDeliveryCharge: number;
         outsideValleyDeliveryCharge: number;
+    }, user?: {
+        userId?: string;
+        username?: string;
     }): Promise<Setting & Required<{
         _id: Types.ObjectId;
     }> & {
@@ -382,6 +456,9 @@ export declare class AdminService {
         message?: string;
         backgroundColor?: string;
         textColor?: string;
+    }, user?: {
+        userId?: string;
+        username?: string;
     }): Promise<Setting & Required<{
         _id: Types.ObjectId;
     }> & {
@@ -392,6 +469,9 @@ export declare class AdminService {
         enabled: boolean;
         percentage?: number;
         minOrderAmount?: number;
+    }, user?: {
+        userId?: string;
+        username?: string;
     }): Promise<Setting & Required<{
         _id: Types.ObjectId;
     }> & {
@@ -416,7 +496,7 @@ export declare class AdminService {
         newRole?: undefined;
     } | {
         email: string;
-        oldRole: UserRole.CUSTOMER | UserRole.ADMIN | UserRole.VENDOR;
+        oldRole: UserRole.CUSTOMER | UserRole.ADMIN | UserRole.VENDOR | UserRole.EDITOR | UserRole.MARKETING | UserRole.AUDITOR;
         newRole: UserRole;
         status: string;
         role?: undefined;

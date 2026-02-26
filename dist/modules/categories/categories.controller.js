@@ -16,14 +16,16 @@ exports.CategoriesController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const categories_service_1 = require("./categories.service");
+const auditlog_service_1 = require("../auditlog/auditlog.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const user_schema_1 = require("../../database/schemas/user.schema");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
 let CategoriesController = class CategoriesController {
-    constructor(categoriesService) {
+    constructor(categoriesService, auditLogService) {
         this.categoriesService = categoriesService;
+        this.auditLogService = auditLogService;
     }
     findAll() {
         return this.categoriesService.findAll();
@@ -34,11 +36,17 @@ let CategoriesController = class CategoriesController {
     create(dto) {
         return this.categoriesService.create(dto);
     }
-    update(id, dto) {
-        return this.categoriesService.update(id, dto);
+    async update(id, dto, req) {
+        const category = await this.categoriesService.update(id, dto);
+        const admin = req.user;
+        await this.auditLogService.log('UPDATE_CATEGORY', admin._id, admin.email, id, { dto });
+        return category;
     }
-    remove(id) {
-        return this.categoriesService.remove(id);
+    async remove(id, req) {
+        const result = await this.categoriesService.remove(id);
+        const admin = req.user;
+        await this.auditLogService.log('DELETE_CATEGORY', admin._id, admin.email, id, {});
+        return result;
     }
     seed() {
         return this.categoriesService.seedInitialCategories();
@@ -79,9 +87,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update category' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
@@ -90,9 +99,10 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Delete category' }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)('seed'),
@@ -106,6 +116,7 @@ __decorate([
 exports.CategoriesController = CategoriesController = __decorate([
     (0, swagger_1.ApiTags)('Categories'),
     (0, common_1.Controller)('categories'),
-    __metadata("design:paramtypes", [categories_service_1.CategoriesService])
+    __metadata("design:paramtypes", [categories_service_1.CategoriesService,
+        auditlog_service_1.AuditLogService])
 ], CategoriesController);
 //# sourceMappingURL=categories.controller.js.map

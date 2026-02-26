@@ -65,6 +65,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Product.prototype, "stockQuantity", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ default: 0 }),
+    __metadata("design:type", Number)
+], Product.prototype, "quantityMl", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ default: 10 }),
     __metadata("design:type", Number)
 ], Product.prototype, "lowStockThreshold", void 0);
