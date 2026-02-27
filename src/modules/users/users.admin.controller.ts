@@ -11,7 +11,7 @@ import { UserRole } from '../../database/schemas/user.schema';
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
-
+export class AdminUsersController {
   constructor(
     private usersService: UsersService,
     private auditLogService: AuditLogService,
@@ -20,7 +20,11 @@ import { UserRole } from '../../database/schemas/user.schema';
   @Put(':id/permissions')
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({ summary: 'Update user permissions' })
-  async updatePermissions(@Param('id') id: string, @Body() permissions: Record<string, boolean>, @Req() req: any) {
+  async updatePermissions(
+    @Param('id') id: string,
+    @Body() permissions: Record<string, boolean>,
+    @Req() req: any,
+  ) {
     const updatedUser = await this.usersService.updateUserPermissions(id, permissions);
     // Log the action
     const admin = req.user;

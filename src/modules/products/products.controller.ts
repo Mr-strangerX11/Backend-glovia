@@ -75,34 +75,70 @@ export class ProductsController {
   getFeatured(@Query('limit') limit?: string) {
     return this.productsService.getFeaturedProducts(
       limit ? Number(limit) : undefined,
-    );
-  }
+      @Delete(':productId/variants/:variantId')
+      @ApiOperation({ summary: 'Delete a product variant' })
+      async deleteVariant(
+        @Param('productId') productId: string,
+        @Param('variantId') variantId: string,
+        @Req() req: any,
+      ) {
+        const result = await this.productsService.deleteVariant(productId, variantId, req.user);
+        // Audit log
+        const admin = req.user;
+        await this.auditLogService.log(
+          'DELETE_PRODUCT_VARIANT',
+          admin._id,
+          admin.email,
+          productId,
+          { variantId }
+        );
+        return result;
+      }
 
-  @Get('best-sellers')
-  @ApiOperation({ summary: 'Get best seller products' })
-  getBestSellers(@Query('limit') limit?: string) {
-    return this.productsService.getBestSellers(
-      limit ? Number(limit) : undefined,
-    );
-  }
+      @Get()
+      @ApiOperation({ summary: 'Get all products with filters' })
+      @ApiQuery({ name: 'search', required: false })
+      @ApiQuery({ name: 'categoryId', required: false })
+      @ApiQuery({ name: 'limit', required: false })
+      @UseGuards(PermissionsGuard)
+      @Permissions('canViewProducts')
+      findAll(@Query() query: any) {
+        return this.productsService.findAll(query);
+      }
 
-  @Get(':slug')
-  @ApiOperation({ summary: 'Get product by slug' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.productsService.findBySlug(slug);
-  }
+      @Get('featured')
+      @ApiOperation({ summary: 'Get featured products' })
+      getFeatured(@Query('limit') limit?: string) {
+        return this.productsService.getFeaturedProducts(
+          limit ? Number(limit) : undefined,
+        );
+      }
 
-  @Get(':id/related')
-  @ApiOperation({ summary: 'Get related products' })
-  getRelated(
-    @Param('id') id: string,
-    @Query('categoryId') categoryId: string,
-    @Query('limit') limit?: string,
-  ) {
-    return this.productsService.getRelatedProducts(
-      id,
-      categoryId,
-      limit ? Number(limit) : undefined,
-    );
-  }
-}
+      @Get('best-sellers')
+      @ApiOperation({ summary: 'Get best seller products' })
+      getBestSellers(@Query('limit') limit?: string) {
+        return this.productsService.getBestSellers(
+          limit ? Number(limit) : undefined,
+        );
+      }
+
+      @Get(':slug')
+      @ApiOperation({ summary: 'Get product by slug' })
+      findBySlug(@Param('slug') slug: string) {
+        return this.productsService.findBySlug(slug);
+      }
+
+      @Get(':id/related')
+      @ApiOperation({ summary: 'Get related products' })
+      getRelated(
+        @Param('id') id: string,
+        @Query('categoryId') categoryId: string,
+        @Query('limit') limit?: string,
+      ) {
+        return this.productsService.getRelatedProducts(
+          id,
+          categoryId,
+          limit ? Number(limit) : undefined,
+        );
+      }
+    }
