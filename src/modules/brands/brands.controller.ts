@@ -8,6 +8,7 @@ import {
   Param,
   UseGuards,
   Inject,
+  Req
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
