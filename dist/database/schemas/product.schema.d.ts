@@ -281,3 +281,4 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         id: string;
     }>;
 }, Product>;
+export type ProductDocument = Product & Document;

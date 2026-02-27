@@ -10,8 +10,6 @@ import { SkinType } from './user.schema';
  */
 @Schema({ timestamps: true, collection: 'products' })
 export class Product extends Document {
-  // Type alias for a Product Mongoose document (for use with Model<ProductDocument>)
-  export type ProductDocument = Product & Document;
   @Prop({ required: true })
   name: string;
 
@@ -94,3 +92,6 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ brandId: 1 });
 ProductSchema.index({ isActive: 1, isFeatured: 1 });
+
+// Type alias for a Product Mongoose document (for use with Model<ProductDocument>)
+export type ProductDocument = Product & Document;

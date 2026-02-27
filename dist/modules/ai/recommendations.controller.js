@@ -14,25 +14,29 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecommendationsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const recommendations_service_1 = require("./recommendations.service");
 let RecommendationsController = class RecommendationsController {
-    getRecommendations(userId, productId) {
-        return [
-            { id: 'p1', name: 'Popular Product 1', price: 500 },
-            { id: 'p2', name: 'Popular Product 2', price: 750 },
-            { id: 'p3', name: 'Similar Product', price: 600 },
-        ];
+    constructor(recommendationsService) {
+        this.recommendationsService = recommendationsService;
+    }
+    async getRecommendations(userId, productId) {
+        return this.recommendationsService.getRecommendations(userId, productId);
     }
 };
 exports.RecommendationsController = RecommendationsController;
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get product recommendations' }),
     __param(0, (0, common_1.Query)('userId')),
     __param(1, (0, common_1.Query)('productId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], RecommendationsController.prototype, "getRecommendations", null);
 exports.RecommendationsController = RecommendationsController = __decorate([
-    (0, common_1.Controller)('recommendations')
+    (0, swagger_1.ApiTags)('Recommendations'),
+    (0, common_1.Controller)('recommendations'),
+    __metadata("design:paramtypes", [recommendations_service_1.RecommendationsService])
 ], RecommendationsController);
 //# sourceMappingURL=recommendations.controller.js.map
