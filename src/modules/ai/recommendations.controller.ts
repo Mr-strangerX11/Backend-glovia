@@ -1,15 +1,19 @@
 import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { RecommendationsService } from './recommendations.service';
 
+@ApiTags('Recommendations')
 @Controller('recommendations')
 export class RecommendationsController {
+  constructor(private recommendationsService: RecommendationsService) {}
+
   @Get()
-  getRecommendations(@Query('userId') userId: string, @Query('productId') productId: string) {
-    // Starter logic: recommend popular products or similar products
-    // TODO: Replace with real collaborative filtering
-    return [
-      { id: 'p1', name: 'Popular Product 1', price: 500 },
-      { id: 'p2', name: 'Popular Product 2', price: 750 },
-      { id: 'p3', name: 'Similar Product', price: 600 },
-    ];
+  @ApiOperation({ summary: 'Get product recommendations' })
+  async getRecommendations(
+    @Query('userId') userId: string,
+    @Query('productId') productId: string,
+  ) {
+    return this.recommendationsService.getRecommendations(userId, productId);
   }
 }
+

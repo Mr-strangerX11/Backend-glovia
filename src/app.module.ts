@@ -23,6 +23,7 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { PromoCodesModule } from './modules/promocodes/promocodes.module';
 import { PopupsModule } from './modules/popups/popups.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     VerificationModule,
     HealthModule,
     AnalyticsModule,
+    AiModule,
   ],
 })
 export class AppModule {}
