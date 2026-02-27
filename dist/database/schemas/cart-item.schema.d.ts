@@ -23,7 +23,7 @@ export declare const CartItemSchema: import("mongoose").Schema<CartItem, import(
 }, "id"> & {
     id: string;
 }, {
-    productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, CartItem, Document<unknown, {}, CartItem, {
+    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, CartItem, Document<unknown, {}, CartItem, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<CartItem & Required<{
         _id: Types.ObjectId;
@@ -41,7 +41,7 @@ export declare const CartItemSchema: import("mongoose").Schema<CartItem, import(
     }, "id"> & {
         id: string;
     }>;
-    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, CartItem, Document<unknown, {}, CartItem, {
+    productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, CartItem, Document<unknown, {}, CartItem, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<CartItem & Required<{
         _id: Types.ObjectId;

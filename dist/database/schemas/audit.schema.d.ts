@@ -26,7 +26,7 @@ export declare const AuditLogSchema: import("mongoose").Schema<AuditLog, import(
 }, "id"> & {
     id: string;
 }, {
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, AuditLog, Document<unknown, {}, AuditLog, {
+    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, AuditLog, Document<unknown, {}, AuditLog, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<AuditLog & Required<{
         _id: Types.ObjectId;
@@ -35,7 +35,7 @@ export declare const AuditLogSchema: import("mongoose").Schema<AuditLog, import(
     }, "id"> & {
         id: string;
     }>;
-    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, AuditLog, Document<unknown, {}, AuditLog, {
+    action?: import("mongoose").SchemaDefinitionProperty<string, AuditLog, Document<unknown, {}, AuditLog, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<AuditLog & Required<{
         _id: Types.ObjectId;
@@ -62,7 +62,7 @@ export declare const AuditLogSchema: import("mongoose").Schema<AuditLog, import(
     }, "id"> & {
         id: string;
     }>;
-    action?: import("mongoose").SchemaDefinitionProperty<string, AuditLog, Document<unknown, {}, AuditLog, {
+    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, AuditLog, Document<unknown, {}, AuditLog, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<AuditLog & Required<{
         _id: Types.ObjectId;

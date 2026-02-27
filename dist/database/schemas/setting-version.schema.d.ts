@@ -25,15 +25,6 @@ export declare const SettingVersionSchema: import("mongoose").Schema<SettingVers
 }, "id"> & {
     id: string;
 }, {
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, SettingVersion, Document<unknown, {}, SettingVersion, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<SettingVersion & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
     _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, SettingVersion, Document<unknown, {}, SettingVersion, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<SettingVersion & Required<{
@@ -44,6 +35,15 @@ export declare const SettingVersionSchema: import("mongoose").Schema<SettingVers
         id: string;
     }>;
     version?: import("mongoose").SchemaDefinitionProperty<number, SettingVersion, Document<unknown, {}, SettingVersion, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<SettingVersion & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, SettingVersion, Document<unknown, {}, SettingVersion, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<SettingVersion & Required<{
         _id: Types.ObjectId;

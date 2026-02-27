@@ -31,25 +31,16 @@ export declare const BlogSchema: import("mongoose").Schema<Blog, import("mongoos
 }, "id"> & {
     id: string;
 }, {
-    tags?: import("mongoose").SchemaDefinitionProperty<string[], Blog, Document<unknown, {}, Blog, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    title?: import("mongoose").SchemaDefinitionProperty<string, Blog, Document<unknown, {}, Blog, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
     _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Blog, Document<unknown, {}, Blog, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    tags?: import("mongoose").SchemaDefinitionProperty<string[], Blog, Document<unknown, {}, Blog, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -85,7 +76,7 @@ export declare const BlogSchema: import("mongoose").Schema<Blog, import("mongoos
     }, "id"> & {
         id: string;
     }>;
-    content?: import("mongoose").SchemaDefinitionProperty<string, Blog, Document<unknown, {}, Blog, {
+    title?: import("mongoose").SchemaDefinitionProperty<string, Blog, Document<unknown, {}, Blog, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -95,6 +86,15 @@ export declare const BlogSchema: import("mongoose").Schema<Blog, import("mongoos
         id: string;
     }>;
     excerpt?: import("mongoose").SchemaDefinitionProperty<string, Blog, Document<unknown, {}, Blog, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    content?: import("mongoose").SchemaDefinitionProperty<string, Blog, Document<unknown, {}, Blog, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Blog & Required<{
         _id: import("mongoose").Types.ObjectId;

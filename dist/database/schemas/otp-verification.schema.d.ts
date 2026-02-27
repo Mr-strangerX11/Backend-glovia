@@ -29,24 +29,6 @@ export declare const OtpVerificationSchema: import("mongoose").Schema<OtpVerific
 }, "id"> & {
     id: string;
 }, {
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, OtpVerification, Document<unknown, {}, OtpVerification, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<OtpVerification & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    isVerified?: import("mongoose").SchemaDefinitionProperty<boolean, OtpVerification, Document<unknown, {}, OtpVerification, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<OtpVerification & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
     _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, OtpVerification, Document<unknown, {}, OtpVerification, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<OtpVerification & Required<{
@@ -75,6 +57,24 @@ export declare const OtpVerificationSchema: import("mongoose").Schema<OtpVerific
         id: string;
     }>;
     phone?: import("mongoose").SchemaDefinitionProperty<string, OtpVerification, Document<unknown, {}, OtpVerification, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<OtpVerification & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, OtpVerification, Document<unknown, {}, OtpVerification, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<OtpVerification & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    isVerified?: import("mongoose").SchemaDefinitionProperty<boolean, OtpVerification, Document<unknown, {}, OtpVerification, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<OtpVerification & Required<{
         _id: Types.ObjectId;

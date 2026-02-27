@@ -28,7 +28,7 @@ export declare const ProductVariantSchema: import("mongoose").Schema<ProductVari
 }, "id"> & {
     id: string;
 }, {
-    productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, ProductVariant, Document<unknown, {}, ProductVariant, {
+    name?: import("mongoose").SchemaDefinitionProperty<string, ProductVariant, Document<unknown, {}, ProductVariant, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductVariant & Required<{
         _id: Types.ObjectId;
@@ -46,7 +46,7 @@ export declare const ProductVariantSchema: import("mongoose").Schema<ProductVari
     }, "id"> & {
         id: string;
     }>;
-    name?: import("mongoose").SchemaDefinitionProperty<string, ProductVariant, Document<unknown, {}, ProductVariant, {
+    options?: import("mongoose").SchemaDefinitionProperty<Record<string, string>, ProductVariant, Document<unknown, {}, ProductVariant, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductVariant & Required<{
         _id: Types.ObjectId;
@@ -55,7 +55,7 @@ export declare const ProductVariantSchema: import("mongoose").Schema<ProductVari
     }, "id"> & {
         id: string;
     }>;
-    options?: import("mongoose").SchemaDefinitionProperty<Record<string, string>, ProductVariant, Document<unknown, {}, ProductVariant, {
+    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, ProductVariant, Document<unknown, {}, ProductVariant, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductVariant & Required<{
         _id: Types.ObjectId;
@@ -100,7 +100,7 @@ export declare const ProductVariantSchema: import("mongoose").Schema<ProductVari
     }, "id"> & {
         id: string;
     }>;
-    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, ProductVariant, Document<unknown, {}, ProductVariant, {
+    productId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, ProductVariant, Document<unknown, {}, ProductVariant, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<ProductVariant & Required<{
         _id: Types.ObjectId;

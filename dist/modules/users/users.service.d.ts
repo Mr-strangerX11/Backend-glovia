@@ -7,6 +7,11 @@ export declare class UsersService {
     private addressModel;
     private orderModel;
     constructor(userModel: Model<User>, addressModel: Model<Address>, orderModel: Model<Order>);
+    updateUserPermissions(userId: string, permissions: Record<string, boolean>): Promise<User & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
     getProfile(userId: string): Promise<User & Required<{
         _id: Types.ObjectId;
     }> & {

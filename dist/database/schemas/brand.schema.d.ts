@@ -25,7 +25,7 @@ export declare const BrandSchema: import("mongoose").Schema<Brand, import("mongo
 }, "id"> & {
     id: string;
 }, {
-    _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Brand, Document<unknown, {}, Brand, {
+    name?: import("mongoose").SchemaDefinitionProperty<string, Brand, Document<unknown, {}, Brand, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Brand & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -34,7 +34,7 @@ export declare const BrandSchema: import("mongoose").Schema<Brand, import("mongo
     }, "id"> & {
         id: string;
     }>;
-    name?: import("mongoose").SchemaDefinitionProperty<string, Brand, Document<unknown, {}, Brand, {
+    _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Brand, Document<unknown, {}, Brand, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Brand & Required<{
         _id: import("mongoose").Types.ObjectId;

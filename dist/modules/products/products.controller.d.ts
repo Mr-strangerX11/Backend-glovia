@@ -1,6 +1,5 @@
 import { ProductsService } from './products.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
-import { SkinType } from '../../database/schemas/user.schema';
 export declare class ProductsController {
     private productsService;
     private auditLogService;
@@ -23,9 +22,11 @@ export declare class ProductsController {
         __v: number;
     } & {
         id: string;
-    }> | {
+    }>;
+    deleteVariant(productId: string, variantId: string, req: any): Promise<{
         message: string;
-    } | Promise<{
+    }>;
+    findAll(query: any): Promise<{
         data: {
             images: any[];
             category: any;
@@ -49,7 +50,7 @@ export declare class ProductsController {
             weight?: number;
             categoryId: import("mongoose").Types.ObjectId;
             brandId?: import("mongoose").Types.ObjectId;
-            suitableFor: SkinType[];
+            suitableFor: import("../../database/schemas").SkinType[];
             isActive: boolean;
             isFeatured: boolean;
             isBestSeller: boolean;
@@ -75,8 +76,10 @@ export declare class ProductsController {
             limit: number;
             totalPages: number;
         };
-    }> | Promise<{
+    }>;
+    getFeatured(limit?: string): Promise<{
         images: any[];
+        category: any;
         name: string;
         slug: string;
         description: string;
@@ -94,7 +97,7 @@ export declare class ProductsController {
         weight?: number;
         categoryId: import("mongoose").Types.ObjectId;
         brandId?: import("mongoose").Types.ObjectId;
-        suitableFor: SkinType[];
+        suitableFor: import("../../database/schemas").SkinType[];
         isActive: boolean;
         isFeatured: boolean;
         isBestSeller: boolean;
@@ -113,7 +116,47 @@ export declare class ProductsController {
         isNew: boolean;
         schema: import("mongoose").Schema;
         __v: number;
-    }[]> | Promise<{
+    }[]>;
+    getBestSellers(limit?: string): Promise<{
+        images: any[];
+        name: string;
+        slug: string;
+        description: string;
+        ingredients?: string;
+        benefits?: string;
+        howToUse?: string;
+        price: number;
+        compareAtPrice?: number;
+        costPrice?: number;
+        sku: string;
+        barcode?: string;
+        stockQuantity: number;
+        quantityMl?: number;
+        lowStockThreshold: number;
+        weight?: number;
+        categoryId: import("mongoose").Types.ObjectId;
+        brandId?: import("mongoose").Types.ObjectId;
+        suitableFor: import("../../database/schemas").SkinType[];
+        isActive: boolean;
+        isFeatured: boolean;
+        isBestSeller: boolean;
+        isNewProduct: boolean;
+        metaTitle?: string;
+        metaDescription?: string;
+        tags: string[];
+        _id: import("mongoose").Types.ObjectId;
+        $locals: Record<string, unknown>;
+        $op: "save" | "validate" | "remove" | null;
+        $where: Record<string, unknown>;
+        baseModelName?: string;
+        collection: import("mongoose").Collection;
+        db: import("mongoose").Connection;
+        errors?: import("mongoose").Error.ValidationError;
+        isNew: boolean;
+        schema: import("mongoose").Schema;
+        __v: number;
+    }[]>;
+    findBySlug(slug: string): Promise<{
         images: (import("../../database/schemas").ProductImage & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
@@ -169,7 +212,7 @@ export declare class ProductsController {
         weight?: number;
         categoryId: import("mongoose").Types.ObjectId;
         brandId?: import("mongoose").Types.ObjectId;
-        suitableFor: SkinType[];
+        suitableFor: import("../../database/schemas").SkinType[];
         isActive: boolean;
         isFeatured: boolean;
         isBestSeller: boolean;
@@ -189,4 +232,43 @@ export declare class ProductsController {
         schema: import("mongoose").Schema;
         __v: number;
     }>;
+    getRelated(id: string, categoryId: string, limit?: string): Promise<{
+        images: any[];
+        name: string;
+        slug: string;
+        description: string;
+        ingredients?: string;
+        benefits?: string;
+        howToUse?: string;
+        price: number;
+        compareAtPrice?: number;
+        costPrice?: number;
+        sku: string;
+        barcode?: string;
+        stockQuantity: number;
+        quantityMl?: number;
+        lowStockThreshold: number;
+        weight?: number;
+        categoryId: import("mongoose").Types.ObjectId;
+        brandId?: import("mongoose").Types.ObjectId;
+        suitableFor: import("../../database/schemas").SkinType[];
+        isActive: boolean;
+        isFeatured: boolean;
+        isBestSeller: boolean;
+        isNewProduct: boolean;
+        metaTitle?: string;
+        metaDescription?: string;
+        tags: string[];
+        _id: import("mongoose").Types.ObjectId;
+        $locals: Record<string, unknown>;
+        $op: "save" | "validate" | "remove" | null;
+        $where: Record<string, unknown>;
+        baseModelName?: string;
+        collection: import("mongoose").Collection;
+        db: import("mongoose").Connection;
+        errors?: import("mongoose").Error.ValidationError;
+        isNew: boolean;
+        schema: import("mongoose").Schema;
+        __v: number;
+    }[]>;
 }

@@ -27,7 +27,7 @@ export declare const PopupSchema: import("mongoose").Schema<Popup, import("mongo
 }, "id"> & {
     id: string;
 }, {
-    title?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
+    link?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Popup & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -45,7 +45,7 @@ export declare const PopupSchema: import("mongoose").Schema<Popup, import("mongo
     }, "id"> & {
         id: string;
     }>;
-    link?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
+    image?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Popup & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -63,16 +63,7 @@ export declare const PopupSchema: import("mongoose").Schema<Popup, import("mongo
     }, "id"> & {
         id: string;
     }>;
-    image?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Popup & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    expiresAt?: import("mongoose").SchemaDefinitionProperty<Date, Popup, Document<unknown, {}, Popup, {
+    title?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Popup & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -82,6 +73,15 @@ export declare const PopupSchema: import("mongoose").Schema<Popup, import("mongo
         id: string;
     }>;
     content?: import("mongoose").SchemaDefinitionProperty<string, Popup, Document<unknown, {}, Popup, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Popup & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    expiresAt?: import("mongoose").SchemaDefinitionProperty<Date, Popup, Document<unknown, {}, Popup, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Popup & Required<{
         _id: import("mongoose").Types.ObjectId;

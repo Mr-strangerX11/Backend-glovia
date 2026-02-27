@@ -1,14 +1,3 @@
-  async updateUserPermissions(userId: string, permissions: Record<string, boolean>) {
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { permissions },
-      { new: true }
-    ).lean();
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
-  }
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -23,6 +12,18 @@ export class UsersService {
     @InjectModel('Address') private addressModel: Model<Address>,
     @InjectModel('Order') private orderModel: Model<Order>,
   ) {}
+
+  async updateUserPermissions(userId: string, permissions: Record<string, boolean>) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { permissions },
+      { new: true }
+    ).lean();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
 
   async getProfile(userId: string) {
     const user = await this.userModel
