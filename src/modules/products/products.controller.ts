@@ -4,6 +4,7 @@ import { ProductsService } from './products.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
+
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
@@ -23,33 +24,38 @@ export class ProductsController {
   @ApiOperation({ summary: 'Create a variant for a product' })
   createVariant(@Param('productId') productId: string, @Body() dto: any, @Req() req: any) {
     return this.productsService.createVariant(productId, dto, req.user);
+  }
+
   @Put(':productId/variants/:variantId')
   @ApiOperation({ summary: 'Update a product variant' })
   updateVariant(
-  @Param('productId') productId: string,
-  @Param('variantId') variantId: string,
-  @Body() dto: any,
+    @Param('productId') productId: string,
+    @Param('variantId') variantId: string,
+    @Body() dto: any,
     @Req() req: any,
   ) {
     return this.productsService.updateVariant(productId, variantId, dto, req.user);
+  }
+
   @Delete(':productId/variants/:variantId')
   @ApiOperation({ summary: 'Delete a product variant' })
   async deleteVariant(
-  @Param('productId') productId: string,
-  @Param('variantId') variantId: string,
-  @Req() req: any,
+    @Param('productId') productId: string,
+    @Param('variantId') variantId: string,
+    @Req() req: any,
   ) {
     const result = await this.productsService.deleteVariant(productId, variantId, req.user);
     const admin = req.user;
     await this.auditLogService.log(
       'DELETE_PRODUCT_VARIANT',
       admin._id,
-  admin.email,
-  productId,
-  { variantId }
+      admin.email,
+      productId,
+      { variantId }
     );
     return result;
   }
+
   @Get()
   @ApiOperation({ summary: 'Get all products with filters' })
   @ApiQuery({ name: 'search', required: false })
@@ -68,6 +74,7 @@ export class ProductsController {
       limit ? Number(limit) : undefined,
     );
   }
+
   @Get('best-sellers')
   @ApiOperation({ summary: 'Get best seller products' })
   getBestSellers(@Query('limit') limit?: string) {
