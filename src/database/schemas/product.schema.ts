@@ -2,8 +2,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { SkinType } from './user.schema';
 
+/**
+ * Product Mongoose schema and document type
+ *
+ * The ProductDocument type is a best practice for type-safe Mongoose operations in NestJS.
+ * It represents a hydrated Product document instance from the database.
+ */
 @Schema({ timestamps: true, collection: 'products' })
 export class Product extends Document {
+  // Type alias for a Product Mongoose document (for use with Model<ProductDocument>)
+  export type ProductDocument = Product & Document;
   @Prop({ required: true })
   name: string;
 
