@@ -11,6 +11,7 @@ import {
   UserSchema,
   ProductVariantSchema,
 } from '../../database/schemas';
+import { AuditLogModule } from '../auditlog/auditlog.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import {
       { name: 'User', schema: UserSchema },
       { name: 'ProductVariant', schema: ProductVariantSchema },
     ]),
+    AuditLogModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],
