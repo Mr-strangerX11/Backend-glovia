@@ -24,6 +24,8 @@ import { PromoCodesModule } from './modules/promocodes/promocodes.module';
 import { PopupsModule } from './modules/popups/popups.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AiModule } from './modules/ai/ai.module';
+import { LoyaltyModule } from './modules/loyalty/loyalty.module';
+import { WalletModule } from './modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { AiModule } from './modules/ai/ai.module';
     HealthModule,
     AnalyticsModule,
     AiModule,
+    LoyaltyModule,
+    WalletModule,
   ],
 })
 export class AppModule {}

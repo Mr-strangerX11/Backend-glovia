@@ -1,9 +1,7 @@
-import { Controller, Get, Param, Query, UseGuards, Post, Body, Put, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, Put, Delete, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
-import { Permissions } from '../../common/decorators/permissions.decorator';
-import { PermissionsGuard } from '../../common/guards/permissions.guard';
 
 @ApiTags('Products')
 @Controller('products')
@@ -61,8 +59,6 @@ export class ProductsController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @UseGuards(PermissionsGuard)
-  @Permissions('canViewProducts')
   findAll(@Query() query: any) {
     return this.productsService.findAll(query);
   }

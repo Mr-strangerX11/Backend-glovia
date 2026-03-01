@@ -175,6 +175,22 @@ export class AdminController {
     return this.adminService.deleteProduct(id);
   }
 
+  @Get('products')
+  @ApiOperation({ summary: 'Get all products (admin)' })
+  getAllProducts(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('brandId') brandId?: string,
+  ) {
+    return this.adminService.getAllProducts(
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 10,
+      categoryId,
+      brandId,
+    );
+  }
+
   @Get('orders')
   @ApiOperation({ summary: 'Get all orders' })
   getAllOrders(
