@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:3002/api/v1}"
+BASE_URL="${BASE_URL:-http://localhost:3001/api/v1}"
+
+function ensure_api_available() {
+  local health_url="$BASE_URL/health"
+  local status
+  status=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 --max-time 5 "$health_url" || true)
+
+  if [[ "$status" == "000" ]]; then
+    echo "API unavailable at $BASE_URL"
+    echo "Start backend first (example: npm run start:dev) or set BASE_URL to a running API."
+    exit 1
+  fi
+}
 
 function check() {
   local name="$1"
@@ -17,6 +29,7 @@ function check() {
 }
 
 echo "Smoke test base: $BASE_URL"
+ensure_api_available
 check "products" "$BASE_URL/products"
 check "categories" "$BASE_URL/categories"
 check "brands" "$BASE_URL/brands"

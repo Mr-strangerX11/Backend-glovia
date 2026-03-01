@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Category, Product, ProductImage, ProductCategory } from '../../database/schemas';
@@ -117,7 +117,60 @@ export class CategoriesService {
   }
 
   async create(dto: any) {
-    const category = await this.categoryModel.create(dto);
+    const payload = { ...dto };
+
+    if (!payload.name || typeof payload.name !== 'string') {
+      throw new BadRequestException('Category name is required');
+    }
+
+    const normalizedName = payload.name.trim();
+    if (!normalizedName) {
+      throw new BadRequestException('Category name is required');
+    }
+    payload.name = normalizedName;
+
+    if (!payload.slug || typeof payload.slug !== 'string' || !payload.slug.trim()) {
+      payload.slug = normalizedName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    } else {
+      payload.slug = payload.slug
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    let parentCategory: Category | null = null;
+
+    if (payload.parentId) {
+      if (!Types.ObjectId.isValid(payload.parentId)) {
+        throw new BadRequestException('Invalid parentId');
+      }
+
+      parentCategory = await this.categoryModel.findById(payload.parentId);
+      if (!parentCategory || !parentCategory.isActive) {
+        throw new BadRequestException('Parent category not found');
+      }
+    }
+
+    if (!payload.type && parentCategory?.type) {
+      payload.type = parentCategory.type;
+    }
+
+    if (!payload.type) {
+      throw new BadRequestException('Category type is required for main category');
+    }
+
+    const existingSlug = await this.categoryModel.findOne({ slug: payload.slug }).select('_id').lean();
+    if (existingSlug) {
+      const suffix = Date.now().toString().slice(-5);
+      payload.slug = `${payload.slug}-${suffix}`;
+    }
+
+    const category = await this.categoryModel.create(payload);
     return category;
   }
 
