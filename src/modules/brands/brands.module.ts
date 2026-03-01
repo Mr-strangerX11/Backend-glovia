@@ -3,9 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BrandsService } from './brands.service';
 import { BrandsController } from './brands.controller';
 import { BrandSchema, ProductSchema, ProductImageSchema, OrderItemSchema } from '../../database/schemas';
+import { AuditLogModule } from '../auditlog/auditlog.module';
 
 @Module({
   imports: [
+    AuditLogModule,
     MongooseModule.forFeature([
       { name: 'Brand', schema: BrandSchema },
       { name: 'Product', schema: ProductSchema },
