@@ -127,7 +127,8 @@ async function createHandler() {
         callback(null, true);
         return;
       }
-      if (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin))) {
+      const isGloviaDomain = /^https:\/\/(www\.)?glovia\.com\.np$/i.test(origin);
+      if (isGloviaDomain || allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin))) {
         callback(null, true);
         return;
       }
@@ -203,7 +204,9 @@ function getAllowedOrigins() {
 
 function addCorsHeaders(res, origin) {
   const allowedOrigins = getAllowedOrigins();
-  const isAllowed = origin && (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin)));
+  const isGloviaDomain =
+    typeof origin === 'string' && /^https:\/\/(www\.)?glovia\.com\.np$/i.test(origin);
+  const isAllowed = origin && (isGloviaDomain || allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin)));
   const allowOrigin =
     isAllowed
       ? origin
