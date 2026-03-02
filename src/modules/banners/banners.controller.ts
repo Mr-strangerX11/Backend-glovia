@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { BannersService } from './banners.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -12,6 +12,9 @@ export class BannersController {
   constructor(private bannersService: BannersService) {}
 
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Get all active banners' })
   findAll() {
     return this.bannersService.findAll();
