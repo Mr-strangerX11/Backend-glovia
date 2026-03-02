@@ -118,6 +118,8 @@ export class OtpService {
 export class EmailOtpService {
   private readonly logger = new Logger(EmailOtpService.name);
   private readonly provider = (process.env.EMAIL_PROVIDER || '').toLowerCase(); // 'smtp', 'sendgrid', 'ses', 'mock'
+  private readonly allowMockFallback = process.env.EMAIL_ALLOW_MOCK_FALLBACK === 'true';
+  private readonly isProduction = process.env.NODE_ENV === 'production';
   private transporter: Transporter | null = null;
 
   private readonly smtpHost = process.env.SMTP_HOST;
@@ -160,11 +162,7 @@ export class EmailOtpService {
     if (this.sendgridApiKey && !configured.includes('sendgrid')) configured.push('sendgrid');
     if (!configured.includes('ses') && this.provider === 'ses') configured.push('ses');
 
-    if (configured.length === 0 || this.provider === 'mock') {
-      configured.push('mock');
-    }
-
-    if (!configured.includes('mock')) {
+    if (configured.length === 0 || this.provider === 'mock' || this.allowMockFallback || !this.isProduction) {
       configured.push('mock');
     }
 
@@ -238,7 +236,15 @@ export class EmailOtpService {
         html,
       });
 
-      this.logger.log(`Email sent successfully to ${email}: ${info.messageId}`);
+      const acceptedCount = Array.isArray(info.accepted) ? info.accepted.length : 0;
+      const rejectedCount = Array.isArray(info.rejected) ? info.rejected.length : 0;
+
+      if (acceptedCount === 0 || rejectedCount > 0) {
+        this.logger.error(`SMTP accepted=${acceptedCount}, rejected=${rejectedCount} for ${email}`);
+        return false;
+      }
+
+      this.logger.log(`Email accepted by SMTP for ${email}: ${info.messageId}`);
       return true;
     } catch (error) {
       this.logger.error(`SMTP error sending to ${email}:`, error);
@@ -273,7 +279,14 @@ export class EmailOtpService {
         }),
       });
 
-      return response.status === 202;
+      if (response.status !== 202) {
+        const text = await response.text();
+        this.logger.error(`SendGrid rejected email (${response.status}) for ${email}: ${text}`);
+        return false;
+      }
+
+      this.logger.log(`Email accepted by SendGrid for ${email}`);
+      return true;
     } catch (error) {
       this.logger.error('SendGrid error:', error);
       return false;
@@ -293,6 +306,11 @@ export class EmailOtpService {
    * Mock email for development
    */
   private sendViaMock(email: string, otp: string, purpose: string): boolean {
+    if (this.isProduction && !this.allowMockFallback) {
+      this.logger.error('Mock email fallback is disabled in production');
+      return false;
+    }
+
     const { subject, html } = this.buildEmailContent(otp, purpose);
     this.logger.log(`[MOCK EMAIL] To: ${email} | Subject: ${subject}`);
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
