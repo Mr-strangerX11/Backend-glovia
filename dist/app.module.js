@@ -33,6 +33,8 @@ const promocodes_module_1 = require("./modules/promocodes/promocodes.module");
 const popups_module_1 = require("./modules/popups/popups.module");
 const analytics_module_1 = require("./modules/analytics/analytics.module");
 const ai_module_1 = require("./modules/ai/ai.module");
+const loyalty_module_1 = require("./modules/loyalty/loyalty.module");
+const wallet_module_1 = require("./modules/wallet/wallet.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -70,6 +72,8 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             analytics_module_1.AnalyticsModule,
             ai_module_1.AiModule,
+            loyalty_module_1.LoyaltyModule,
+            wallet_module_1.WalletModule,
         ],
     })
 ], AppModule);

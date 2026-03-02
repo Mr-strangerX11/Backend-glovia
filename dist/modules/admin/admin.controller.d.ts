@@ -148,6 +148,55 @@ export declare class AdminController {
     }> & {
         __v: number;
     }>;
+    getAllProducts(page?: string, limit?: string, categoryId?: string, brandId?: string): Promise<{
+        data: {
+            images: any[];
+            category: any;
+            brand: any;
+            name: string;
+            slug: string;
+            description: string;
+            ingredients?: string;
+            benefits?: string;
+            howToUse?: string;
+            price: number;
+            compareAtPrice?: number;
+            costPrice?: number;
+            sku: string;
+            barcode?: string;
+            stockQuantity: number;
+            quantityMl?: number;
+            lowStockThreshold: number;
+            weight?: number;
+            categoryId: import("mongoose").Types.ObjectId;
+            brandId?: import("mongoose").Types.ObjectId;
+            suitableFor: import("../../database/schemas/user.schema").SkinType[];
+            isActive: boolean;
+            isFeatured: boolean;
+            isBestSeller: boolean;
+            isNewProduct: boolean;
+            metaTitle?: string;
+            metaDescription?: string;
+            tags: string[];
+            _id: import("mongoose").Types.ObjectId;
+            $locals: Record<string, unknown>;
+            $op: "save" | "validate" | "remove" | null;
+            $where: Record<string, unknown>;
+            baseModelName?: string;
+            collection: import("mongoose").Collection;
+            db: import("mongoose").Connection;
+            errors?: import("mongoose").Error.ValidationError;
+            isNew: boolean;
+            schema: import("mongoose").Schema;
+            __v: number;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
     getAllOrders(status?: string, page?: string, limit?: string): Promise<{
         data: {
             user: any;

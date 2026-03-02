@@ -17,8 +17,6 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const products_service_1 = require("./products.service");
 const auditlog_service_1 = require("../auditlog/auditlog.service");
-const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
-const permissions_guard_1 = require("../../common/guards/permissions.guard");
 let ProductsController = class ProductsController {
     constructor(productsService, auditLogService) {
         this.productsService = productsService;
@@ -101,8 +99,6 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'search', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'limit', required: false }),
-    (0, common_1.UseGuards)(permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.Permissions)('canViewProducts'),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

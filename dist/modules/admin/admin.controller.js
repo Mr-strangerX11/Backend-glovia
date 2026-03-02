@@ -119,6 +119,9 @@ let AdminController = class AdminController {
     deleteProduct(id) {
         return this.adminService.deleteProduct(id);
     }
+    getAllProducts(page, limit, categoryId, brandId) {
+        return this.adminService.getAllProducts(page ? Number(page) : 1, limit ? Number(limit) : 10, categoryId, brandId);
+    }
     getAllOrders(status, page, limit) {
         return this.adminService.getAllOrders(page ? Number(page) : 1, limit ? Number(limit) : 10, status);
     }
@@ -293,6 +296,17 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "deleteProduct", null);
+__decorate([
+    (0, common_1.Get)('products'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all products (admin)' }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('categoryId')),
+    __param(3, (0, common_1.Query)('brandId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getAllProducts", null);
 __decorate([
     (0, common_1.Get)('orders'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all orders' }),

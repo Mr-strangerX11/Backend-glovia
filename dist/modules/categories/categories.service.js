@@ -116,7 +116,51 @@ let CategoriesService = class CategoriesService {
         };
     }
     async create(dto) {
-        const category = await this.categoryModel.create(dto);
+        const payload = { ...dto };
+        if (!payload.name || typeof payload.name !== 'string') {
+            throw new common_1.BadRequestException('Category name is required');
+        }
+        const normalizedName = payload.name.trim();
+        if (!normalizedName) {
+            throw new common_1.BadRequestException('Category name is required');
+        }
+        payload.name = normalizedName;
+        if (!payload.slug || typeof payload.slug !== 'string' || !payload.slug.trim()) {
+            payload.slug = normalizedName
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+        else {
+            payload.slug = payload.slug
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+        let parentCategory = null;
+        if (payload.parentId) {
+            if (!mongoose_2.Types.ObjectId.isValid(payload.parentId)) {
+                throw new common_1.BadRequestException('Invalid parentId');
+            }
+            parentCategory = await this.categoryModel.findById(payload.parentId);
+            if (!parentCategory || !parentCategory.isActive) {
+                throw new common_1.BadRequestException('Parent category not found');
+            }
+        }
+        if (!payload.type && parentCategory?.type) {
+            payload.type = parentCategory.type;
+        }
+        if (!payload.type) {
+            throw new common_1.BadRequestException('Category type is required for main category');
+        }
+        const existingSlug = await this.categoryModel.findOne({ slug: payload.slug }).select('_id').lean();
+        if (existingSlug) {
+            const suffix = Date.now().toString().slice(-5);
+            payload.slug = `${payload.slug}-${suffix}`;
+        }
+        const category = await this.categoryModel.create(payload);
         return category;
     }
     async update(id, dto) {

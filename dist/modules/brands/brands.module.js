@@ -12,12 +12,14 @@ const mongoose_1 = require("@nestjs/mongoose");
 const brands_service_1 = require("./brands.service");
 const brands_controller_1 = require("./brands.controller");
 const schemas_1 = require("../../database/schemas");
+const auditlog_module_1 = require("../auditlog/auditlog.module");
 let BrandsModule = class BrandsModule {
 };
 exports.BrandsModule = BrandsModule;
 exports.BrandsModule = BrandsModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            auditlog_module_1.AuditLogModule,
             mongoose_1.MongooseModule.forFeature([
                 { name: 'Brand', schema: schemas_1.BrandSchema },
                 { name: 'Product', schema: schemas_1.ProductSchema },

@@ -20,11 +20,44 @@ async function bootstrap() {
         .split(',')
         .map((url) => url.trim())
         .filter(Boolean);
-    const allowedOrigins = frontendUrls.length
-        ? frontendUrls
-        : ['http://localhost:3000', 'http://localhost:3001'];
+    const fallbackOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+    const configuredOrigins = frontendUrls.length ? frontendUrls : fallbackOrigins;
+    const normalizedAllowSet = new Set();
+    const normalizeOrigin = (origin) => {
+        try {
+            const parsed = new URL(origin);
+            const hostWithoutWww = parsed.hostname.replace(/^www\./, '');
+            return `${parsed.protocol}//${hostWithoutWww}${parsed.port ? `:${parsed.port}` : ''}`;
+        }
+        catch {
+            return origin;
+        }
+    };
+    configuredOrigins.forEach((origin) => {
+        normalizedAllowSet.add(origin);
+        normalizedAllowSet.add(normalizeOrigin(origin));
+        try {
+            const parsed = new URL(origin);
+            const withWww = `${parsed.protocol}//www.${parsed.hostname.replace(/^www\./, '')}${parsed.port ? `:${parsed.port}` : ''}`;
+            const withoutWww = `${parsed.protocol}//${parsed.hostname.replace(/^www\./, '')}${parsed.port ? `:${parsed.port}` : ''}`;
+            normalizedAllowSet.add(withWww);
+            normalizedAllowSet.add(withoutWww);
+        }
+        catch {
+        }
+    });
     app.enableCors({
-        origin: allowedOrigins,
+        origin: (origin, callback) => {
+            if (!origin) {
+                callback(null, true);
+                return;
+            }
+            if (normalizedAllowSet.has(origin) || normalizedAllowSet.has(normalizeOrigin(origin))) {
+                callback(null, true);
+                return;
+            }
+            callback(new Error(`Origin ${origin} not allowed by CORS`), false);
+        },
         credentials: true,
     });
     app.use(compression());
