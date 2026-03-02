@@ -156,18 +156,50 @@ const DEFAULT_FRONTEND_URLS = [
   'https://www.glovia.com.np',
 ];
 
+function normalizeOrigin(origin) {
+  try {
+    const parsed = new URL(origin);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+    return `${parsed.protocol}//${hostname}${parsed.port ? `:${parsed.port}` : ''}`;
+  } catch {
+    return origin;
+  }
+}
+
+function expandOrigins(origins) {
+  const expanded = new Set();
+
+  for (const origin of origins) {
+    expanded.add(origin);
+    expanded.add(normalizeOrigin(origin));
+
+    try {
+      const parsed = new URL(origin);
+      const baseHost = parsed.hostname.replace(/^www\./, '');
+      expanded.add(`${parsed.protocol}//${baseHost}${parsed.port ? `:${parsed.port}` : ''}`);
+      expanded.add(`${parsed.protocol}//www.${baseHost}${parsed.port ? `:${parsed.port}` : ''}`);
+    } catch {
+      // Ignore malformed origins
+    }
+  }
+
+  return Array.from(expanded);
+}
+
 function getAllowedOrigins() {
   const fromEnv = (process.env.FRONTEND_URL || '')
     .split(',')
     .map((url) => url.trim())
     .filter(Boolean);
-  return fromEnv.length > 0 ? fromEnv : DEFAULT_FRONTEND_URLS;
+  const baseOrigins = fromEnv.length > 0 ? fromEnv : DEFAULT_FRONTEND_URLS;
+  return expandOrigins(baseOrigins);
 }
 
 function addCorsHeaders(res, origin) {
   const allowedOrigins = getAllowedOrigins();
+  const isAllowed = origin && (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin)));
   const allowOrigin =
-    origin && allowedOrigins.includes(origin)
+    isAllowed
       ? origin
       : allowedOrigins[0] || 'https://glovia.com.np';
 

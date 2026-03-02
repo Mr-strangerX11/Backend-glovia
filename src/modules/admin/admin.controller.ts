@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   Patch,
+  Header,
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
@@ -191,6 +192,12 @@ export class AdminController {
     );
   }
 
+  @Get('products/:id')
+  @ApiOperation({ summary: 'Get product by ID (admin)' })
+  getProduct(@Param('id') id: string) {
+    return this.adminService.getProduct(id);
+  }
+
   @Get('orders')
   @ApiOperation({ summary: 'Get all orders' })
   getAllOrders(
@@ -273,6 +280,9 @@ export class AdminController {
 
   @Public()
   @Get('settings/announcement')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Get announcement bar settings' })
   getAnnouncement() {
     return this.adminService.getAnnouncementBar();
