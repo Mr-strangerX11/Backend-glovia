@@ -55,7 +55,7 @@ export class ReviewsService {
       userId: new Types.ObjectId(userId),
       productId: new Types.ObjectId(dto.productId),
       isVerified: !!hasPurchased,
-      approved: false
+      isApproved: false
     });
 
     const savedReview = await review.save();
@@ -65,6 +65,7 @@ export class ReviewsService {
 
     return {
       ...savedReview.toObject(),
+      approved: savedReview.isApproved,
       user
     };
   }
@@ -76,7 +77,7 @@ export class ReviewsService {
 
     const reviews = await this.reviewModel.find({
       productId: new Types.ObjectId(productId),
-      approved: true
+      isApproved: true
     }).sort({ createdAt: -1 }).lean();
 
     // Get user details
@@ -92,6 +93,7 @@ export class ReviewsService {
 
     return reviews.map(review => ({
       ...review,
+      approved: review.isApproved,
       user: userMap[review.userId.toString()] || null
     }));
   }

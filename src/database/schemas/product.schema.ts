@@ -34,6 +34,9 @@ export class Product extends Document {
   @Prop()
   compareAtPrice?: number;
 
+  @Prop({ default: 0 })
+  discountPercentage?: number;
+
   @Prop()
   costPrice?: number;
 
