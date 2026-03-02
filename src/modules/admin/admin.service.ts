@@ -47,7 +47,11 @@ export class AdminService {
       }
     ]);
     const totalCustomers = await this.userModel.countDocuments({ role: UserRole.CUSTOMER });
+    const totalUsers = await this.userModel.countDocuments();
+    const totalAdmins = await this.userModel.countDocuments({ role: UserRole.ADMIN });
+    const totalVendors = await this.userModel.countDocuments({ role: UserRole.VENDOR });
     const totalProducts = await this.productModel.countDocuments();
+    const pendingOrders = await this.orderModel.countDocuments({ status: OrderStatus.PENDING });
 
     // Recent orders with user info
     const recentOrders = await this.orderModel
@@ -56,7 +60,11 @@ export class AdminService {
       .limit(10)
       .lean();
     
-    const userIds = [...new Set(recentOrders.map(o => o.userId.toString()))];
+    const userIds = [...new Set(
+      recentOrders
+        .map((o) => o?.userId?.toString?.())
+        .filter(Boolean)
+    )];
     const users = await this.userModel.find({ _id: { $in: userIds } }).lean();
     const userMap = users.reduce((acc, u) => {
       acc[u._id.toString()] = u;
@@ -65,7 +73,7 @@ export class AdminService {
 
     const recentOrdersWithUsers = recentOrders.map(order => ({
       ...order,
-      user: userMap[order.userId.toString()] || null
+      user: order?.userId ? userMap[order.userId.toString()] || null : null
     }));
 
     // Top selling products
@@ -118,7 +126,11 @@ export class AdminService {
       totalOrders,
       totalRevenue: totalRevenue[0]?.sum || 0,
       totalCustomers,
+      totalUsers,
+      totalAdmins,
+      totalVendors,
       totalProducts,
+      pendingOrders,
       recentOrders: recentOrdersWithUsers,
       topProducts: topProductsWithDetails,
       revenueByMonth
@@ -377,6 +389,20 @@ export class AdminService {
       updateData.isNewProduct = isNew;
     }
 
+    if (categoryId) {
+      if (!Types.ObjectId.isValid(categoryId)) {
+        throw new BadRequestException('Invalid category ID');
+      }
+      updateData.categoryId = new Types.ObjectId(categoryId);
+    }
+
+    if (brandId) {
+      if (!Types.ObjectId.isValid(brandId)) {
+        throw new BadRequestException('Invalid brand ID');
+      }
+      updateData.brandId = new Types.ObjectId(brandId);
+    }
+
     // Update product
     const updatedProduct = await this.productModel.findByIdAndUpdate(
       productId,
@@ -452,7 +478,11 @@ export class AdminService {
     ]);
 
     // Get users
-    const userIds = [...new Set(orders.map(o => o.userId.toString()))];
+    const userIds = [...new Set(
+      orders
+        .map((o) => o?.userId?.toString?.())
+        .filter(Boolean)
+    )];
     const users = await this.userModel.find({ _id: { $in: userIds } }).lean();
     const userMap = users.reduce((acc, u) => {
       acc[u._id.toString()] = u;
@@ -471,7 +501,7 @@ export class AdminService {
 
     const ordersWithRelations = orders.map(order => ({
       ...order,
-      user: userMap[order.userId.toString()] || null,
+      user: order?.userId ? userMap[order.userId.toString()] || null : null,
       items: itemsByOrder[order._id.toString()] || []
     }));
 
@@ -769,7 +799,15 @@ export class AdminService {
         outsideValleyDeliveryCharge: 149
       };
     }
-    return JSON.parse(setting.value);
+    try {
+      return JSON.parse(setting.value);
+    } catch {
+      return {
+        freeDeliveryThreshold: 2999,
+        valleyDeliveryCharge: 99,
+        outsideValleyDeliveryCharge: 149
+      };
+    }
   }
 
   async updateAnnouncementBar(data: { enabled?: boolean; message?: string; backgroundColor?: string; textColor?: string }, user?: { userId?: string, username?: string }) {
@@ -827,7 +865,17 @@ export class AdminService {
       };
     }
 
-    const parsed = JSON.parse(setting.value);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(setting.value);
+    } catch {
+      parsed = {
+        enabled: false,
+        message: '',
+        backgroundColor: '#000000',
+        textColor: '#ffffff'
+      };
+    }
     return {
       ...parsed,
       isActive: parsed.enabled,
@@ -1016,19 +1064,3 @@ export class AdminService {
     return { email: superadmin.email, oldRole: superadmin.role, newRole: UserRole.SUPER_ADMIN, status: 'updated' };
   }
 }
-
-    // Handle categoryId conversion
-    if (categoryId) {
-      if (!Types.ObjectId.isValid(categoryId)) {
-        throw new BadRequestException('Invalid category ID');
-      }
-      updateData.categoryId = new Types.ObjectId(categoryId);
-    }
-
-    // Handle brandId conversion
-    if (brandId) {
-      if (!Types.ObjectId.isValid(brandId)) {
-        throw new BadRequestException('Invalid brand ID');
-      }
-      updateData.brandId = new Types.ObjectId(brandId);
-    }
