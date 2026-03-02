@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Patch,
+  Header,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
@@ -32,6 +33,9 @@ export class OrdersController {
   }
 
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Get user orders' })
   findAll(
     @CurrentUser('id') userId: string,

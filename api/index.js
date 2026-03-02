@@ -33,25 +33,70 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
 
+const DEFAULT_FRONTEND_URLS = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://glovia.com.np',
+  'https://www.glovia.com.np',
+];
+
+function normalizeOrigin(origin) {
+  try {
+    const parsed = new URL(origin);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+    return `${parsed.protocol}//${hostname}${parsed.port ? `:${parsed.port}` : ''}`;
+  } catch {
+    return origin;
+  }
+}
+
+function expandOrigins(origins) {
+  const expanded = new Set();
+
+  for (const origin of origins) {
+    expanded.add(origin);
+    expanded.add(normalizeOrigin(origin));
+
+    try {
+      const parsed = new URL(origin);
+      const baseHost = parsed.hostname.replace(/^www\./, '');
+      expanded.add(`${parsed.protocol}//${baseHost}${parsed.port ? `:${parsed.port}` : ''}`);
+      expanded.add(`${parsed.protocol}//www.${baseHost}${parsed.port ? `:${parsed.port}` : ''}`);
+    } catch {
+      // Ignore malformed origins
+    }
+  }
+
+  return Array.from(expanded);
+}
+
+function getAllowedOriginsFromEnv(frontendUrlValue) {
+  const fromEnv = (frontendUrlValue || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+  const baseOrigins = fromEnv.length > 0 ? fromEnv : DEFAULT_FRONTEND_URLS;
+  return expandOrigins(baseOrigins);
+}
+
 async function createHandler() {
   const expressApp = express();
+  let allowedOrigins = getAllowedOriginsFromEnv(process.env.FRONTEND_URL);
   
   // Set CORS headers immediately for all requests
   expressApp.use((req, res, next) => {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://glovia.com.np',
-      'https://www.glovia.com.np',
-    ];
-    
     const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
+    const isAllowed = origin && (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin)));
+
+    if (isAllowed) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     } else if (!origin) {
       // Allow requests without origin (for health checks, etc)
       res.setHeader('Access-Control-Allow-Origin', '*');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0] || 'https://glovia.com.np');
     }
+    res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
@@ -70,20 +115,21 @@ async function createHandler() {
     .split(',')
     .map((url) => url.trim())
     .filter(Boolean);
-
-  const allowedOrigins =
-    frontendUrls.length > 0
-      ? frontendUrls
-      : [
-          'http://localhost:3000',
-          'http://localhost:3001',
-          'https://glovia.com.np',
-          'https://www.glovia.com.np',
-        ];
+  allowedOrigins = getAllowedOriginsFromEnv(frontendUrls.join(','));
 
   // Configure CORS in NestJS (backup for routes after global prefix)
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizeOrigin(origin))) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`Origin ${origin} not allowed by CORS`), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -148,51 +194,8 @@ async function createHandler() {
   return expressApp;
 }
 
-// Same default frontend URLs as in createHandler – keep in sync
-const DEFAULT_FRONTEND_URLS = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://glovia.com.np',
-  'https://www.glovia.com.np',
-];
-
-function normalizeOrigin(origin) {
-  try {
-    const parsed = new URL(origin);
-    const hostname = parsed.hostname.replace(/^www\./, '');
-    return `${parsed.protocol}//${hostname}${parsed.port ? `:${parsed.port}` : ''}`;
-  } catch {
-    return origin;
-  }
-}
-
-function expandOrigins(origins) {
-  const expanded = new Set();
-
-  for (const origin of origins) {
-    expanded.add(origin);
-    expanded.add(normalizeOrigin(origin));
-
-    try {
-      const parsed = new URL(origin);
-      const baseHost = parsed.hostname.replace(/^www\./, '');
-      expanded.add(`${parsed.protocol}//${baseHost}${parsed.port ? `:${parsed.port}` : ''}`);
-      expanded.add(`${parsed.protocol}//www.${baseHost}${parsed.port ? `:${parsed.port}` : ''}`);
-    } catch {
-      // Ignore malformed origins
-    }
-  }
-
-  return Array.from(expanded);
-}
-
 function getAllowedOrigins() {
-  const fromEnv = (process.env.FRONTEND_URL || '')
-    .split(',')
-    .map((url) => url.trim())
-    .filter(Boolean);
-  const baseOrigins = fromEnv.length > 0 ? fromEnv : DEFAULT_FRONTEND_URLS;
-  return expandOrigins(baseOrigins);
+  return getAllowedOriginsFromEnv(process.env.FRONTEND_URL);
 }
 
 function addCorsHeaders(res, origin) {
@@ -204,6 +207,7 @@ function addCorsHeaders(res, origin) {
       : allowedOrigins[0] || 'https://glovia.com.np';
 
   res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');

@@ -53,14 +53,22 @@ export class CategoriesController {
   async update(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
     const category = await this.categoriesService.update(id, dto);
     // Audit log
-    const admin = req.user;
-    await this.auditLogService.log(
-      'UPDATE_CATEGORY',
-      admin._id,
-      admin.email,
-      id,
-      { dto }
-    );
+    const admin = req.user || {};
+    const adminId = admin._id || admin.id || admin.userId;
+    const adminEmail = admin.email || admin.username || 'unknown';
+    try {
+      if (adminId) {
+        await this.auditLogService.log(
+          'UPDATE_CATEGORY',
+          adminId,
+          adminEmail,
+          id,
+          { dto }
+        );
+      }
+    } catch {
+      // Do not fail category update if audit logging fails
+    }
     return category;
   }
 
@@ -72,14 +80,22 @@ export class CategoriesController {
   async remove(@Param('id') id: string, @Req() req: any) {
     const result = await this.categoriesService.remove(id);
     // Audit log
-    const admin = req.user;
-    await this.auditLogService.log(
-      'DELETE_CATEGORY',
-      admin._id,
-      admin.email,
-      id,
-      {}
-    );
+    const admin = req.user || {};
+    const adminId = admin._id || admin.id || admin.userId;
+    const adminEmail = admin.email || admin.username || 'unknown';
+    try {
+      if (adminId) {
+        await this.auditLogService.log(
+          'DELETE_CATEGORY',
+          adminId,
+          adminEmail,
+          id,
+          {}
+        );
+      }
+    } catch {
+      // Do not fail category delete if audit logging fails
+    }
     return result;
   }
 

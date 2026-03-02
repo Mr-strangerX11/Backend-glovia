@@ -118,6 +118,9 @@ export class BrandsController {
 
   // Admin analytics endpoint
   @Get('admin/analytics')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async getBrandAnalytics() {
