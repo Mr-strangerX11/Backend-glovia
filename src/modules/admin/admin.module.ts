@@ -14,6 +14,7 @@ import { Brand, BrandSchema } from '../../database/schemas/brand.schema';
 import { ProductImage, ProductImageSchema } from '../../database/schemas/product-image.schema';
 import { Setting, SettingSchema } from '../../database/schemas/setting.schema';
 import { Address, AddressSchema } from '../../database/schemas/address.schema';
+import { Banner, BannerSchema } from '../../database/schemas/banner.schema';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
 import { AuditLog, AuditLogSchema } from '../../database/schemas/audit.schema';
 import { SettingVersion, SettingVersionSchema } from '../../database/schemas/setting-version.schema';
@@ -33,6 +34,7 @@ import { SettingVersion, SettingVersionSchema } from '../../database/schemas/set
       { name: Address.name, schema: AddressSchema },
       { name: AuditLog.name, schema: AuditLogSchema },
       { name: SettingVersion.name, schema: SettingVersionSchema },
+      { name: Banner.name, schema: BannerSchema },
     ]),
     UploadModule,
   ],

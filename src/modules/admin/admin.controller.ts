@@ -313,6 +313,37 @@ export class AdminController {
     return this.adminService.getAllCategories();
   }
 
+  // Banner Management Routes
+  @Get('banners')
+  @ApiOperation({ summary: 'Get all banners including inactive' })
+  async getBanners() {
+    return this.adminService.getAllBanners();
+  }
+
+  @Get('banners/:id')
+  @ApiOperation({ summary: 'Get banner by ID' })
+  async getBanner(@Param('id') id: string) {
+    return this.adminService.getBanner(id);
+  }
+
+  @Post('banners')
+  @ApiOperation({ summary: 'Create a new banner' })
+  async createBanner(@Body() createBannerDto: any) {
+    return this.adminService.createBanner(createBannerDto);
+  }
+
+  @Put('banners/:id')
+  @ApiOperation({ summary: 'Update a banner' })
+  async updateBanner(@Param('id') id: string, @Body() updateBannerDto: any) {
+    return this.adminService.updateBanner(id, updateBannerDto);
+  }
+
+  @Delete('banners/:id')
+  @ApiOperation({ summary: 'Delete a banner' })
+  async deleteBanner(@Param('id') id: string) {
+    return this.adminService.deleteBanner(id);
+  }
+
   @Post('init')
   @Public()
   @HttpCode(200)

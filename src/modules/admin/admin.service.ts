@@ -14,6 +14,7 @@ import { Setting } from '../../database/schemas/setting.schema';
 import { AuditLog } from '../../database/schemas/audit.schema';
 import { Address } from '../../database/schemas/address.schema';
 import { SettingVersion } from '../../database/schemas/setting-version.schema';
+import { Banner } from '../../database/schemas/banner.schema';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateProductDto, CreateProductDto } from './dto/product.dto';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
@@ -33,6 +34,7 @@ export class AdminService {
     @InjectModel(Address.name) private addressModel: Model<Address>,
     @InjectModel(AuditLog.name) private auditLogModel: Model<AuditLog>,
     @InjectModel(SettingVersion.name) private settingVersionModel: Model<SettingVersion>,
+    @InjectModel(Banner.name) private bannerModel: Model<Banner>,
     private emailNotificationService: EmailNotificationService,
   ) {}
 
@@ -1062,5 +1064,43 @@ export class AdminService {
 
     await this.userModel.findByIdAndUpdate(superadmin._id, { role: UserRole.SUPER_ADMIN });
     return { email: superadmin.email, oldRole: superadmin.role, newRole: UserRole.SUPER_ADMIN, status: 'updated' };
+  }
+
+  // Banner Management Methods
+  async getAllBanners() {
+    return this.bannerModel.find().sort({ displayOrder: 1 }).lean();
+  }
+
+  async getBanner(id: string) {
+    const banner = await this.bannerModel.findById(id).lean();
+    if (!banner) {
+      throw new NotFoundException('Banner not found');
+    }
+    return banner;
+  }
+
+  async createBanner(createBannerDto: any) {
+    const banner = new this.bannerModel(createBannerDto);
+    return banner.save();
+  }
+
+  async updateBanner(id: string, updateBannerDto: any) {
+    const banner = await this.bannerModel.findByIdAndUpdate(
+      id,
+      updateBannerDto,
+      { new: true }
+    );
+    if (!banner) {
+      throw new NotFoundException('Banner not found');
+    }
+    return banner;
+  }
+
+  async deleteBanner(id: string) {
+    const banner = await this.bannerModel.findByIdAndDelete(id);
+    if (!banner) {
+      throw new NotFoundException('Banner not found');
+    }
+    return { message: 'Banner deleted successfully' };
   }
 }
