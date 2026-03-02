@@ -144,6 +144,7 @@ export class AdminController {
   }
 
   @Put('products/:id')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
   @ApiOperation({ summary: 'Update product' })
   updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.adminService.updateProduct(id, dto);
@@ -193,6 +194,9 @@ export class AdminController {
   }
 
   @Get('products/:id')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Get product by ID (admin)' })
   getProduct(@Param('id') id: string) {
     return this.adminService.getProduct(id);

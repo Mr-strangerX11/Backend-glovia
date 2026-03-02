@@ -375,7 +375,7 @@ export class AdminService {
 
   async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
     if (!Types.ObjectId.isValid(productId)) {
-      throw new BadRequestException('Invalid product ID');
+      throw new BadRequestException('Invalid product ID format');
     }
 
     const product = await this.productModel.findById(productId).lean();
@@ -391,18 +391,47 @@ export class AdminService {
       updateData.isNewProduct = isNew;
     }
 
-    if (categoryId) {
-      if (!Types.ObjectId.isValid(categoryId)) {
-        throw new BadRequestException('Invalid category ID');
+    // Validate and set categoryId
+    if (categoryId !== undefined) {
+      if (!categoryId) {
+        // Allow clearing categoryId
+        updateData.categoryId = null;
+      } else if (!Types.ObjectId.isValid(categoryId)) {
+        throw new BadRequestException(`Invalid category ID format: ${categoryId}`);
+      } else {
+        const categoryExists = await this.categoryModel.findById(categoryId).lean();
+        if (!categoryExists) {
+          throw new BadRequestException(`Category not found with ID: ${categoryId}`);
+        }
+        updateData.categoryId = new Types.ObjectId(categoryId);
       }
-      updateData.categoryId = new Types.ObjectId(categoryId);
     }
 
-    if (brandId) {
-      if (!Types.ObjectId.isValid(brandId)) {
-        throw new BadRequestException('Invalid brand ID');
+    // Validate and set brandId
+    if (brandId !== undefined) {
+      if (!brandId) {
+        // Allow clearing brandId
+        updateData.brandId = null;
+      } else if (!Types.ObjectId.isValid(brandId)) {
+        throw new BadRequestException(`Invalid brand ID format: ${brandId}`);
+      } else {
+        const brandExists = await this.brandModel.findById(brandId).lean();
+        if (!brandExists) {
+          throw new BadRequestException(`Brand not found with ID: ${brandId}`);
+        }
+        updateData.brandId = new Types.ObjectId(brandId);
       }
-      updateData.brandId = new Types.ObjectId(brandId);
+    }
+
+    // Validate numeric fields
+    if (updateData.price !== undefined && (typeof updateData.price !== 'number' || updateData.price < 0)) {
+      throw new BadRequestException('Price must be a non-negative number');
+    }
+    if (updateData.stockQuantity !== undefined && (typeof updateData.stockQuantity !== 'number' || updateData.stockQuantity < 0)) {
+      throw new BadRequestException('Stock quantity must be a non-negative number');
+    }
+    if (updateData.compareAtPrice !== undefined && updateData.compareAtPrice !== null && (typeof updateData.compareAtPrice !== 'number' || updateData.compareAtPrice < 0)) {
+      throw new BadRequestException('Compare at price must be a non-negative number');
     }
 
     // Update product
@@ -418,14 +447,16 @@ export class AdminService {
       await this.productImageModel.deleteMany({ productId: new Types.ObjectId(productId) });
 
       // Create new images
-      const newImages = images.map((img: any) => ({
-        productId: new Types.ObjectId(productId),
-        url: img.url,
-        altText: img.altText || null,
-        isPrimary: img.isPrimary || false
-      }));
+      if (images.length > 0) {
+        const newImages = images.map((img: any, index: number) => ({
+          productId: new Types.ObjectId(productId),
+          url: typeof img === 'string' ? img : img.url,
+          altText: (typeof img === 'object' && img.altText) || null,
+          isPrimary: (typeof img === 'object' && img.isPrimary) || index === 0
+        }));
 
-      await this.productImageModel.insertMany(newImages);
+        await this.productImageModel.insertMany(newImages);
+      }
     }
 
     return updatedProduct;
