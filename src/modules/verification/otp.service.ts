@@ -117,44 +117,99 @@ export class OtpService {
 @Injectable()
 export class EmailOtpService {
   private readonly logger = new Logger(EmailOtpService.name);
-  private readonly provider = process.env.EMAIL_PROVIDER || 'mock'; // 'smtp', 'sendgrid', 'ses', 'mock'
-  private transporter: Transporter;
+  private readonly provider = (process.env.EMAIL_PROVIDER || '').toLowerCase(); // 'smtp', 'sendgrid', 'ses', 'mock'
+  private transporter: Transporter | null = null;
+
+  private readonly smtpHost = process.env.SMTP_HOST;
+  private readonly smtpPort = parseInt(process.env.SMTP_PORT || '587');
+  private readonly smtpSecure = process.env.SMTP_SECURE === 'true';
+  private readonly smtpUser = process.env.SMTP_USER || process.env.SMTP_USERNAME;
+  private readonly smtpPassword = process.env.SMTP_PASSWORD || process.env.SMTP_PASS;
+  private readonly smtpFromName = process.env.SMTP_FROM_NAME || 'Glovia Nepal';
+  private readonly smtpFromEmail = process.env.SMTP_FROM_EMAIL || this.smtpUser;
+  private readonly sendgridApiKey = process.env.SENDGRID_API_KEY;
+  private readonly sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL || this.smtpFromEmail || 'noreply@glovia.local';
 
   constructor() {
-    // Initialize SMTP transporter if provider is smtp
-    if (this.provider === 'smtp') {
+    // Initialize SMTP transporter if SMTP config exists
+    if (this.hasSmtpConfig()) {
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
+        host: this.smtpHost,
+        port: this.smtpPort,
+        secure: this.smtpSecure,
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
+          user: this.smtpUser,
+          pass: this.smtpPassword,
         },
       });
     }
+  }
+
+  private hasSmtpConfig(): boolean {
+    return !!(this.smtpHost && this.smtpUser && this.smtpPassword);
+  }
+
+  private getProviderSequence(): Array<'smtp' | 'sendgrid' | 'ses' | 'mock'> {
+    const configured: Array<'smtp' | 'sendgrid' | 'ses' | 'mock'> = [];
+
+    if (this.provider === 'smtp' || this.provider === 'sendgrid' || this.provider === 'ses' || this.provider === 'mock') {
+      configured.push(this.provider as 'smtp' | 'sendgrid' | 'ses' | 'mock');
+    }
+
+    if (this.hasSmtpConfig() && !configured.includes('smtp')) configured.push('smtp');
+    if (this.sendgridApiKey && !configured.includes('sendgrid')) configured.push('sendgrid');
+    if (!configured.includes('ses') && this.provider === 'ses') configured.push('ses');
+
+    if (configured.length === 0 || this.provider === 'mock') {
+      configured.push('mock');
+    }
+
+    if (!configured.includes('mock') && process.env.NODE_ENV !== 'production') {
+      configured.push('mock');
+    }
+
+    return configured;
   }
 
   /**
    * Send OTP via email
    */
   async sendEmailOtp(email: string, otp: string, purpose: string): Promise<boolean> {
-    try {
-      switch (this.provider) {
-        case 'smtp':
-          return await this.sendViaSMTP(email, otp, purpose);
-        case 'sendgrid':
-          return await this.sendViaSendGrid(email, otp, purpose);
-        case 'ses':
-          return await this.sendViaSES(email, otp, purpose);
-        case 'mock':
-        default:
-          return this.sendViaMock(email, otp, purpose);
+    const providers = this.getProviderSequence();
+
+    for (const provider of providers) {
+      try {
+        switch (provider) {
+          case 'smtp':
+            if (await this.sendViaSMTP(email, otp, purpose)) {
+              return true;
+            }
+            break;
+          case 'sendgrid':
+            if (await this.sendViaSendGrid(email, otp, purpose)) {
+              return true;
+            }
+            break;
+          case 'ses':
+            if (await this.sendViaSES(email, otp, purpose)) {
+              return true;
+            }
+            break;
+          case 'mock':
+            if (this.sendViaMock(email, otp, purpose)) {
+              return true;
+            }
+            break;
+          default:
+            break;
+        }
+      } catch (error) {
+        this.logger.error(`Email provider ${provider} failed for ${email}:`, error);
       }
-    } catch (error) {
-      this.logger.error(`Failed to send email OTP to ${email}:`, error);
-      return false;
     }
+
+    this.logger.error(`Failed to send email OTP to ${email} via providers: ${providers.join(', ')}`);
+    return false;
   }
 
   /**
@@ -167,8 +222,8 @@ export class EmailOtpService {
     }
 
     const { subject, html } = this.buildEmailContent(otp, purpose);
-    const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
-    const fromName = process.env.SMTP_FROM_NAME || 'Glovia Nepal';
+    const fromEmail = this.smtpFromEmail;
+    const fromName = this.smtpFromName;
 
     if (!fromEmail) {
       this.logger.warn('SMTP_FROM_EMAIL or SMTP_USER not configured');
@@ -195,7 +250,7 @@ export class EmailOtpService {
    * SendGrid email integration
    */
   private async sendViaSendGrid(email: string, otp: string, purpose: string): Promise<boolean> {
-    const apiKey = process.env.SENDGRID_API_KEY;
+    const apiKey = this.sendgridApiKey;
     if (!apiKey) {
       this.logger.warn('SendGrid API key not configured');
       return false;
@@ -212,7 +267,7 @@ export class EmailOtpService {
         },
         body: JSON.stringify({
           personalizations: [{ to: [{ email }] }],
-          from: { email: process.env.SENDGRID_FROM_EMAIL || 'noreply@glovia.local', name: 'Glovia Nepal' },
+          from: { email: this.sendgridFromEmail, name: this.smtpFromName },
           subject,
           content: [{ type: 'text/html', value: html }],
         }),
