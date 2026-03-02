@@ -27,8 +27,11 @@ let CategoriesController = class CategoriesController {
         this.categoriesService = categoriesService;
         this.auditLogService = auditLogService;
     }
-    findAll() {
-        return this.categoriesService.findAll();
+    async findAll(res) {
+        const categories = await this.categoriesService.findAll();
+        res.setHeader('Access-Control-Allow-Origin', res.getHeader('Access-Control-Allow-Origin') || '*');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        return categories;
     }
     findBySlug(slug) {
         return this.categoriesService.findBySlug(slug);
@@ -55,10 +58,14 @@ let CategoriesController = class CategoriesController {
 exports.CategoriesController = CategoriesController;
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
+    (0, common_1.Header)('Pragma', 'no-cache'),
+    (0, common_1.Header)('Expires', '0'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all categories' }),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':slug'),

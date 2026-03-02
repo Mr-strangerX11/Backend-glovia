@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Post, Body, Put, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, Put, Delete, Req, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
@@ -55,6 +55,9 @@ export class ProductsController {
   }
 
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Get all products with filters' })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'categoryId', required: false })

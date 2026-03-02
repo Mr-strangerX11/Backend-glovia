@@ -1,6 +1,7 @@
 
-import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, HttpCode, Req } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, HttpCode, Req, Res, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Response } from 'express';
 import { CategoriesService } from './categories.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -18,9 +19,15 @@ export class CategoriesController {
   ) {}
 
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Get all categories' })
-  findAll() {
-    return this.categoriesService.findAll();
+  async findAll(@Res({ passthrough: true }) res: Response) {
+    const categories = await this.categoriesService.findAll();
+    res.setHeader('Access-Control-Allow-Origin', res.getHeader('Access-Control-Allow-Origin') || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    return categories;
   }
 
   @Get(':slug')

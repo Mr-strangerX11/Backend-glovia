@@ -89,6 +89,9 @@ let BrandsController = class BrandsController {
 exports.BrandsController = BrandsController;
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
+    (0, common_1.Header)('Pragma', 'no-cache'),
+    (0, common_1.Header)('Expires', '0'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

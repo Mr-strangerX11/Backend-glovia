@@ -8,7 +8,8 @@ import {
   Param,
   UseGuards,
   Inject,
-  Req
+  Req,
+  Header
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
@@ -28,6 +29,9 @@ export class BrandsController {
 
   // Public endpoints
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async getAllBrands() {
     return {
       success: true,

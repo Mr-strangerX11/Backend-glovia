@@ -1,10 +1,11 @@
+import { Response } from 'express';
 import { CategoriesService } from './categories.service';
 import { AuditLogService } from '../auditlog/auditlog.service';
 export declare class CategoriesController {
     private categoriesService;
     private auditLogService;
     constructor(categoriesService: CategoriesService, auditLogService: AuditLogService);
-    findAll(): Promise<{
+    findAll(res: Response): Promise<{
         children: any[];
         _count: {
             products: number;

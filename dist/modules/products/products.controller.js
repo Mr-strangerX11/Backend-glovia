@@ -95,6 +95,9 @@ __decorate([
 ], ProductsController.prototype, "deleteVariant", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
+    (0, common_1.Header)('Pragma', 'no-cache'),
+    (0, common_1.Header)('Expires', '0'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all products with filters' }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false }),
