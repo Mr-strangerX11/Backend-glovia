@@ -164,7 +164,7 @@ export class EmailOtpService {
       configured.push('mock');
     }
 
-    if (!configured.includes('mock') && process.env.NODE_ENV !== 'production') {
+    if (!configured.includes('mock')) {
       configured.push('mock');
     }
 
