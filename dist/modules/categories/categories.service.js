@@ -164,11 +164,43 @@ let CategoriesService = class CategoriesService {
         return category;
     }
     async update(id, dto) {
-        const category = await this.categoryModel.findByIdAndUpdate(id, dto, { new: true });
-        if (!category) {
-            throw new common_1.NotFoundException('Category not found');
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException('Invalid category ID');
         }
-        return category;
+        const payload = { ...dto };
+        if (typeof payload.name === 'string') {
+            payload.name = payload.name.trim();
+            if (!payload.name) {
+                throw new common_1.BadRequestException('Category name cannot be empty');
+            }
+        }
+        if (typeof payload.slug === 'string') {
+            payload.slug = payload.slug
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            if (!payload.slug) {
+                throw new common_1.BadRequestException('Category slug cannot be empty');
+            }
+        }
+        try {
+            const category = await this.categoryModel.findByIdAndUpdate(id, payload, { new: true });
+            if (!category) {
+                throw new common_1.NotFoundException('Category not found');
+            }
+            return category;
+        }
+        catch (error) {
+            if (error?.code === 11000) {
+                throw new common_1.BadRequestException('Category slug already exists');
+            }
+            if (error?.name === 'ValidationError' || error?.name === 'CastError') {
+                throw new common_1.BadRequestException(error?.message || 'Invalid category data');
+            }
+            throw error;
+        }
     }
     async remove(id) {
         const category = await this.categoryModel.findByIdAndDelete(id);

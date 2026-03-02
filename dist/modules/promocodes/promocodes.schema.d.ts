@@ -44,6 +44,15 @@ export declare const PromoCodeSchema: import("mongoose").Schema<PromoCode, impor
     }, "id"> & {
         id: string;
     }>;
+    discountPercentage?: import("mongoose").SchemaDefinitionProperty<number, PromoCode, Document<unknown, {}, PromoCode, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<PromoCode & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
     code?: import("mongoose").SchemaDefinitionProperty<string, PromoCode, Document<unknown, {}, PromoCode, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<PromoCode & Required<{
@@ -63,15 +72,6 @@ export declare const PromoCodeSchema: import("mongoose").Schema<PromoCode, impor
         id: string;
     }>;
     expiresAt?: import("mongoose").SchemaDefinitionProperty<Date, PromoCode, Document<unknown, {}, PromoCode, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<PromoCode & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }>;
-    discountPercentage?: import("mongoose").SchemaDefinitionProperty<number, PromoCode, Document<unknown, {}, PromoCode, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<PromoCode & Required<{
         _id: import("mongoose").Types.ObjectId;

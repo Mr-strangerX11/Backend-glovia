@@ -167,19 +167,26 @@ export class EmailOtpService {
     }
 
     const { subject, html } = this.buildEmailContent(otp, purpose);
+    const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+    const fromName = process.env.SMTP_FROM_NAME || 'Glovia Nepal';
+
+    if (!fromEmail) {
+      this.logger.warn('SMTP_FROM_EMAIL or SMTP_USER not configured');
+      return false;
+    }
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"${process.env.SMTP_FROM_NAME || 'Glovia Nepal'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+        from: `"${fromName}" <${fromEmail}>`,
         to: email,
         subject,
         html,
       });
 
-      this.logger.log(`Email sent: ${info.messageId}`);
+      this.logger.log(`Email sent successfully to ${email}: ${info.messageId}`);
       return true;
     } catch (error) {
-      this.logger.error('SMTP error:', error);
+      this.logger.error(`SMTP error sending to ${email}:`, error);
       return false;
     }
   }

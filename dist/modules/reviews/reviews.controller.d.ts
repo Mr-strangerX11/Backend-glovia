@@ -4,6 +4,7 @@ export declare class ReviewsController {
     private reviewsService;
     constructor(reviewsService: ReviewsService);
     create(userId: string, dto: CreateReviewDto): Promise<{
+        approved: boolean;
         user: import("../../database/schemas").User & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
@@ -29,6 +30,7 @@ export declare class ReviewsController {
         __v: number;
     }>;
     findByProduct(productId: string): Promise<{
+        approved: boolean;
         user: any;
         productId: import("mongoose").Types.ObjectId;
         userId: import("mongoose").Types.ObjectId;

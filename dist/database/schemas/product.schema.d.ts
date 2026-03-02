@@ -9,6 +9,7 @@ export declare class Product extends Document {
     howToUse?: string;
     price: number;
     compareAtPrice?: number;
+    discountPercentage?: number;
     costPrice?: number;
     sku: string;
     barcode?: string;
@@ -137,6 +138,15 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         id: string;
     }>;
     compareAtPrice?: import("mongoose").SchemaDefinitionProperty<number, Product, Document<unknown, {}, Product, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    discountPercentage?: import("mongoose").SchemaDefinitionProperty<number, Product, Document<unknown, {}, Product, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<Product & Required<{
         _id: Types.ObjectId;

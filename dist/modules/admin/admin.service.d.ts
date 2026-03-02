@@ -11,6 +11,7 @@ import { Setting } from '../../database/schemas/setting.schema';
 import { AuditLog } from '../../database/schemas/audit.schema';
 import { Address } from '../../database/schemas/address.schema';
 import { SettingVersion } from '../../database/schemas/setting-version.schema';
+import { Banner } from '../../database/schemas/banner.schema';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateProductDto, CreateProductDto } from './dto/product.dto';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
@@ -27,13 +28,18 @@ export declare class AdminService {
     private addressModel;
     private auditLogModel;
     private settingVersionModel;
+    private bannerModel;
     private emailNotificationService;
-    constructor(userModel: Model<User>, productModel: Model<Product>, orderModel: Model<Order>, orderItemModel: Model<OrderItem>, reviewModel: Model<Review>, categoryModel: Model<Category>, brandModel: Model<Brand>, productImageModel: Model<ProductImage>, settingModel: Model<Setting>, addressModel: Model<Address>, auditLogModel: Model<AuditLog>, settingVersionModel: Model<SettingVersion>, emailNotificationService: EmailNotificationService);
+    constructor(userModel: Model<User>, productModel: Model<Product>, orderModel: Model<Order>, orderItemModel: Model<OrderItem>, reviewModel: Model<Review>, categoryModel: Model<Category>, brandModel: Model<Brand>, productImageModel: Model<ProductImage>, settingModel: Model<Setting>, addressModel: Model<Address>, auditLogModel: Model<AuditLog>, settingVersionModel: Model<SettingVersion>, bannerModel: Model<Banner>, emailNotificationService: EmailNotificationService);
     getDashboard(): Promise<{
         totalOrders: number;
         totalRevenue: any;
         totalCustomers: number;
+        totalUsers: number;
+        totalAdmins: number;
+        totalVendors: number;
         totalProducts: number;
+        pendingOrders: number;
         recentOrders: {
             user: any;
             orderNumber: string;
@@ -149,6 +155,7 @@ export declare class AdminService {
             howToUse?: string;
             price: number;
             compareAtPrice?: number;
+            discountPercentage?: number;
             costPrice?: number;
             sku: string;
             barcode?: string;
@@ -209,6 +216,7 @@ export declare class AdminService {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -500,5 +508,32 @@ export declare class AdminService {
         newRole: UserRole;
         status: string;
         role?: undefined;
+    }>;
+    getAllBanners(): Promise<(Banner & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
+    getBanner(id: string): Promise<Banner & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
+    createBanner(createBannerDto: any): Promise<import("mongoose").Document<unknown, {}, Banner, {}, import("mongoose").DefaultSchemaOptions> & Banner & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    updateBanner(id: string, updateBannerDto: any): Promise<import("mongoose").Document<unknown, {}, Banner, {}, import("mongoose").DefaultSchemaOptions> & Banner & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    deleteBanner(id: string): Promise<{
+        message: string;
     }>;
 }

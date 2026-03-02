@@ -46,6 +46,7 @@ export declare class CategoriesService {
             howToUse?: string;
             price: number;
             compareAtPrice?: number;
+            discountPercentage?: number;
             costPrice?: number;
             sku: string;
             barcode?: string;

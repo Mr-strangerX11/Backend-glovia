@@ -61,6 +61,7 @@ export declare class ProductsService {
             howToUse?: string;
             price: number;
             compareAtPrice?: number;
+            discountPercentage?: number;
             costPrice?: number;
             sku: string;
             barcode?: string;
@@ -144,6 +145,7 @@ export declare class ProductsService {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -184,6 +186,7 @@ export declare class ProductsService {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -223,6 +226,7 @@ export declare class ProductsService {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -262,6 +266,7 @@ export declare class ProductsService {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;

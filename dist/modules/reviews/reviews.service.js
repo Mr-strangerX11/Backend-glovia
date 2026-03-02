@@ -58,12 +58,13 @@ let ReviewsService = class ReviewsService {
             userId: new mongoose_2.Types.ObjectId(userId),
             productId: new mongoose_2.Types.ObjectId(dto.productId),
             isVerified: !!hasPurchased,
-            approved: false
+            isApproved: false
         });
         const savedReview = await review.save();
         const user = await this.userModel.findById(userId).select('firstName lastName profileImage').lean();
         return {
             ...savedReview.toObject(),
+            approved: savedReview.isApproved,
             user
         };
     }
@@ -73,7 +74,7 @@ let ReviewsService = class ReviewsService {
         }
         const reviews = await this.reviewModel.find({
             productId: new mongoose_2.Types.ObjectId(productId),
-            approved: true
+            isApproved: true
         }).sort({ createdAt: -1 }).lean();
         const userIds = [...new Set(reviews.map(r => r.userId.toString()))];
         const users = await this.userModel.find({
@@ -85,6 +86,7 @@ let ReviewsService = class ReviewsService {
         }, {});
         return reviews.map(review => ({
             ...review,
+            approved: review.isApproved,
             user: userMap[review.userId.toString()] || null
         }));
     }

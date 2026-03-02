@@ -13,6 +13,7 @@ export declare class ReviewsService {
     private userModel;
     constructor(reviewModel: Model<Review>, productModel: Model<Product>, orderItemModel: Model<OrderItem>, orderModel: Model<Order>, userModel: Model<User>);
     create(userId: string, dto: CreateReviewDto): Promise<{
+        approved: boolean;
         user: User & Required<{
             _id: Types.ObjectId;
         }> & {
@@ -38,6 +39,7 @@ export declare class ReviewsService {
         __v: number;
     }>;
     findByProduct(productId: string): Promise<{
+        approved: boolean;
         user: any;
         productId: Types.ObjectId;
         userId: Types.ObjectId;

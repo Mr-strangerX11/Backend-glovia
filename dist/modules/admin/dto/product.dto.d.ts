@@ -10,6 +10,7 @@ export declare class CreateProductDto {
     compareAtPrice?: number;
     sku: string;
     stockQuantity: number;
+    quantityMl?: number;
     categoryId: string;
     brandId?: string;
     suitableFor?: SkinType[];
@@ -22,9 +23,20 @@ export declare class CreateProductDto {
 }
 export declare class UpdateProductDto {
     name?: string;
+    slug?: string;
     description?: string;
+    ingredients?: string;
+    benefits?: string;
+    howToUse?: string;
     price?: number;
+    compareAtPrice?: number;
+    sku?: string;
     stockQuantity?: number;
+    quantityMl?: number;
+    categoryId?: string;
+    brandId?: string;
+    suitableFor?: SkinType[];
+    tags?: string[];
     isActive?: boolean;
     isFeatured?: boolean;
     isBestSeller?: boolean;

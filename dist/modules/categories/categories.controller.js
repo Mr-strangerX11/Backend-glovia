@@ -41,14 +41,30 @@ let CategoriesController = class CategoriesController {
     }
     async update(id, dto, req) {
         const category = await this.categoriesService.update(id, dto);
-        const admin = req.user;
-        await this.auditLogService.log('UPDATE_CATEGORY', admin._id, admin.email, id, { dto });
+        const admin = req.user || {};
+        const adminId = admin._id || admin.id || admin.userId;
+        const adminEmail = admin.email || admin.username || 'unknown';
+        try {
+            if (adminId) {
+                await this.auditLogService.log('UPDATE_CATEGORY', adminId, adminEmail, id, { dto });
+            }
+        }
+        catch {
+        }
         return category;
     }
     async remove(id, req) {
         const result = await this.categoriesService.remove(id);
-        const admin = req.user;
-        await this.auditLogService.log('DELETE_CATEGORY', admin._id, admin.email, id, {});
+        const admin = req.user || {};
+        const adminId = admin._id || admin.id || admin.userId;
+        const adminEmail = admin.email || admin.username || 'unknown';
+        try {
+            if (adminId) {
+                await this.auditLogService.log('DELETE_CATEGORY', adminId, adminEmail, id, {});
+            }
+        }
+        catch {
+        }
         return result;
     }
     seed() {

@@ -16,7 +16,11 @@ export declare class AdminController {
         totalOrders: number;
         totalRevenue: any;
         totalCustomers: number;
+        totalUsers: number;
+        totalAdmins: number;
+        totalVendors: number;
         totalProducts: number;
+        pendingOrders: number;
         recentOrders: {
             user: any;
             orderNumber: string;
@@ -161,6 +165,7 @@ export declare class AdminController {
             howToUse?: string;
             price: number;
             compareAtPrice?: number;
+            discountPercentage?: number;
             costPrice?: number;
             sku: string;
             barcode?: string;
@@ -196,6 +201,60 @@ export declare class AdminController {
             limit: number;
             totalPages: number;
         };
+    }>;
+    getProduct(id: string): Promise<{
+        images: (import("../../database/schemas").ProductImage & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        })[];
+        category: import("../../database/schemas").Category & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        brand: import("../../database/schemas").Brand & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        name: string;
+        slug: string;
+        description: string;
+        ingredients?: string;
+        benefits?: string;
+        howToUse?: string;
+        price: number;
+        compareAtPrice?: number;
+        discountPercentage?: number;
+        costPrice?: number;
+        sku: string;
+        barcode?: string;
+        stockQuantity: number;
+        quantityMl?: number;
+        lowStockThreshold: number;
+        weight?: number;
+        categoryId: import("mongoose").Types.ObjectId;
+        brandId?: import("mongoose").Types.ObjectId;
+        suitableFor: import("../../database/schemas/user.schema").SkinType[];
+        isActive: boolean;
+        isFeatured: boolean;
+        isBestSeller: boolean;
+        isNewProduct: boolean;
+        metaTitle?: string;
+        metaDescription?: string;
+        tags: string[];
+        _id: import("mongoose").Types.ObjectId;
+        $locals: Record<string, unknown>;
+        $op: "save" | "validate" | "remove" | null;
+        $where: Record<string, unknown>;
+        baseModelName?: string;
+        collection: import("mongoose").Collection;
+        db: import("mongoose").Connection;
+        errors?: import("mongoose").Error.ValidationError;
+        isNew: boolean;
+        schema: import("mongoose").Schema;
+        __v: number;
     }>;
     getAllOrders(status?: string, page?: string, limit?: string): Promise<{
         data: {
@@ -405,6 +464,33 @@ export declare class AdminController {
             __v: number;
         })[];
         count: number;
+        message: string;
+    }>;
+    getBanners(): Promise<(import("../../database/schemas").Banner & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
+    getBanner(id: string): Promise<import("../../database/schemas").Banner & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
+    createBanner(createBannerDto: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Banner, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Banner & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    updateBanner(id: string, updateBannerDto: any): Promise<import("mongoose").Document<unknown, {}, import("../../database/schemas").Banner, {}, import("mongoose").DefaultSchemaOptions> & import("../../database/schemas").Banner & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    deleteBanner(id: string): Promise<{
         message: string;
     }>;
     initializeUsers(): Promise<{

@@ -73,6 +73,7 @@ export class AdminController {
       price: parseNumber(body.price),
       compareAtPrice: parseNumber(body.compareAtPrice),
       stockQuantity: parseNumber(body.stockQuantity),
+      quantityMl: parseNumber(body.quantityMl),
       discountPercentage: parseNumber(body.discountPercentage),
       isFeatured: parseBoolean(body.isFeatured),
       isBestSeller: parseBoolean(body.isBestSeller),

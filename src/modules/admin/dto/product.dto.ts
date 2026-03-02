@@ -38,6 +38,7 @@ export class CreateProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   compareAtPrice?: number;
 
   @ApiProperty()
@@ -48,6 +49,12 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   stockQuantity: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  quantityMl?: number;
 
   @ApiProperty()
   @IsString()
@@ -150,6 +157,12 @@ export class UpdateProductDto {
     @IsNumber()
     @Min(0)
   stockQuantity?: number;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    quantityMl?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()

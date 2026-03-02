@@ -26,6 +26,34 @@ let BannersService = class BannersService {
             isActive: true,
         }).sort({ displayOrder: 1 }).lean();
     }
+    async findAllForAdmin() {
+        return this.bannerModel.find().sort({ displayOrder: 1 }).lean();
+    }
+    async findOne(id) {
+        const banner = await this.bannerModel.findById(id).lean();
+        if (!banner) {
+            throw new common_1.NotFoundException('Banner not found');
+        }
+        return banner;
+    }
+    async create(createBannerDto) {
+        const banner = new this.bannerModel(createBannerDto);
+        return banner.save();
+    }
+    async update(id, updateBannerDto) {
+        const banner = await this.bannerModel.findByIdAndUpdate(id, updateBannerDto, { new: true });
+        if (!banner) {
+            throw new common_1.NotFoundException('Banner not found');
+        }
+        return banner;
+    }
+    async remove(id) {
+        const banner = await this.bannerModel.findByIdAndDelete(id);
+        if (!banner) {
+            throw new common_1.NotFoundException('Banner not found');
+        }
+        return { message: 'Banner deleted successfully' };
+    }
 };
 exports.BannersService = BannersService;
 exports.BannersService = BannersService = __decorate([

@@ -41,6 +41,7 @@ export declare class ProductsController {
             howToUse?: string;
             price: number;
             compareAtPrice?: number;
+            discountPercentage?: number;
             costPrice?: number;
             sku: string;
             barcode?: string;
@@ -88,6 +89,7 @@ export declare class ProductsController {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -127,6 +129,7 @@ export declare class ProductsController {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -203,6 +206,7 @@ export declare class ProductsController {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;
@@ -242,6 +246,7 @@ export declare class ProductsController {
         howToUse?: string;
         price: number;
         compareAtPrice?: number;
+        discountPercentage?: number;
         costPrice?: number;
         sku: string;
         barcode?: string;

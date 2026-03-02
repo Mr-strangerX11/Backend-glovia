@@ -68,6 +68,7 @@ let AdminController = class AdminController {
             price: parseNumber(body.price),
             compareAtPrice: parseNumber(body.compareAtPrice),
             stockQuantity: parseNumber(body.stockQuantity),
+            quantityMl: parseNumber(body.quantityMl),
             discountPercentage: parseNumber(body.discountPercentage),
             isFeatured: parseBoolean(body.isFeatured),
             isBestSeller: parseBoolean(body.isBestSeller),
@@ -122,6 +123,9 @@ let AdminController = class AdminController {
     getAllProducts(page, limit, categoryId, brandId) {
         return this.adminService.getAllProducts(page ? Number(page) : 1, limit ? Number(limit) : 10, categoryId, brandId);
     }
+    getProduct(id) {
+        return this.adminService.getProduct(id);
+    }
     getAllOrders(status, page, limit) {
         return this.adminService.getAllOrders(page ? Number(page) : 1, limit ? Number(limit) : 10, status);
     }
@@ -168,6 +172,21 @@ let AdminController = class AdminController {
     }
     async getCategories() {
         return this.adminService.getAllCategories();
+    }
+    async getBanners() {
+        return this.adminService.getAllBanners();
+    }
+    async getBanner(id) {
+        return this.adminService.getBanner(id);
+    }
+    async createBanner(createBannerDto) {
+        return this.adminService.createBanner(createBannerDto);
+    }
+    async updateBanner(id, updateBannerDto) {
+        return this.adminService.updateBanner(id, updateBannerDto);
+    }
+    async deleteBanner(id) {
+        return this.adminService.deleteBanner(id);
     }
     async initializeUsers() {
         try {
@@ -269,6 +288,7 @@ __decorate([
 ], AdminController.prototype, "createProductWithImages", null);
 __decorate([
     (0, common_1.Put)('products/:id'),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
     (0, swagger_1.ApiOperation)({ summary: 'Update product' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -307,6 +327,17 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getAllProducts", null);
+__decorate([
+    (0, common_1.Get)('products/:id'),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
+    (0, common_1.Header)('Pragma', 'no-cache'),
+    (0, common_1.Header)('Expires', '0'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get product by ID (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getProduct", null);
 __decorate([
     (0, common_1.Get)('orders'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all orders' }),
@@ -396,6 +427,9 @@ __decorate([
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('settings/announcement'),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
+    (0, common_1.Header)('Pragma', 'no-cache'),
+    (0, common_1.Header)('Expires', '0'),
     (0, swagger_1.ApiOperation)({ summary: 'Get announcement bar settings' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -433,6 +467,46 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getCategories", null);
+__decorate([
+    (0, common_1.Get)('banners'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all banners including inactive' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getBanners", null);
+__decorate([
+    (0, common_1.Get)('banners/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get banner by ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getBanner", null);
+__decorate([
+    (0, common_1.Post)('banners'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new banner' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "createBanner", null);
+__decorate([
+    (0, common_1.Put)('banners/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update a banner' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateBanner", null);
+__decorate([
+    (0, common_1.Delete)('banners/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a banner' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "deleteBanner", null);
 __decorate([
     (0, common_1.Post)('init'),
     (0, public_decorator_1.Public)(),

@@ -29,9 +29,10 @@ const setting_schema_1 = require("../../database/schemas/setting.schema");
 const audit_schema_1 = require("../../database/schemas/audit.schema");
 const address_schema_1 = require("../../database/schemas/address.schema");
 const setting_version_schema_1 = require("../../database/schemas/setting-version.schema");
+const banner_schema_1 = require("../../database/schemas/banner.schema");
 const email_notification_service_1 = require("../../common/services/email-notification.service");
 let AdminService = class AdminService {
-    constructor(userModel, productModel, orderModel, orderItemModel, reviewModel, categoryModel, brandModel, productImageModel, settingModel, addressModel, auditLogModel, settingVersionModel, emailNotificationService) {
+    constructor(userModel, productModel, orderModel, orderItemModel, reviewModel, categoryModel, brandModel, productImageModel, settingModel, addressModel, auditLogModel, settingVersionModel, bannerModel, emailNotificationService) {
         this.userModel = userModel;
         this.productModel = productModel;
         this.orderModel = orderModel;
@@ -44,6 +45,7 @@ let AdminService = class AdminService {
         this.addressModel = addressModel;
         this.auditLogModel = auditLogModel;
         this.settingVersionModel = settingVersionModel;
+        this.bannerModel = bannerModel;
         this.emailNotificationService = emailNotificationService;
     }
     async getDashboard() {
@@ -57,13 +59,19 @@ let AdminService = class AdminService {
             }
         ]);
         const totalCustomers = await this.userModel.countDocuments({ role: user_schema_1.UserRole.CUSTOMER });
+        const totalUsers = await this.userModel.countDocuments();
+        const totalAdmins = await this.userModel.countDocuments({ role: user_schema_1.UserRole.ADMIN });
+        const totalVendors = await this.userModel.countDocuments({ role: user_schema_1.UserRole.VENDOR });
         const totalProducts = await this.productModel.countDocuments();
+        const pendingOrders = await this.orderModel.countDocuments({ status: order_schema_1.OrderStatus.PENDING });
         const recentOrders = await this.orderModel
             .find()
             .sort({ createdAt: -1 })
             .limit(10)
             .lean();
-        const userIds = [...new Set(recentOrders.map(o => o.userId.toString()))];
+        const userIds = [...new Set(recentOrders
+                .map((o) => o?.userId?.toString?.())
+                .filter(Boolean))];
         const users = await this.userModel.find({ _id: { $in: userIds } }).lean();
         const userMap = users.reduce((acc, u) => {
             acc[u._id.toString()] = u;
@@ -71,7 +79,7 @@ let AdminService = class AdminService {
         }, {});
         const recentOrdersWithUsers = recentOrders.map(order => ({
             ...order,
-            user: userMap[order.userId.toString()] || null
+            user: order?.userId ? userMap[order.userId.toString()] || null : null
         }));
         const topProducts = await this.orderItemModel.aggregate([
             {
@@ -116,7 +124,11 @@ let AdminService = class AdminService {
             totalOrders,
             totalRevenue: totalRevenue[0]?.sum || 0,
             totalCustomers,
+            totalUsers,
+            totalAdmins,
+            totalVendors,
             totalProducts,
+            pendingOrders,
             recentOrders: recentOrdersWithUsers,
             topProducts: topProductsWithDetails,
             revenueByMonth
@@ -313,27 +325,68 @@ let AdminService = class AdminService {
     }
     async updateProduct(productId, updateProductDto) {
         if (!mongoose_2.Types.ObjectId.isValid(productId)) {
-            throw new common_1.BadRequestException('Invalid product ID');
+            throw new common_1.BadRequestException('Invalid product ID format');
         }
         const product = await this.productModel.findById(productId).lean();
         if (!product) {
             throw new common_1.NotFoundException('Product not found');
         }
-        const { images, isNew, ...productData } = updateProductDto;
+        const { images, isNew, categoryId, brandId, ...productData } = updateProductDto;
         const updateData = { ...productData };
         if (isNew !== undefined) {
             updateData.isNewProduct = isNew;
         }
+        if (categoryId !== undefined) {
+            if (!categoryId) {
+                updateData.categoryId = null;
+            }
+            else if (!mongoose_2.Types.ObjectId.isValid(categoryId)) {
+                throw new common_1.BadRequestException(`Invalid category ID format: ${categoryId}`);
+            }
+            else {
+                const categoryExists = await this.categoryModel.findById(categoryId).lean();
+                if (!categoryExists) {
+                    throw new common_1.BadRequestException(`Category not found with ID: ${categoryId}`);
+                }
+                updateData.categoryId = new mongoose_2.Types.ObjectId(categoryId);
+            }
+        }
+        if (brandId !== undefined) {
+            if (!brandId) {
+                updateData.brandId = null;
+            }
+            else if (!mongoose_2.Types.ObjectId.isValid(brandId)) {
+                throw new common_1.BadRequestException(`Invalid brand ID format: ${brandId}`);
+            }
+            else {
+                const brandExists = await this.brandModel.findById(brandId).lean();
+                if (!brandExists) {
+                    throw new common_1.BadRequestException(`Brand not found with ID: ${brandId}`);
+                }
+                updateData.brandId = new mongoose_2.Types.ObjectId(brandId);
+            }
+        }
+        if (updateData.price !== undefined && (typeof updateData.price !== 'number' || updateData.price < 0)) {
+            throw new common_1.BadRequestException('Price must be a non-negative number');
+        }
+        if (updateData.stockQuantity !== undefined && (typeof updateData.stockQuantity !== 'number' || updateData.stockQuantity < 0)) {
+            throw new common_1.BadRequestException('Stock quantity must be a non-negative number');
+        }
+        if (updateData.compareAtPrice !== undefined && updateData.compareAtPrice !== null && (typeof updateData.compareAtPrice !== 'number' || updateData.compareAtPrice < 0)) {
+            throw new common_1.BadRequestException('Compare at price must be a non-negative number');
+        }
         const updatedProduct = await this.productModel.findByIdAndUpdate(productId, updateData, { new: true }).lean();
         if (images && Array.isArray(images)) {
             await this.productImageModel.deleteMany({ productId: new mongoose_2.Types.ObjectId(productId) });
-            const newImages = images.map((img) => ({
-                productId: new mongoose_2.Types.ObjectId(productId),
-                url: img.url,
-                altText: img.altText || null,
-                isPrimary: img.isPrimary || false
-            }));
-            await this.productImageModel.insertMany(newImages);
+            if (images.length > 0) {
+                const newImages = images.map((img, index) => ({
+                    productId: new mongoose_2.Types.ObjectId(productId),
+                    url: typeof img === 'string' ? img : img.url,
+                    altText: (typeof img === 'object' && img.altText) || null,
+                    isPrimary: (typeof img === 'object' && img.isPrimary) || index === 0
+                }));
+                await this.productImageModel.insertMany(newImages);
+            }
         }
         return updatedProduct;
     }
@@ -371,7 +424,9 @@ let AdminService = class AdminService {
             this.orderModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
             this.orderModel.countDocuments(filter)
         ]);
-        const userIds = [...new Set(orders.map(o => o.userId.toString()))];
+        const userIds = [...new Set(orders
+                .map((o) => o?.userId?.toString?.())
+                .filter(Boolean))];
         const users = await this.userModel.find({ _id: { $in: userIds } }).lean();
         const userMap = users.reduce((acc, u) => {
             acc[u._id.toString()] = u;
@@ -388,7 +443,7 @@ let AdminService = class AdminService {
         }, {});
         const ordersWithRelations = orders.map(order => ({
             ...order,
-            user: userMap[order.userId.toString()] || null,
+            user: order?.userId ? userMap[order.userId.toString()] || null : null,
             items: itemsByOrder[order._id.toString()] || []
         }));
         return {
@@ -629,7 +684,16 @@ let AdminService = class AdminService {
                 outsideValleyDeliveryCharge: 149
             };
         }
-        return JSON.parse(setting.value);
+        try {
+            return JSON.parse(setting.value);
+        }
+        catch {
+            return {
+                freeDeliveryThreshold: 2999,
+                valleyDeliveryCharge: 99,
+                outsideValleyDeliveryCharge: 149
+            };
+        }
     }
     async updateAnnouncementBar(data, user) {
         const prev = await this.settingModel.findOne({ key: 'announcementBar' }).lean();
@@ -679,7 +743,18 @@ let AdminService = class AdminService {
                 textColor: '#ffffff'
             };
         }
-        const parsed = JSON.parse(setting.value);
+        let parsed;
+        try {
+            parsed = JSON.parse(setting.value);
+        }
+        catch {
+            parsed = {
+                enabled: false,
+                message: '',
+                backgroundColor: '#000000',
+                textColor: '#ffffff'
+            };
+        }
         return {
             ...parsed,
             isActive: parsed.enabled,
@@ -848,6 +923,34 @@ let AdminService = class AdminService {
         await this.userModel.findByIdAndUpdate(superadmin._id, { role: user_schema_1.UserRole.SUPER_ADMIN });
         return { email: superadmin.email, oldRole: superadmin.role, newRole: user_schema_1.UserRole.SUPER_ADMIN, status: 'updated' };
     }
+    async getAllBanners() {
+        return this.bannerModel.find().sort({ displayOrder: 1 }).lean();
+    }
+    async getBanner(id) {
+        const banner = await this.bannerModel.findById(id).lean();
+        if (!banner) {
+            throw new common_1.NotFoundException('Banner not found');
+        }
+        return banner;
+    }
+    async createBanner(createBannerDto) {
+        const banner = new this.bannerModel(createBannerDto);
+        return banner.save();
+    }
+    async updateBanner(id, updateBannerDto) {
+        const banner = await this.bannerModel.findByIdAndUpdate(id, updateBannerDto, { new: true });
+        if (!banner) {
+            throw new common_1.NotFoundException('Banner not found');
+        }
+        return banner;
+    }
+    async deleteBanner(id) {
+        const banner = await this.bannerModel.findByIdAndDelete(id);
+        if (!banner) {
+            throw new common_1.NotFoundException('Banner not found');
+        }
+        return { message: 'Banner deleted successfully' };
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
@@ -864,7 +967,9 @@ exports.AdminService = AdminService = __decorate([
     __param(9, (0, mongoose_1.InjectModel)(address_schema_1.Address.name)),
     __param(10, (0, mongoose_1.InjectModel)(audit_schema_1.AuditLog.name)),
     __param(11, (0, mongoose_1.InjectModel)(setting_version_schema_1.SettingVersion.name)),
+    __param(12, (0, mongoose_1.InjectModel)(banner_schema_1.Banner.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
