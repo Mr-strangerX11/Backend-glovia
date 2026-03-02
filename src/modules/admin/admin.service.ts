@@ -1111,8 +1111,29 @@ export class AdminService {
   }
 
   async createBanner(createBannerDto: any) {
-    const banner = new this.bannerModel(createBannerDto);
-    return banner.save();
+    const image = createBannerDto?.image || createBannerDto?.imageUrl;
+    if (!image) {
+      throw new BadRequestException('Banner image is required');
+    }
+
+    const payload = {
+      title: createBannerDto?.title,
+      subtitle: createBannerDto?.subtitle,
+      image,
+      mobileImage: createBannerDto?.mobileImage,
+      link: createBannerDto?.link,
+      displayOrder: Number.isFinite(Number(createBannerDto?.displayOrder))
+        ? Number(createBannerDto.displayOrder)
+        : (Number.isFinite(Number(createBannerDto?.priority)) ? Number(createBannerDto.priority) : 0),
+      isActive: typeof createBannerDto?.isActive === 'boolean' ? createBannerDto.isActive : true,
+    };
+
+    const banner = new this.bannerModel(payload);
+    try {
+      return await banner.save();
+    } catch (error: any) {
+      throw new BadRequestException(error?.message || 'Failed to create banner');
+    }
   }
 
   async updateBanner(id: string, updateBannerDto: any) {

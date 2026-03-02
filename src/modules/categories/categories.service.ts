@@ -161,7 +161,7 @@ export class CategoriesService {
     }
 
     if (!payload.type) {
-      throw new BadRequestException('Category type is required for main category');
+      payload.type = ProductCategory.SKINCARE;
     }
 
     const existingSlug = await this.categoryModel.findOne({ slug: payload.slug }).select('_id').lean();

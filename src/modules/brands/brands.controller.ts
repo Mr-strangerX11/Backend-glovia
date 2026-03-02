@@ -81,14 +81,22 @@ export class BrandsController {
   async updateBrand(@Param('id') id: string, @Body() dto: UpdateBrandDto, @Req() req: any) {
     const brand = await this.brandsService.updateBrand(id, dto);
     // Audit log
-    const admin = req.user;
-    await this.auditLogService.log(
-      'UPDATE_BRAND',
-      admin._id,
-      admin.email,
-      id,
-      { dto }
-    );
+    const admin = req.user || {};
+    const adminId = admin._id || admin.id || admin.userId;
+    const adminEmail = admin.email || admin.username || 'unknown';
+    try {
+      if (adminId) {
+        await this.auditLogService.log(
+          'UPDATE_BRAND',
+          adminId,
+          adminEmail,
+          id,
+          { dto }
+        );
+      }
+    } catch {
+      // Do not fail brand update if audit logging fails
+    }
     return {
       success: true,
       message: 'Brand updated successfully',
@@ -102,14 +110,22 @@ export class BrandsController {
   async deleteBrand(@Param('id') id: string, @Req() req: any) {
     await this.brandsService.deleteBrand(id);
     // Audit log
-    const admin = req.user;
-    await this.auditLogService.log(
-      'DELETE_BRAND',
-      admin._id,
-      admin.email,
-      id,
-      {}
-    );
+    const admin = req.user || {};
+    const adminId = admin._id || admin.id || admin.userId;
+    const adminEmail = admin.email || admin.username || 'unknown';
+    try {
+      if (adminId) {
+        await this.auditLogService.log(
+          'DELETE_BRAND',
+          adminId,
+          adminEmail,
+          id,
+          {}
+        );
+      }
+    } catch {
+      // Do not fail brand delete if audit logging fails
+    }
     return {
       success: true,
       message: 'Brand deleted successfully',
