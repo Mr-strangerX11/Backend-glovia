@@ -379,4 +379,8 @@ export class AuthService {
       message: 'Verification OTP resent successfully. Please check your email.',
     };
   }
+
+  async getEmailDeliveryHealth() {
+    return this.emailOtpService.getDeliveryHealth();
+  }
 }

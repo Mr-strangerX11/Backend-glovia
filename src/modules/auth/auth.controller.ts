@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Get,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -14,6 +15,7 @@ import { RegisterDto, LoginDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswor
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Request } from 'express';
+import { UserRole } from '../../database/schemas/user.schema';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -73,6 +75,18 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user' })
   async getProfile(@CurrentUser() user: any) {
     return user;
+  }
+
+  @Get('email-health')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get email delivery diagnostics (admin only)' })
+  async getEmailHealth(@CurrentUser() user: any) {
+    const role = user?.role;
+    if (role !== UserRole.ADMIN && role !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.authService.getEmailDeliveryHealth();
   }
 
   @Post('password/forgot')

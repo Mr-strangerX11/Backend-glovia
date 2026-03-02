@@ -169,6 +169,53 @@ export class EmailOtpService {
     return configured;
   }
 
+  async getDeliveryHealth() {
+    let smtpVerified: boolean | null = null;
+    let smtpVerifyError: string | null = null;
+
+    if (this.transporter) {
+      try {
+        const verifyPromise = this.transporter.verify();
+        smtpVerified = await Promise.race<boolean>([
+          verifyPromise,
+          new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000)),
+        ]);
+
+        if (!smtpVerified) {
+          smtpVerifyError = 'SMTP verify timeout or failed';
+        }
+      } catch (error: any) {
+        smtpVerified = false;
+        smtpVerifyError = error?.message || 'SMTP verify failed';
+      }
+    }
+
+    const providers = this.getProviderSequence();
+
+    return {
+      nodeEnv: process.env.NODE_ENV || 'development',
+      configuredProvider: this.provider || 'auto',
+      providerSequence: providers,
+      allowMockFallback: this.allowMockFallback,
+      smtp: {
+        configured: this.hasSmtpConfig(),
+        hostConfigured: !!this.smtpHost,
+        port: this.smtpPort,
+        secure: this.smtpSecure,
+        usernameConfigured: !!this.smtpUser,
+        passwordConfigured: !!this.smtpPassword,
+        fromEmailConfigured: !!this.smtpFromEmail,
+        verified: smtpVerified,
+        verifyError: smtpVerifyError,
+      },
+      sendgrid: {
+        configured: !!this.sendgridApiKey,
+        fromEmailConfigured: !!this.sendgridFromEmail,
+      },
+      canAttemptRealDelivery: providers.some((provider) => provider === 'smtp' || provider === 'sendgrid' || provider === 'ses'),
+    };
+  }
+
   /**
    * Send OTP via email
    */
