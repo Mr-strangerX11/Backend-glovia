@@ -107,7 +107,27 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+    slug?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
   description?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    ingredients?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    benefits?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    howToUse?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -117,7 +137,41 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
+    @Min(0)
+    compareAtPrice?: number;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    sku?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
   stockQuantity?: number;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    categoryId?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    brandId?: string;
+
+    @ApiProperty({ required: false, enum: SkinType, isArray: true })
+    @IsOptional()
+    @IsArray()
+    @IsEnum(SkinType, { each: true })
+    suitableFor?: SkinType[];
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    tags?: string[];
 
   @ApiProperty({ required: false })
   @IsOptional()

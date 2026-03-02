@@ -369,7 +369,7 @@ export class AdminService {
       throw new NotFoundException('Product not found');
     }
 
-    const { images, isNew, ...productData } = updateProductDto;
+    const { images, isNew, categoryId, brandId, ...productData } = updateProductDto;
 
     // Map isNew to isNewProduct
     const updateData: any = { ...productData };
@@ -1016,3 +1016,19 @@ export class AdminService {
     return { email: superadmin.email, oldRole: superadmin.role, newRole: UserRole.SUPER_ADMIN, status: 'updated' };
   }
 }
+
+    // Handle categoryId conversion
+    if (categoryId) {
+      if (!Types.ObjectId.isValid(categoryId)) {
+        throw new BadRequestException('Invalid category ID');
+      }
+      updateData.categoryId = new Types.ObjectId(categoryId);
+    }
+
+    // Handle brandId conversion
+    if (brandId) {
+      if (!Types.ObjectId.isValid(brandId)) {
+        throw new BadRequestException('Invalid brand ID');
+      }
+      updateData.brandId = new Types.ObjectId(brandId);
+    }
