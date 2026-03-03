@@ -39,8 +39,14 @@ export class AdminService {
   ) {}
 
   async getDashboard() {
+    const cancelledStatuses = [OrderStatus.CANCELLED, 'CANCELED'];
     const totalOrders = await this.orderModel.countDocuments();
     const totalRevenue = await this.orderModel.aggregate([
+      {
+        $match: {
+          status: { $nin: cancelledStatuses }
+        }
+      },
       {
         $group: {
           _id: null,
@@ -109,7 +115,8 @@ export class AdminService {
     const revenueByMonth = await this.orderModel.aggregate([
       {
         $match: {
-          createdAt: { $gte: sixMonthsAgo }
+          createdAt: { $gte: sixMonthsAgo },
+          status: { $nin: cancelledStatuses }
         }
       },
       {
