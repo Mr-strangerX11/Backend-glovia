@@ -13,9 +13,10 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { CreateOrderDto } from './dto/orders.dto';
+import { CreateOrderDto, TrackOrderDto } from './dto/orders.dto';
 import { OrderStatus } from '../../database/schemas/order.schema';
 import { TrustScoreGuard } from '../../common/guards/trust-score.guard';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -23,6 +24,13 @@ import { TrustScoreGuard } from '../../common/guards/trust-score.guard';
 @ApiBearerAuth()
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
+
+  @Public()
+  @Get('track')
+  @ApiOperation({ summary: 'Track order by order number and email/phone' })
+  track(@Query() query: TrackOrderDto) {
+    return this.ordersService.trackOrder(query);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create new order' })

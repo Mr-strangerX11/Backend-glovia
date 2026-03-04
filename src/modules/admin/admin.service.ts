@@ -561,9 +561,17 @@ export class AdminService {
       throw new BadRequestException('Invalid order ID');
     }
 
+    if (!status) {
+      throw new BadRequestException('Order status is required');
+    }
+
     const order = await this.orderModel.findById(orderId).lean();
     if (!order) {
       throw new NotFoundException('Order not found');
+    }
+
+    if (order.status === status) {
+      return order;
     }
 
     const updateData: any = { status };
@@ -587,6 +595,8 @@ export class AdminService {
     if (status === OrderStatus.CONFIRMED) {
       await this.sendOrderConfirmationEmail(orderId);
     }
+
+    await this.sendOrderStatusChangedEmail(orderId, status);
 
     return updatedOrder;
   }
@@ -668,6 +678,27 @@ export class AdminService {
       );
     } catch (error) {
       // Do not block order update on email failure
+    }
+  }
+
+  private async sendOrderStatusChangedEmail(orderId: string, status: OrderStatus): Promise<void> {
+    try {
+      const order = await this.orderModel.findById(orderId).lean();
+      if (!order) return;
+
+      const user = await this.userModel.findById(order.userId).lean();
+      if (!user?.email) return;
+
+      await this.emailNotificationService.sendOrderStatusChangedEmail({
+        orderNumber: order.orderNumber,
+        status,
+        customerName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer',
+        customerEmail: user.email,
+        trackingNumber: order.trackingNumber,
+        deliveryPartner: order.deliveryPartner,
+        updatedAt: new Date(),
+      });
+    } catch (error) {
     }
   }
 

@@ -14,6 +14,7 @@ import { Coupon } from '../../database/schemas/coupon.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
 import { User } from '../../database/schemas/user.schema';
+import { TrackOrderDto } from './dto/orders.dto';
 
 @Injectable()
 export class OrdersService {
@@ -329,12 +330,105 @@ export class OrdersService {
     return updatedOrder;
   }
 
+  async trackOrder(dto: TrackOrderDto) {
+    const orderNumber = (dto.orderNumber || '').trim().toUpperCase();
+    const identifier = (dto.identifier || '').trim();
+
+    if (!orderNumber || !identifier) {
+      throw new BadRequestException('Order number and identifier are required');
+    }
+
+    const order = await this.orderModel.findOne({ orderNumber }).lean();
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const createdAt = (order as any).createdAt || null;
+
+    const user = await this.userModel
+      .findById(order.userId, { email: 1, phone: 1, firstName: 1, lastName: 1 })
+      .lean();
+
+    const normalizedIdentifier = identifier.toLowerCase();
+    const normalizedIdentifierPhone = this.normalizePhone(identifier);
+    const emailMatches = user?.email?.toLowerCase() === normalizedIdentifier;
+    const phoneMatches = !!user?.phone && this.normalizePhone(user.phone) === normalizedIdentifierPhone;
+
+    if (!emailMatches && !phoneMatches) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const [items, payment, address] = await Promise.all([
+      this.orderItemModel.find({ orderId: order._id }).lean(),
+      this.paymentModel.findOne({ orderId: order._id }).lean(),
+      this.addressModel.findById(order.addressId).lean(),
+    ]);
+
+    const productIds = items.map((item) => item.productId);
+    const [products, productImages] = await Promise.all([
+      this.productModel.find({ _id: { $in: productIds } }, { name: 1, slug: 1 }).lean(),
+      this.productImageModel.find({ productId: { $in: productIds } }).lean(),
+    ]);
+
+    const productMap = products.reduce((acc, product) => {
+      acc[product._id.toString()] = product;
+      return acc;
+    }, {} as Record<string, any>);
+
+    const imagesByProduct = productImages.reduce((acc, img) => {
+      const key = img.productId.toString();
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(img);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    const timeline = [
+      { key: 'PENDING', label: 'Order Placed', at: createdAt },
+      { key: 'CONFIRMED', label: 'Order Confirmed', at: order.confirmedAt || null },
+      { key: 'SHIPPED', label: 'Shipped', at: order.shippedAt || null },
+      { key: 'DELIVERED', label: 'Delivered', at: order.deliveredAt || null },
+      { key: 'CANCELLED', label: 'Cancelled', at: order.cancelledAt || null },
+    ];
+
+    return {
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      createdAt,
+      confirmedAt: order.confirmedAt,
+      shippedAt: order.shippedAt,
+      deliveredAt: order.deliveredAt,
+      cancelledAt: order.cancelledAt,
+      trackingNumber: order.trackingNumber,
+      deliveryPartner: order.deliveryPartner,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      subtotal: order.subtotal,
+      discount: order.discount,
+      deliveryCharge: order.deliveryCharge,
+      total: order.total,
+      customerName: [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim(),
+      items: items.map((item) => ({
+        ...item,
+        product: productMap[item.productId.toString()] || null,
+        images: imagesByProduct[item.productId.toString()] || [],
+      })),
+      address,
+      payment,
+      timeline,
+    };
+  }
+
   private generateOrderNumber(): string {
     const timestamp = Date.now().toString();
     const random = Math.floor(Math.random() * 1000)
       .toString()
       .padStart(3, '0');
     return `ORD${timestamp}${random}`;
+  }
+
+  private normalizePhone(value: string): string {
+    return (value || '').replace(/[^\d]/g, '');
   }
 
   private calculateDeliveryCharge(district: string, subtotal: number): number {

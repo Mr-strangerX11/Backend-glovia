@@ -44,3 +44,16 @@ export class CreateOrderDto {
   @IsBoolean()
   clearCart?: boolean;
 }
+
+export class TrackOrderDto {
+  @ApiProperty({ example: 'ORD1739345345001' })
+  @IsString()
+  orderNumber: string;
+
+  @ApiProperty({
+    description: 'Customer email or phone number used to place the order',
+    example: 'customer@example.com',
+  })
+  @IsString()
+  identifier: string;
+}

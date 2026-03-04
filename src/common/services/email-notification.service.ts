@@ -33,6 +33,16 @@ interface OrderEmailPayload {
   address: OrderEmailAddress;
 }
 
+interface OrderStatusEmailPayload {
+  orderNumber: string;
+  status: string;
+  customerName: string;
+  customerEmail: string;
+  trackingNumber?: string;
+  deliveryPartner?: string;
+  updatedAt?: Date;
+}
+
 @Injectable()
 export class EmailNotificationService {
   private readonly logger = new Logger(EmailNotificationService.name);
@@ -96,6 +106,51 @@ export class EmailNotificationService {
         error as Error
       );
       // Optionally, rethrow to let upstream handle notification failures
+      throw error;
+    }
+  }
+
+  async sendOrderStatusChangedEmail(payload: OrderStatusEmailPayload): Promise<void> {
+    const subject = `Order Update - ${payload.orderNumber} is ${payload.status}`;
+    const html = this.buildOrderStatusChangedHtml(payload);
+
+    const fromName = process.env.SMTP_FROM_NAME || 'Glovia Nepal';
+    const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'noreply@glovia.local';
+    const recipients = payload.customerEmail;
+
+    if (!recipients) {
+      this.logger.warn('No customer recipient configured for order status email');
+      return;
+    }
+
+    if (this.provider === 'mock') {
+      this.logger.log(`[MOCK EMAIL] To: ${recipients} | Subject: ${subject}`);
+      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`✉️  EMAIL to ${recipients}`);
+      console.log(`📧 Subject: ${subject}`);
+      console.log(`📄 Body:\n${html}`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+      return;
+    }
+
+    if (!this.transporter) {
+      this.logger.warn('SMTP transporter not configured');
+      return;
+    }
+
+    try {
+      await this.transporter.sendMail({
+        from: `"${fromName}" <${fromEmail}>`,
+        to: recipients,
+        subject,
+        html,
+      });
+      this.logger.log(`Order status email sent to ${recipients}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send order status email.\nRecipients: ${recipients}\nSubject: ${subject}\nPayload: ${JSON.stringify(payload, null, 2)}`,
+        error as Error,
+      );
       throw error;
     }
   }
@@ -166,6 +221,55 @@ export class EmailNotificationService {
               </div>
 
               <p style="margin-top: 32px; font-size: 16px; color: #64748b;">Thank you for shopping with <b>Glovia Nepal</b>!<br/>If you have any questions, reply to this email or contact our support.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #f1f5f9; text-align: center; padding: 16px; color: #64748b; font-size: 13px;">
+              &copy; ${new Date().getFullYear()} Glovia Nepal. All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </div>
+    `;
+  }
+
+  private buildOrderStatusChangedHtml(payload: OrderStatusEmailPayload): string {
+    const statusMessages: Record<string, string> = {
+      PENDING: 'We have received your order and will process it shortly.',
+      CONFIRMED: 'Your order has been confirmed and is now being prepared.',
+      PROCESSING: 'Your order is currently being prepared for shipment.',
+      SHIPPED: 'Great news! Your order is on the way.',
+      DELIVERED: 'Your order has been delivered. Enjoy your purchase!',
+      CANCELLED: 'Your order has been cancelled. If this was unexpected, please contact support.',
+      RETURNED: 'Your order has been marked as returned.',
+    };
+
+    const statusMessage = statusMessages[payload.status] || 'Your order status has been updated.';
+    const updatedAtText = payload.updatedAt ? new Date(payload.updatedAt).toLocaleString() : new Date().toLocaleString();
+
+    return `
+      <div style="background: #f4f6fb; padding: 0; margin: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-family: Arial, sans-serif;">
+          <tr>
+            <td style="background: #1e293b; padding: 24px 0; text-align: center;">
+              <h1 style="color: #fff; font-size: 24px; margin: 0; letter-spacing: 1px;">Glovia Nepal</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px 24px 16px 24px; color: #111;">
+              <h2 style="margin-bottom: 8px; color: #2563eb; font-size: 22px;">Order Status Updated</h2>
+              <p style="font-size: 16px; margin: 0 0 16px 0;">Hi <b>${payload.customerName || 'Customer'}</b>,</p>
+              <p style="font-size: 15px; margin: 0 0 18px 0;">${statusMessage}</p>
+
+              <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                <p style="margin: 0 0 6px 0;"><strong>Order Number:</strong> ${payload.orderNumber}</p>
+                <p style="margin: 0 0 6px 0;"><strong>Current Status:</strong> ${payload.status}</p>
+                <p style="margin: 0 0 6px 0;"><strong>Updated At:</strong> ${updatedAtText}</p>
+                <p style="margin: 0 0 6px 0;"><strong>Tracking Number:</strong> ${payload.trackingNumber || 'Not assigned yet'}</p>
+                <p style="margin: 0;"><strong>Delivery Partner:</strong> ${payload.deliveryPartner || 'Pending assignment'}</p>
+              </div>
+
+              <p style="margin-top: 24px; font-size: 15px; color: #64748b;">Need help? Reply to this email or contact our support team.</p>
             </td>
           </tr>
           <tr>
