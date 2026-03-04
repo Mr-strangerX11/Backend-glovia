@@ -69,6 +69,9 @@ export class User extends Document {
   @Prop({ default: false })
   isPhoneVerified: boolean;
 
+  @Prop({ default: 0 })
+  loyaltyPoints: number;
+
   @Prop({ type: String, enum: SkinType })
   skinType?: SkinType;
 
