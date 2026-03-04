@@ -116,6 +116,17 @@ export class CategoriesService {
     };
   }
 
+  async findByParent(parentId: string) {
+    if (!Types.ObjectId.isValid(parentId)) {
+      throw new BadRequestException('Invalid parent category id');
+    }
+
+    return this.categoryModel
+      .find({ parentId: new Types.ObjectId(parentId), isActive: true })
+      .sort({ displayOrder: 1, name: 1 })
+      .lean();
+  }
+
   async create(dto: any) {
     const payload = { ...dto };
 

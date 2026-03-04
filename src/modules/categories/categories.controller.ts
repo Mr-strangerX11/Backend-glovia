@@ -30,6 +30,12 @@ export class CategoriesController {
     return categories;
   }
 
+  @Get('parent/:parentId')
+  @ApiOperation({ summary: 'Get sub-categories by parent category id' })
+  findByParent(@Param('parentId') parentId: string) {
+    return this.categoriesService.findByParent(parentId);
+  }
+
   @Get(':slug')
   @ApiOperation({ summary: 'Get category by slug' })
   findBySlug(@Param('slug') slug: string) {
