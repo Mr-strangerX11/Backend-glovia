@@ -1,8 +1,13 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsInt, Min, Max, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SkinType } from '../../../database/schemas/user.schema';
 
 export class UpdateProfileDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
@@ -27,6 +32,22 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   profileImage?: string;
+}
+
+export class SendEmailChangeOtpDto {
+  @ApiProperty({ example: 'newemail@example.com' })
+  @IsEmail()
+  email: string;
+}
+
+export class VerifyEmailChangeOtpDto {
+  @ApiProperty({ example: 'newemail@example.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ example: '123456' })
+  @IsString()
+  otp: string;
 }
 
 export class CreateAddressDto {

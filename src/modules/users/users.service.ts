@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UpdateProfileDto, CreateAddressDto, UpdateAddressDto } from './dto/users.dto';
 import { AddAddressWithGeoDto } from './dto/add-address-geo.dto';
 import { User, Address, Order } from '../../database/schemas';
+import { OtpVerification } from '../../database/schemas/otp-verification.schema';
+import { OtpService, EmailOtpService } from '../verification/otp.service';
 
 @Injectable()
 export class UsersService {
@@ -11,6 +13,9 @@ export class UsersService {
     @InjectModel('User') private userModel: Model<User>,
     @InjectModel('Address') private addressModel: Model<Address>,
     @InjectModel('Order') private orderModel: Model<Order>,
+    @InjectModel('OtpVerification') private otpVerificationModel: Model<OtpVerification>,
+    private otpService: OtpService,
+    private emailOtpService: EmailOtpService,
   ) {}
 
   async updateUserPermissions(userId: string, permissions: Record<string, boolean>) {
@@ -39,10 +44,198 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    return this.userModel
-      .findByIdAndUpdate(userId, dto, { new: true })
+    const user = await this.userModel.findById(userId).lean();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const payload: any = {};
+
+    if (dto.firstName !== undefined) {
+      payload.firstName = dto.firstName.trim();
+    }
+
+    if (dto.lastName !== undefined) {
+      payload.lastName = dto.lastName.trim();
+    }
+
+    if (dto.skinType !== undefined) {
+      payload.skinType = dto.skinType;
+    }
+
+    if (dto.profileImage !== undefined) {
+      payload.profileImage = dto.profileImage?.trim() || '';
+    }
+
+    if (dto.email !== undefined) {
+      const normalizedEmail = dto.email.trim().toLowerCase();
+
+      if (normalizedEmail !== (user.email || '').toLowerCase()) {
+        const verifiedEmailChange = await this.otpVerificationModel
+          .findOne({
+            userId: new Types.ObjectId(userId),
+            phone: normalizedEmail,
+            purpose: 'email_change',
+            isVerified: true,
+          })
+          .sort({ updatedAt: -1 })
+          .lean();
+
+        if (!verifiedEmailChange) {
+          throw new BadRequestException('Please verify your new email with OTP before saving');
+        }
+      }
+
+      const duplicateEmail = await this.userModel
+        .findOne({ email: normalizedEmail, _id: { $ne: userId } })
+        .select('_id')
+        .lean();
+
+      if (duplicateEmail) {
+        throw new BadRequestException('Email is already in use');
+      }
+
+      payload.email = normalizedEmail;
+    }
+
+    if (dto.phone !== undefined) {
+      const normalizedPhone = dto.phone.trim();
+      if (!normalizedPhone) {
+        payload.phone = undefined;
+      } else {
+        const duplicatePhone = await this.userModel
+          .findOne({ phone: normalizedPhone, _id: { $ne: userId } })
+          .select('_id')
+          .lean();
+
+        if (duplicatePhone) {
+          throw new BadRequestException('Phone number is already in use');
+        }
+
+        payload.phone = normalizedPhone;
+      }
+    }
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(userId, payload, { new: true })
       .select('id email phone firstName lastName skinType profileImage')
       .lean();
+
+    if (payload.email && payload.email !== (user.email || '').toLowerCase()) {
+      await this.otpVerificationModel.deleteMany({
+        userId: new Types.ObjectId(userId),
+        phone: payload.email,
+        purpose: 'email_change',
+      });
+    }
+
+    return updatedUser;
+  }
+
+  async sendEmailChangeOtp(userId: string, email: string) {
+    const user = await this.userModel.findById(userId).lean();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      throw new BadRequestException('Email is required');
+    }
+
+    if (normalizedEmail === (user.email || '').toLowerCase()) {
+      throw new BadRequestException('Please enter a different email');
+    }
+
+    const duplicateEmail = await this.userModel
+      .findOne({ email: normalizedEmail, _id: { $ne: userId } })
+      .select('_id')
+      .lean();
+
+    if (duplicateEmail) {
+      throw new BadRequestException('Email is already in use');
+    }
+
+    const otp = this.otpService.generateOtp();
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+    await this.otpVerificationModel.create({
+      userId: new Types.ObjectId(userId),
+      phone: normalizedEmail,
+      otp,
+      purpose: 'email_change',
+      expiresAt,
+    });
+
+    const sent = await this.emailOtpService.sendEmailOtp(normalizedEmail, otp, 'email_verification');
+    if (!sent) {
+      throw new BadRequestException('Failed to send verification code to new email');
+    }
+
+    return {
+      success: true,
+      message: 'Verification code sent to your new email',
+    };
+  }
+
+  async verifyEmailChangeOtp(userId: string, email: string, otp: string) {
+    const user = await this.userModel.findById(userId).lean();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const otpRecord = await this.otpVerificationModel
+      .findOne({
+        userId: new Types.ObjectId(userId),
+        phone: normalizedEmail,
+        otp,
+        purpose: 'email_change',
+        isVerified: false,
+        expiresAt: { $gt: new Date() },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!otpRecord) {
+      const anyOtpRecord = await this.otpVerificationModel
+        .findOne({
+          userId: new Types.ObjectId(userId),
+          phone: normalizedEmail,
+          purpose: 'email_change',
+          isVerified: false,
+          expiresAt: { $gt: new Date() },
+        })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      if (anyOtpRecord) {
+        await this.otpVerificationModel.findByIdAndUpdate(anyOtpRecord._id, { $inc: { attempts: 1 } }, { new: true });
+        throw new BadRequestException('Wrong code. Please check your email and try again.');
+      }
+
+      throw new BadRequestException('Verification code expired. Please request a new code.');
+    }
+
+    if (otpRecord.attempts >= 5) {
+      throw new BadRequestException('Too many failed attempts. Please request a new code.');
+    }
+
+    await this.otpVerificationModel.findByIdAndUpdate(
+      otpRecord._id,
+      { $set: { isVerified: true }, $inc: { attempts: 1 } },
+      { new: true },
+    );
+
+    return {
+      success: true,
+      message: 'New email verified successfully. You can now save profile changes.',
+      email: normalizedEmail,
+    };
   }
 
   async getAddresses(userId: string) {

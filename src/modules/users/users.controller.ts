@@ -12,7 +12,13 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { UpdateProfileDto, CreateAddressDto, UpdateAddressDto } from './dto/users.dto';
+import {
+  UpdateProfileDto,
+  CreateAddressDto,
+  UpdateAddressDto,
+  SendEmailChangeOtpDto,
+  VerifyEmailChangeOtpDto,
+} from './dto/users.dto';
 import { AddAddressWithGeoDto } from './dto/add-address-geo.dto';
 
 @ApiTags('Users')
@@ -35,6 +41,24 @@ export class UsersController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.usersService.updateProfile(userId, dto);
+  }
+
+  @Post('profile/email-change/send-otp')
+  @ApiOperation({ summary: 'Send OTP to new email for profile email change' })
+  sendEmailChangeOtp(
+    @CurrentUser('id') userId: string,
+    @Body() dto: SendEmailChangeOtpDto,
+  ) {
+    return this.usersService.sendEmailChangeOtp(userId, dto.email);
+  }
+
+  @Post('profile/email-change/verify-otp')
+  @ApiOperation({ summary: 'Verify OTP for profile email change' })
+  verifyEmailChangeOtp(
+    @CurrentUser('id') userId: string,
+    @Body() dto: VerifyEmailChangeOtpDto,
+  ) {
+    return this.usersService.verifyEmailChangeOtp(userId, dto.email, dto.otp);
   }
 
   @Get('addresses')
