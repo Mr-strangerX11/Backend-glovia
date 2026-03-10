@@ -73,19 +73,25 @@ export class PromoCodesService {
 
     const discountValue = dto.discountValue ?? dto.discountPercentage;
     if (!isPartial || discountValue !== undefined) {
-      payload.discountValue = Number(discountValue);
+      payload.discountValue = this.toNumber(discountValue, 'discountValue');
     }
 
     if (!isPartial || dto.minOrderAmount !== undefined) {
-      payload.minOrderAmount = dto.minOrderAmount !== undefined ? Number(dto.minOrderAmount) : undefined;
+      payload.minOrderAmount = dto.minOrderAmount !== undefined
+        ? this.toNumber(dto.minOrderAmount, 'minOrderAmount')
+        : undefined;
     }
 
     if (!isPartial || dto.maxDiscount !== undefined) {
-      payload.maxDiscount = dto.maxDiscount !== undefined ? Number(dto.maxDiscount) : undefined;
+      payload.maxDiscount = dto.maxDiscount !== undefined
+        ? this.toNumber(dto.maxDiscount, 'maxDiscount')
+        : undefined;
     }
 
     if (!isPartial || dto.usageLimit !== undefined) {
-      payload.usageLimit = dto.usageLimit !== undefined ? Number(dto.usageLimit) : undefined;
+      payload.usageLimit = dto.usageLimit !== undefined
+        ? this.toNumber(dto.usageLimit, 'usageLimit')
+        : undefined;
     }
 
     if (!isPartial || dto.isActive !== undefined) {
@@ -96,13 +102,38 @@ export class PromoCodesService {
     const validUntil = dto.validUntil ?? dto.expiresAt;
 
     if (!isPartial || validFrom !== undefined) {
-      payload.validFrom = validFrom ? new Date(validFrom) : new Date();
+      payload.validFrom = validFrom ? this.toDate(validFrom, 'validFrom') : new Date();
     }
 
     if (!isPartial || validUntil !== undefined) {
-      payload.validUntil = validUntil ? new Date(validUntil) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      payload.validUntil = validUntil
+        ? this.toDate(validUntil, 'validUntil')
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
+
+    if (payload.validFrom && payload.validUntil && payload.validFrom > payload.validUntil) {
+      throw new BadRequestException('validUntil must be greater than validFrom');
     }
 
     return payload;
+  }
+
+  private toNumber(value: any, field: string): number {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      throw new BadRequestException(`${field} must be a valid number`);
+    }
+    if (parsed < 0) {
+      throw new BadRequestException(`${field} cannot be negative`);
+    }
+    return parsed;
+  }
+
+  private toDate(value: any, field: string): Date {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      throw new BadRequestException(`${field} must be a valid date`);
+    }
+    return parsed;
   }
 }
