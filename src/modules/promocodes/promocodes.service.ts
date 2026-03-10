@@ -1,33 +1,104 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PromoCode } from './promocodes.schema';
+import { Coupon } from '../../database/schemas/coupon.schema';
 
 @Injectable()
 export class PromoCodesService {
   constructor(
-    @InjectModel('PromoCode') private promoCodeModel: Model<PromoCode>
+    @InjectModel(Coupon.name) private couponModel: Model<Coupon>
   ) {}
 
   async create(dto: any) {
-    return this.promoCodeModel.create(dto);
+    const payload = this.mapCouponPayload(dto);
+    return this.couponModel.create(payload);
   }
 
   async findAll() {
-    return this.promoCodeModel.find().lean();
+    const now = new Date();
+    return this.couponModel
+      .find({
+        isActive: true,
+        validFrom: { $lte: now },
+        validUntil: { $gte: now },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async findByCode(code: string) {
-    const promo = await this.promoCodeModel.findOne({ code, isActive: true }).lean();
+    const normalizedCode = (code || '').trim().toUpperCase();
+    const promo = await this.couponModel.findOne({ code: normalizedCode, isActive: true }).lean();
     if (!promo) throw new NotFoundException('Promo code not found');
+
+    const now = new Date();
+    if (promo.validFrom && now < new Date(promo.validFrom)) {
+      throw new BadRequestException('Promo code is not active yet');
+    }
+    if (promo.validUntil && now > new Date(promo.validUntil)) {
+      throw new BadRequestException('Promo code has expired');
+    }
+
     return promo;
   }
 
   async update(id: string, dto: any) {
-    return this.promoCodeModel.findByIdAndUpdate(id, dto, { new: true });
+    const payload = this.mapCouponPayload(dto, true);
+    return this.couponModel.findByIdAndUpdate(id, payload, { new: true });
   }
 
   async remove(id: string) {
-    return this.promoCodeModel.findByIdAndDelete(id);
+    return this.couponModel.findByIdAndDelete(id);
+  }
+
+  private mapCouponPayload(dto: any, isPartial = false) {
+    const payload: any = {};
+
+    if (!isPartial || dto.code !== undefined) {
+      payload.code = String(dto.code || '').trim().toUpperCase();
+    }
+
+    if (!isPartial || dto.description !== undefined) {
+      payload.description = dto.description || undefined;
+    }
+
+    const discountType = dto.discountType || (dto.discountPercentage !== undefined ? 'PERCENTAGE' : undefined);
+    if (!isPartial || discountType !== undefined) {
+      payload.discountType = discountType;
+    }
+
+    const discountValue = dto.discountValue ?? dto.discountPercentage;
+    if (!isPartial || discountValue !== undefined) {
+      payload.discountValue = Number(discountValue);
+    }
+
+    if (!isPartial || dto.minOrderAmount !== undefined) {
+      payload.minOrderAmount = dto.minOrderAmount !== undefined ? Number(dto.minOrderAmount) : undefined;
+    }
+
+    if (!isPartial || dto.maxDiscount !== undefined) {
+      payload.maxDiscount = dto.maxDiscount !== undefined ? Number(dto.maxDiscount) : undefined;
+    }
+
+    if (!isPartial || dto.usageLimit !== undefined) {
+      payload.usageLimit = dto.usageLimit !== undefined ? Number(dto.usageLimit) : undefined;
+    }
+
+    if (!isPartial || dto.isActive !== undefined) {
+      payload.isActive = dto.isActive !== undefined ? Boolean(dto.isActive) : true;
+    }
+
+    const validFrom = dto.validFrom;
+    const validUntil = dto.validUntil ?? dto.expiresAt;
+
+    if (!isPartial || validFrom !== undefined) {
+      payload.validFrom = validFrom ? new Date(validFrom) : new Date();
+    }
+
+    if (!isPartial || validUntil !== undefined) {
+      payload.validUntil = validUntil ? new Date(validUntil) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
+
+    return payload;
   }
 }
