@@ -11,6 +11,15 @@ import { UserRole } from '../../database/schemas/user.schema';
 export class PromoCodesController {
   constructor(private promoCodesService: PromoCodesService) {}
 
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all promo codes for superadmin' })
+  findAllForAdmin() {
+    return this.promoCodesService.findAllForAdmin();
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get all promo codes' })
   findAll() {

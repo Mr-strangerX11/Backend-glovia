@@ -26,6 +26,10 @@ export class PromoCodesService {
       .lean();
   }
 
+  async findAllForAdmin() {
+    return this.couponModel.find().sort({ createdAt: -1 }).lean();
+  }
+
   async findByCode(code: string) {
     const normalizedCode = (code || '').trim().toUpperCase();
     const promo = await this.couponModel.findOne({ code: normalizedCode, isActive: true }).lean();
