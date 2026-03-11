@@ -1,8 +1,8 @@
 {
-  "name": "glovia-nepal-backend",
+  "name": "glovia-marketplace-backend",
   "version": "1.0.0",
-  "description": "Glovia Nepal E-Commerce Backend API",
-  "author": "Glovia Nepal",
+  "description": "glovia Market place E-Commerce Backend API",
+  "author": "glovia Market place",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

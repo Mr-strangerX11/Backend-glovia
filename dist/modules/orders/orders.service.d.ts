@@ -12,6 +12,7 @@ import { Coupon } from '../../database/schemas/coupon.schema';
 import { ProductImage } from '../../database/schemas/product-image.schema';
 import { EmailNotificationService } from '../../common/services/email-notification.service';
 import { User } from '../../database/schemas/user.schema';
+import { TrackOrderDto } from './dto/orders.dto';
 export declare class OrdersService {
     private orderModel;
     private orderItemModel;
@@ -186,7 +187,62 @@ export declare class OrdersService {
     }> & {
         __v: number;
     }>;
+    trackOrder(dto: TrackOrderDto): Promise<{
+        _id: Types.ObjectId;
+        orderNumber: string;
+        status: OrderStatus;
+        createdAt: any;
+        confirmedAt: Date;
+        shippedAt: Date;
+        deliveredAt: Date;
+        cancelledAt: Date;
+        trackingNumber: string;
+        deliveryPartner: string;
+        paymentMethod: PaymentMethod;
+        paymentStatus: PaymentStatus;
+        subtotal: number;
+        discount: number;
+        deliveryCharge: number;
+        total: number;
+        customerName: string;
+        items: {
+            product: any;
+            images: any[];
+            orderId: Types.ObjectId;
+            productId: Types.ObjectId;
+            quantity: number;
+            price: number;
+            total: number;
+            _id: Types.ObjectId;
+            $locals: Record<string, unknown>;
+            $op: "save" | "validate" | "remove" | null;
+            $where: Record<string, unknown>;
+            baseModelName?: string;
+            collection: import("mongoose").Collection;
+            db: import("mongoose").Connection;
+            errors?: import("mongoose").Error.ValidationError;
+            isNew: boolean;
+            schema: import("mongoose").Schema;
+            __v: number;
+        }[];
+        address: Address & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        payment: Payment & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        timeline: {
+            key: string;
+            label: string;
+            at: any;
+        }[];
+    }>;
     private generateOrderNumber;
+    private normalizePhone;
     private calculateDeliveryCharge;
     private calculateDiscount;
 }

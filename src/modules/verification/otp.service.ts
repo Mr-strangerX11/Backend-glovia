@@ -45,7 +45,7 @@ export class OtpService {
    */
   private async sendViaSparrow(phone: string, otp: string, purpose: string): Promise<boolean> {
     const token = process.env.SPARROW_SMS_TOKEN;
-    const from = process.env.SPARROW_SMS_FROM || 'GloviaNepal';
+    const from = process.env.SPARROW_SMS_FROM || 'gloviaMarket';
 
     if (!token) {
       this.logger.warn('Sparrow SMS token not configured');
@@ -101,12 +101,12 @@ export class OtpService {
    */
   private buildMessage(otp: string, purpose: string): string {
     const templates = {
-      phone_verification: `Your Glovia Nepal verification code is: ${otp}. Valid for 5 minutes.`,
-      login: `Your Glovia Nepal login OTP is: ${otp}. Do not share with anyone.`,
-      password_reset: `Your Glovia Nepal password reset code is: ${otp}. Valid for 5 minutes.`,
+      phone_verification: `Your glovia Market place verification code is: ${otp}. Valid for 5 minutes.`,
+      login: `Your glovia Market place login OTP is: ${otp}. Do not share with anyone.`,
+      password_reset: `Your glovia Market place password reset code is: ${otp}. Valid for 5 minutes.`,
     };
 
-    return templates[purpose] || `Your Glovia Nepal OTP is: ${otp}`;
+    return templates[purpose] || `Your glovia Market place OTP is: ${otp}`;
   }
 }
 
@@ -127,7 +127,7 @@ export class EmailOtpService {
   private readonly smtpSecure = process.env.SMTP_SECURE === 'true';
   private readonly smtpUser = process.env.SMTP_USER || process.env.SMTP_USERNAME;
   private readonly smtpPassword = process.env.SMTP_PASSWORD || process.env.SMTP_PASS;
-  private readonly smtpFromName = process.env.SMTP_FROM_NAME || 'Glovia Nepal';
+  private readonly smtpFromName = process.env.SMTP_FROM_NAME || 'glovia Market place';
   private readonly smtpFromEmail = process.env.SMTP_FROM_EMAIL || this.smtpUser;
   private readonly sendgridApiKey = process.env.SENDGRID_API_KEY;
   private readonly sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL || this.smtpFromEmail || 'noreply@glovia.local';
@@ -374,11 +374,11 @@ export class EmailOtpService {
   private buildEmailContent(otp: string, purpose: string): { subject: string; html: string } {
     const templates: Record<string, { subject: string; html: string }> = {
       email_verification: {
-        subject: 'Verify your Glovia Nepal email address',
+        subject: 'Verify your glovia Market place email address',
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h2>Email Verification</h2>
-            <p>Welcome to Glovia Nepal! To complete your registration, please verify your email.</p>
+            <p>Welcome to glovia Market place! To complete your registration, please verify your email.</p>
             <p style="font-size: 24px; font-weight: bold; color: #007bff;">${otp}</p>
             <p>Enter this code to verify your email. Valid for 5 minutes.</p>
             <p style="color: #888; font-size: 12px;">If you didn't request this, please ignore this email.</p>
@@ -386,7 +386,7 @@ export class EmailOtpService {
         `,
       },
       password_reset: {
-        subject: 'Reset your Glovia Nepal password',
+        subject: 'Reset your glovia Market place password',
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h2>Password Reset</h2>
@@ -400,7 +400,7 @@ export class EmailOtpService {
     };
 
     return templates[purpose] || {
-      subject: 'Glovia Nepal Verification Code',
+      subject: 'glovia Market place Verification Code',
       html: `<p>Your verification code: <strong>${otp}</strong></p>`,
     };
   }

@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { UpdateProfileDto, CreateAddressDto, UpdateAddressDto } from './dto/users.dto';
+import { UpdateProfileDto, CreateAddressDto, UpdateAddressDto, SendEmailChangeOtpDto, VerifyEmailChangeOtpDto } from './dto/users.dto';
 import { AddAddressWithGeoDto } from './dto/add-address-geo.dto';
 export declare class UsersController {
     private usersService;
@@ -13,6 +13,15 @@ export declare class UsersController {
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
+    }>;
+    sendEmailChangeOtp(userId: string, dto: SendEmailChangeOtpDto): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    verifyEmailChangeOtp(userId: string, dto: VerifyEmailChangeOtpDto): Promise<{
+        success: boolean;
+        message: string;
+        email: string;
     }>;
     getAddresses(userId: string): Promise<(import("../../database/schemas").Address & Required<{
         _id: import("mongoose").Types.ObjectId;

@@ -104,6 +104,7 @@ export declare class AdminService {
             };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
+            loyaltyPoints: number;
             skinType?: import("../../database/schemas/user.schema").SkinType;
             profileImage?: string;
             refreshToken?: string;
@@ -355,6 +356,7 @@ export declare class AdminService {
         deletedOrderId: string;
     }>;
     private sendOrderConfirmationEmail;
+    private sendOrderStatusChangedEmail;
     getAllCustomers(page?: number, limit?: number): Promise<{
         data: {
             id: string;
@@ -378,6 +380,7 @@ export declare class AdminService {
             };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
+            loyaltyPoints: number;
             skinType?: import("../../database/schemas/user.schema").SkinType;
             profileImage?: string;
             refreshToken?: string;

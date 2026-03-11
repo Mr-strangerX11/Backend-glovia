@@ -80,6 +80,7 @@ export declare class AdminController {
             };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
+            loyaltyPoints: number;
             skinType?: import("../../database/schemas/user.schema").SkinType;
             profileImage?: string;
             refreshToken?: string;
@@ -370,6 +371,7 @@ export declare class AdminController {
             };
             isEmailVerified: boolean;
             isPhoneVerified: boolean;
+            loyaltyPoints: number;
             skinType?: import("../../database/schemas/user.schema").SkinType;
             profileImage?: string;
             refreshToken?: string;

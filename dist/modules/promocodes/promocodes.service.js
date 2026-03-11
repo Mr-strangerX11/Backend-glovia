@@ -16,33 +16,121 @@ exports.PromoCodesService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const coupon_schema_1 = require("../../database/schemas/coupon.schema");
 let PromoCodesService = class PromoCodesService {
-    constructor(promoCodeModel) {
-        this.promoCodeModel = promoCodeModel;
+    constructor(couponModel) {
+        this.couponModel = couponModel;
     }
     async create(dto) {
-        return this.promoCodeModel.create(dto);
+        const payload = this.mapCouponPayload(dto);
+        return this.couponModel.create(payload);
     }
     async findAll() {
-        return this.promoCodeModel.find().lean();
+        const now = new Date();
+        return this.couponModel
+            .find({
+            isActive: true,
+            validFrom: { $lte: now },
+            validUntil: { $gte: now },
+        })
+            .sort({ createdAt: -1 })
+            .lean();
+    }
+    async findAllForAdmin() {
+        return this.couponModel.find().sort({ createdAt: -1 }).lean();
     }
     async findByCode(code) {
-        const promo = await this.promoCodeModel.findOne({ code, isActive: true }).lean();
+        const normalizedCode = (code || '').trim().toUpperCase();
+        const promo = await this.couponModel.findOne({ code: normalizedCode, isActive: true }).lean();
         if (!promo)
             throw new common_1.NotFoundException('Promo code not found');
+        const now = new Date();
+        if (promo.validFrom && now < new Date(promo.validFrom)) {
+            throw new common_1.BadRequestException('Promo code is not active yet');
+        }
+        if (promo.validUntil && now > new Date(promo.validUntil)) {
+            throw new common_1.BadRequestException('Promo code has expired');
+        }
         return promo;
     }
     async update(id, dto) {
-        return this.promoCodeModel.findByIdAndUpdate(id, dto, { new: true });
+        const payload = this.mapCouponPayload(dto, true);
+        return this.couponModel.findByIdAndUpdate(id, payload, { new: true });
     }
     async remove(id) {
-        return this.promoCodeModel.findByIdAndDelete(id);
+        return this.couponModel.findByIdAndDelete(id);
+    }
+    mapCouponPayload(dto, isPartial = false) {
+        const payload = {};
+        if (!isPartial || dto.code !== undefined) {
+            payload.code = String(dto.code || '').trim().toUpperCase();
+        }
+        if (!isPartial || dto.description !== undefined) {
+            payload.description = dto.description || undefined;
+        }
+        const discountType = dto.discountType || (dto.discountPercentage !== undefined ? 'PERCENTAGE' : undefined);
+        if (!isPartial || discountType !== undefined) {
+            payload.discountType = discountType;
+        }
+        const discountValue = dto.discountValue ?? dto.discountPercentage;
+        if (!isPartial || discountValue !== undefined) {
+            payload.discountValue = this.toNumber(discountValue, 'discountValue');
+        }
+        if (!isPartial || dto.minOrderAmount !== undefined) {
+            payload.minOrderAmount = dto.minOrderAmount !== undefined
+                ? this.toNumber(dto.minOrderAmount, 'minOrderAmount')
+                : undefined;
+        }
+        if (!isPartial || dto.maxDiscount !== undefined) {
+            payload.maxDiscount = dto.maxDiscount !== undefined
+                ? this.toNumber(dto.maxDiscount, 'maxDiscount')
+                : undefined;
+        }
+        if (!isPartial || dto.usageLimit !== undefined) {
+            payload.usageLimit = dto.usageLimit !== undefined
+                ? this.toNumber(dto.usageLimit, 'usageLimit')
+                : undefined;
+        }
+        if (!isPartial || dto.isActive !== undefined) {
+            payload.isActive = dto.isActive !== undefined ? Boolean(dto.isActive) : true;
+        }
+        const validFrom = dto.validFrom;
+        const validUntil = dto.validUntil ?? dto.expiresAt;
+        if (!isPartial || validFrom !== undefined) {
+            payload.validFrom = validFrom ? this.toDate(validFrom, 'validFrom') : new Date();
+        }
+        if (!isPartial || validUntil !== undefined) {
+            payload.validUntil = validUntil
+                ? this.toDate(validUntil, 'validUntil')
+                : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        }
+        if (payload.validFrom && payload.validUntil && payload.validFrom > payload.validUntil) {
+            throw new common_1.BadRequestException('validUntil must be greater than validFrom');
+        }
+        return payload;
+    }
+    toNumber(value, field) {
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed)) {
+            throw new common_1.BadRequestException(`${field} must be a valid number`);
+        }
+        if (parsed < 0) {
+            throw new common_1.BadRequestException(`${field} cannot be negative`);
+        }
+        return parsed;
+    }
+    toDate(value, field) {
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) {
+            throw new common_1.BadRequestException(`${field} must be a valid date`);
+        }
+        return parsed;
     }
 };
 exports.PromoCodesService = PromoCodesService;
 exports.PromoCodesService = PromoCodesService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, mongoose_1.InjectModel)('PromoCode')),
+    __param(0, (0, mongoose_1.InjectModel)(coupon_schema_1.Coupon.name)),
     __metadata("design:paramtypes", [mongoose_2.Model])
 ], PromoCodesService);
 //# sourceMappingURL=promocodes.service.js.map

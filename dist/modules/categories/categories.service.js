@@ -115,6 +115,15 @@ let CategoriesService = class CategoriesService {
             products: productsWithImages,
         };
     }
+    async findByParent(parentId) {
+        if (!mongoose_2.Types.ObjectId.isValid(parentId)) {
+            throw new common_1.BadRequestException('Invalid parent category id');
+        }
+        return this.categoryModel
+            .find({ parentId: new mongoose_2.Types.ObjectId(parentId), isActive: true })
+            .sort({ displayOrder: 1, name: 1 })
+            .lean();
+    }
     async create(dto) {
         const payload = { ...dto };
         if (!payload.name || typeof payload.name !== 'string') {
@@ -153,7 +162,7 @@ let CategoriesService = class CategoriesService {
             payload.type = parentCategory.type;
         }
         if (!payload.type) {
-            throw new common_1.BadRequestException('Category type is required for main category');
+            payload.type = schemas_1.ProductCategory.SKINCARE;
         }
         const existingSlug = await this.categoryModel.findOne({ slug: payload.slug }).select('_id').lean();
         if (existingSlug) {

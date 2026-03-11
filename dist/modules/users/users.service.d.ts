@@ -2,11 +2,16 @@ import { Model, Types } from 'mongoose';
 import { UpdateProfileDto, CreateAddressDto, UpdateAddressDto } from './dto/users.dto';
 import { AddAddressWithGeoDto } from './dto/add-address-geo.dto';
 import { User, Address, Order } from '../../database/schemas';
+import { OtpVerification } from '../../database/schemas/otp-verification.schema';
+import { OtpService, EmailOtpService } from '../verification/otp.service';
 export declare class UsersService {
     private userModel;
     private addressModel;
     private orderModel;
-    constructor(userModel: Model<User>, addressModel: Model<Address>, orderModel: Model<Order>);
+    private otpVerificationModel;
+    private otpService;
+    private emailOtpService;
+    constructor(userModel: Model<User>, addressModel: Model<Address>, orderModel: Model<Order>, otpVerificationModel: Model<OtpVerification>, otpService: OtpService, emailOtpService: EmailOtpService);
     updateUserPermissions(userId: string, permissions: Record<string, boolean>): Promise<User & Required<{
         _id: Types.ObjectId;
     }> & {
@@ -21,6 +26,15 @@ export declare class UsersService {
         _id: Types.ObjectId;
     }> & {
         __v: number;
+    }>;
+    sendEmailChangeOtp(userId: string, email: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    verifyEmailChangeOtp(userId: string, email: string, otp: string): Promise<{
+        success: boolean;
+        message: string;
+        email: string;
     }>;
     getAddresses(userId: string): Promise<(Address & Required<{
         _id: Types.ObjectId;

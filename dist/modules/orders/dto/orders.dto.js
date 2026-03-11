@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateOrderDto = void 0;
+exports.TrackOrderDto = exports.CreateOrderDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -65,4 +65,20 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateOrderDto.prototype, "clearCart", void 0);
+class TrackOrderDto {
+}
+exports.TrackOrderDto = TrackOrderDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'ORD1739345345001' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TrackOrderDto.prototype, "orderNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Customer email or phone number used to place the order',
+        example: 'customer@example.com',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TrackOrderDto.prototype, "identifier", void 0);
 //# sourceMappingURL=orders.dto.js.map

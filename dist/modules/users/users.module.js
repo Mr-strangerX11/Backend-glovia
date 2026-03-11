@@ -14,6 +14,7 @@ const users_controller_1 = require("./users.controller");
 const users_admin_controller_1 = require("./users.admin.controller");
 const schemas_1 = require("../../database/schemas");
 const auditlog_module_1 = require("../auditlog/auditlog.module");
+const verification_module_1 = require("../verification/verification.module");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
@@ -24,8 +25,10 @@ exports.UsersModule = UsersModule = __decorate([
                 { name: 'User', schema: schemas_1.UserSchema },
                 { name: 'Address', schema: schemas_1.AddressSchema },
                 { name: 'Order', schema: schemas_1.OrderSchema },
+                { name: 'OtpVerification', schema: schemas_1.OtpVerificationSchema },
             ]),
             auditlog_module_1.AuditLogModule,
+            verification_module_1.VerificationModule,
         ],
         controllers: [users_controller_1.UsersController, users_admin_controller_1.AdminUsersController],
         providers: [users_service_1.UsersService],

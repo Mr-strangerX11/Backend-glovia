@@ -1,6 +1,7 @@
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto, VerifyEmailOtpDto } from './dto/auth.dto';
 import { Request } from 'express';
+import { UserRole } from '../../database/schemas/user.schema';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
@@ -33,7 +34,7 @@ export declare class AuthController {
             phone: string;
             firstName: string;
             lastName: string;
-            role: import("../../database/schemas").UserRole;
+            role: UserRole;
             trustScore: number;
             isEmailVerified: true;
             isPhoneVerified: boolean;
@@ -47,6 +48,28 @@ export declare class AuthController {
         message: string;
     }>;
     getProfile(user: any): Promise<any>;
+    getEmailHealth(user: any): Promise<{
+        nodeEnv: string;
+        configuredProvider: string;
+        providerSequence: ("mock" | "smtp" | "sendgrid" | "ses")[];
+        allowMockFallback: boolean;
+        smtp: {
+            configured: boolean;
+            hostConfigured: boolean;
+            port: number;
+            secure: boolean;
+            usernameConfigured: boolean;
+            passwordConfigured: boolean;
+            fromEmailConfigured: boolean;
+            verified: boolean;
+            verifyError: string;
+        };
+        sendgrid: {
+            configured: boolean;
+            fromEmailConfigured: boolean;
+        };
+        canAttemptRealDelivery: boolean;
+    }>;
     forgotPassword(dto: ForgotPasswordDto): Promise<{
         message: string;
     }>;

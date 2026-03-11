@@ -30,6 +30,12 @@ let UsersController = class UsersController {
     updateProfile(userId, dto) {
         return this.usersService.updateProfile(userId, dto);
     }
+    sendEmailChangeOtp(userId, dto) {
+        return this.usersService.sendEmailChangeOtp(userId, dto.email);
+    }
+    verifyEmailChangeOtp(userId, dto) {
+        return this.usersService.verifyEmailChangeOtp(userId, dto.email, dto.otp);
+    }
     getAddresses(userId) {
         return this.usersService.getAddresses(userId);
     }
@@ -67,6 +73,24 @@ __decorate([
     __metadata("design:paramtypes", [String, users_dto_1.UpdateProfileDto]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "updateProfile", null);
+__decorate([
+    (0, common_1.Post)('profile/email-change/send-otp'),
+    (0, swagger_1.ApiOperation)({ summary: 'Send OTP to new email for profile email change' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, users_dto_1.SendEmailChangeOtpDto]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "sendEmailChangeOtp", null);
+__decorate([
+    (0, common_1.Post)('profile/email-change/verify-otp'),
+    (0, swagger_1.ApiOperation)({ summary: 'Verify OTP for profile email change' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, users_dto_1.VerifyEmailChangeOtpDto]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "verifyEmailChangeOtp", null);
 __decorate([
     (0, common_1.Get)('addresses'),
     (0, swagger_1.ApiOperation)({ summary: 'Get user addresses' }),

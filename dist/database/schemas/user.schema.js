@@ -81,6 +81,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isPhoneVerified", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "loyaltyPoints", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: String, enum: SkinType }),
     __metadata("design:type", String)
 ], User.prototype, "skinType", void 0);

@@ -30,6 +30,11 @@ export declare class CategoriesController {
         schema: import("mongoose").Schema;
         __v: number;
     }[]>;
+    findByParent(parentId: string): Promise<(import("../../database/schemas").Category & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
     findBySlug(slug: string): Promise<{
         children: (import("../../database/schemas").Category & Required<{
             _id: import("mongoose").Types.ObjectId;

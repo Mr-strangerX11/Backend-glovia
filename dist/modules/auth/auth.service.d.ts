@@ -67,4 +67,26 @@ export declare class AuthService {
     resendVerificationOtp(email: string): Promise<{
         message: string;
     }>;
+    getEmailDeliveryHealth(): Promise<{
+        nodeEnv: string;
+        configuredProvider: string;
+        providerSequence: ("mock" | "smtp" | "sendgrid" | "ses")[];
+        allowMockFallback: boolean;
+        smtp: {
+            configured: boolean;
+            hostConfigured: boolean;
+            port: number;
+            secure: boolean;
+            usernameConfigured: boolean;
+            passwordConfigured: boolean;
+            fromEmailConfigured: boolean;
+            verified: boolean;
+            verifyError: string;
+        };
+        sendgrid: {
+            configured: boolean;
+            fromEmailConfigured: boolean;
+        };
+        canAttemptRealDelivery: boolean;
+    }>;
 }

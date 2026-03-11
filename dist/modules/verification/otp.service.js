@@ -40,7 +40,7 @@ let OtpService = OtpService_1 = class OtpService {
     }
     async sendViaSparrow(phone, otp, purpose) {
         const token = process.env.SPARROW_SMS_TOKEN;
-        const from = process.env.SPARROW_SMS_FROM || 'GloviaNepal';
+        const from = process.env.SPARROW_SMS_FROM || 'gloviaMarket';
         if (!token) {
             this.logger.warn('Sparrow SMS token not configured');
             return false;
@@ -77,11 +77,11 @@ let OtpService = OtpService_1 = class OtpService {
     }
     buildMessage(otp, purpose) {
         const templates = {
-            phone_verification: `Your Glovia Nepal verification code is: ${otp}. Valid for 5 minutes.`,
-            login: `Your Glovia Nepal login OTP is: ${otp}. Do not share with anyone.`,
-            password_reset: `Your Glovia Nepal password reset code is: ${otp}. Valid for 5 minutes.`,
+            phone_verification: `Your glovia Market place verification code is: ${otp}. Valid for 5 minutes.`,
+            login: `Your glovia Market place login OTP is: ${otp}. Do not share with anyone.`,
+            password_reset: `Your glovia Market place password reset code is: ${otp}. Valid for 5 minutes.`,
         };
-        return templates[purpose] || `Your Glovia Nepal OTP is: ${otp}`;
+        return templates[purpose] || `Your glovia Market place OTP is: ${otp}`;
     }
 };
 exports.OtpService = OtpService;
@@ -91,37 +91,128 @@ exports.OtpService = OtpService = OtpService_1 = __decorate([
 let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
     constructor() {
         this.logger = new common_1.Logger(EmailOtpService_1.name);
-        this.provider = process.env.EMAIL_PROVIDER || 'mock';
-        if (this.provider === 'smtp') {
+        this.provider = (process.env.EMAIL_PROVIDER || '').toLowerCase();
+        this.allowMockFallback = process.env.EMAIL_ALLOW_MOCK_FALLBACK === 'true';
+        this.isProduction = process.env.NODE_ENV === 'production';
+        this.transporter = null;
+        this.smtpHost = process.env.SMTP_HOST;
+        this.smtpPort = parseInt(process.env.SMTP_PORT || '587');
+        this.smtpSecure = process.env.SMTP_SECURE === 'true';
+        this.smtpUser = process.env.SMTP_USER || process.env.SMTP_USERNAME;
+        this.smtpPassword = process.env.SMTP_PASSWORD || process.env.SMTP_PASS;
+        this.smtpFromName = process.env.SMTP_FROM_NAME || 'glovia Market place';
+        this.smtpFromEmail = process.env.SMTP_FROM_EMAIL || this.smtpUser;
+        this.sendgridApiKey = process.env.SENDGRID_API_KEY;
+        this.sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL || this.smtpFromEmail || 'noreply@glovia.local';
+        if (this.hasSmtpConfig()) {
             this.transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: parseInt(process.env.SMTP_PORT || '587'),
-                secure: process.env.SMTP_SECURE === 'true',
+                host: this.smtpHost,
+                port: this.smtpPort,
+                secure: this.smtpSecure,
                 auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASSWORD,
+                    user: this.smtpUser,
+                    pass: this.smtpPassword,
                 },
             });
         }
     }
-    async sendEmailOtp(email, otp, purpose) {
-        try {
-            switch (this.provider) {
-                case 'smtp':
-                    return await this.sendViaSMTP(email, otp, purpose);
-                case 'sendgrid':
-                    return await this.sendViaSendGrid(email, otp, purpose);
-                case 'ses':
-                    return await this.sendViaSES(email, otp, purpose);
-                case 'mock':
-                default:
-                    return this.sendViaMock(email, otp, purpose);
+    hasSmtpConfig() {
+        return !!(this.smtpHost && this.smtpUser && this.smtpPassword);
+    }
+    getProviderSequence() {
+        const configured = [];
+        if (this.provider === 'smtp' || this.provider === 'sendgrid' || this.provider === 'ses' || this.provider === 'mock') {
+            configured.push(this.provider);
+        }
+        if (this.hasSmtpConfig() && !configured.includes('smtp'))
+            configured.push('smtp');
+        if (this.sendgridApiKey && !configured.includes('sendgrid'))
+            configured.push('sendgrid');
+        if (!configured.includes('ses') && this.provider === 'ses')
+            configured.push('ses');
+        if (configured.length === 0 || this.provider === 'mock' || this.allowMockFallback || !this.isProduction) {
+            configured.push('mock');
+        }
+        return configured;
+    }
+    async getDeliveryHealth() {
+        let smtpVerified = null;
+        let smtpVerifyError = null;
+        if (this.transporter) {
+            try {
+                const verifyPromise = this.transporter.verify();
+                smtpVerified = await Promise.race([
+                    verifyPromise,
+                    new Promise((resolve) => setTimeout(() => resolve(false), 3000)),
+                ]);
+                if (!smtpVerified) {
+                    smtpVerifyError = 'SMTP verify timeout or failed';
+                }
+            }
+            catch (error) {
+                smtpVerified = false;
+                smtpVerifyError = error?.message || 'SMTP verify failed';
             }
         }
-        catch (error) {
-            this.logger.error(`Failed to send email OTP to ${email}:`, error);
-            return false;
+        const providers = this.getProviderSequence();
+        return {
+            nodeEnv: process.env.NODE_ENV || 'development',
+            configuredProvider: this.provider || 'auto',
+            providerSequence: providers,
+            allowMockFallback: this.allowMockFallback,
+            smtp: {
+                configured: this.hasSmtpConfig(),
+                hostConfigured: !!this.smtpHost,
+                port: this.smtpPort,
+                secure: this.smtpSecure,
+                usernameConfigured: !!this.smtpUser,
+                passwordConfigured: !!this.smtpPassword,
+                fromEmailConfigured: !!this.smtpFromEmail,
+                verified: smtpVerified,
+                verifyError: smtpVerifyError,
+            },
+            sendgrid: {
+                configured: !!this.sendgridApiKey,
+                fromEmailConfigured: !!this.sendgridFromEmail,
+            },
+            canAttemptRealDelivery: providers.some((provider) => provider === 'smtp' || provider === 'sendgrid' || provider === 'ses'),
+        };
+    }
+    async sendEmailOtp(email, otp, purpose) {
+        const providers = this.getProviderSequence();
+        for (const provider of providers) {
+            try {
+                switch (provider) {
+                    case 'smtp':
+                        if (await this.sendViaSMTP(email, otp, purpose)) {
+                            return true;
+                        }
+                        break;
+                    case 'sendgrid':
+                        if (await this.sendViaSendGrid(email, otp, purpose)) {
+                            return true;
+                        }
+                        break;
+                    case 'ses':
+                        if (await this.sendViaSES(email, otp, purpose)) {
+                            return true;
+                        }
+                        break;
+                    case 'mock':
+                        if (this.sendViaMock(email, otp, purpose)) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (error) {
+                this.logger.error(`Email provider ${provider} failed for ${email}:`, error);
+            }
         }
+        this.logger.error(`Failed to send email OTP to ${email} via providers: ${providers.join(', ')}`);
+        return false;
     }
     async sendViaSMTP(email, otp, purpose) {
         if (!this.transporter) {
@@ -129,8 +220,8 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
             return false;
         }
         const { subject, html } = this.buildEmailContent(otp, purpose);
-        const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
-        const fromName = process.env.SMTP_FROM_NAME || 'Glovia Nepal';
+        const fromEmail = this.smtpFromEmail;
+        const fromName = this.smtpFromName;
         if (!fromEmail) {
             this.logger.warn('SMTP_FROM_EMAIL or SMTP_USER not configured');
             return false;
@@ -142,7 +233,13 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
                 subject,
                 html,
             });
-            this.logger.log(`Email sent successfully to ${email}: ${info.messageId}`);
+            const acceptedCount = Array.isArray(info.accepted) ? info.accepted.length : 0;
+            const rejectedCount = Array.isArray(info.rejected) ? info.rejected.length : 0;
+            if (acceptedCount === 0 || rejectedCount > 0) {
+                this.logger.error(`SMTP accepted=${acceptedCount}, rejected=${rejectedCount} for ${email}`);
+                return false;
+            }
+            this.logger.log(`Email accepted by SMTP for ${email}: ${info.messageId}`);
             return true;
         }
         catch (error) {
@@ -151,7 +248,7 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
         }
     }
     async sendViaSendGrid(email, otp, purpose) {
-        const apiKey = process.env.SENDGRID_API_KEY;
+        const apiKey = this.sendgridApiKey;
         if (!apiKey) {
             this.logger.warn('SendGrid API key not configured');
             return false;
@@ -166,12 +263,18 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
                 },
                 body: JSON.stringify({
                     personalizations: [{ to: [{ email }] }],
-                    from: { email: process.env.SENDGRID_FROM_EMAIL || 'noreply@glovia.local', name: 'Glovia Nepal' },
+                    from: { email: this.sendgridFromEmail, name: this.smtpFromName },
                     subject,
                     content: [{ type: 'text/html', value: html }],
                 }),
             });
-            return response.status === 202;
+            if (response.status !== 202) {
+                const text = await response.text();
+                this.logger.error(`SendGrid rejected email (${response.status}) for ${email}: ${text}`);
+                return false;
+            }
+            this.logger.log(`Email accepted by SendGrid for ${email}`);
+            return true;
         }
         catch (error) {
             this.logger.error('SendGrid error:', error);
@@ -183,6 +286,10 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
         return false;
     }
     sendViaMock(email, otp, purpose) {
+        if (this.isProduction && !this.allowMockFallback) {
+            this.logger.error('Mock email fallback is disabled in production');
+            return false;
+        }
         const { subject, html } = this.buildEmailContent(otp, purpose);
         this.logger.log(`[MOCK EMAIL] To: ${email} | Subject: ${subject}`);
         console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -195,11 +302,11 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
     buildEmailContent(otp, purpose) {
         const templates = {
             email_verification: {
-                subject: 'Verify your Glovia Nepal email address',
+                subject: 'Verify your glovia Market place email address',
                 html: `
           <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h2>Email Verification</h2>
-            <p>Welcome to Glovia Nepal! To complete your registration, please verify your email.</p>
+            <p>Welcome to glovia Market place! To complete your registration, please verify your email.</p>
             <p style="font-size: 24px; font-weight: bold; color: #007bff;">${otp}</p>
             <p>Enter this code to verify your email. Valid for 5 minutes.</p>
             <p style="color: #888; font-size: 12px;">If you didn't request this, please ignore this email.</p>
@@ -207,7 +314,7 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
         `,
             },
             password_reset: {
-                subject: 'Reset your Glovia Nepal password',
+                subject: 'Reset your glovia Market place password',
                 html: `
           <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h2>Password Reset</h2>
@@ -220,7 +327,7 @@ let EmailOtpService = EmailOtpService_1 = class EmailOtpService {
             },
         };
         return templates[purpose] || {
-            subject: 'Glovia Nepal Verification Code',
+            subject: 'glovia Market place Verification Code',
             html: `<p>Your verification code: <strong>${otp}</strong></p>`,
         };
     }

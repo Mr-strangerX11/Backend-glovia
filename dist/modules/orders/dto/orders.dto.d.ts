@@ -11,4 +11,8 @@ export declare class CreateOrderDto {
     note?: string;
     clearCart?: boolean;
 }
+export declare class TrackOrderDto {
+    orderNumber: string;
+    identifier: string;
+}
 export {};

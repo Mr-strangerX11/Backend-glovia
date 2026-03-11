@@ -73,7 +73,7 @@ async function bootstrap() {
     app.setGlobalPrefix(apiPrefix);
     if (process.env.NODE_ENV !== 'production') {
         const config = new swagger_1.DocumentBuilder()
-            .setTitle('Glovia Nepal API')
+            .setTitle('glovia Market place API')
             .setDescription('E-Commerce Platform API Documentation')
             .setVersion('1.0')
             .addBearerAuth()
@@ -90,7 +90,7 @@ async function bootstrap() {
     }
     const port = configService.get('PORT') || 3001;
     await app.listen(port, '0.0.0.0');
-    console.log(`🚀 Glovia Nepal API is running on: http://0.0.0.0:${port}/${apiPrefix}`);
+    console.log(`🚀 glovia Market place API is running on: http://0.0.0.0:${port}/${apiPrefix}`);
     if (process.env.NODE_ENV !== 'production') {
         console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
     }

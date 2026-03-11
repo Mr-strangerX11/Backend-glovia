@@ -49,8 +49,14 @@ let AdminService = class AdminService {
         this.emailNotificationService = emailNotificationService;
     }
     async getDashboard() {
+        const cancelledStatuses = [order_schema_1.OrderStatus.CANCELLED, 'CANCELED'];
         const totalOrders = await this.orderModel.countDocuments();
         const totalRevenue = await this.orderModel.aggregate([
+            {
+                $match: {
+                    status: { $nin: cancelledStatuses }
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -106,7 +112,8 @@ let AdminService = class AdminService {
         const revenueByMonth = await this.orderModel.aggregate([
             {
                 $match: {
-                    createdAt: { $gte: sixMonthsAgo }
+                    createdAt: { $gte: sixMonthsAgo },
+                    status: { $nin: cancelledStatuses }
                 }
             },
             {
@@ -460,9 +467,15 @@ let AdminService = class AdminService {
         if (!mongoose_2.Types.ObjectId.isValid(orderId)) {
             throw new common_1.BadRequestException('Invalid order ID');
         }
+        if (!status) {
+            throw new common_1.BadRequestException('Order status is required');
+        }
         const order = await this.orderModel.findById(orderId).lean();
         if (!order) {
             throw new common_1.NotFoundException('Order not found');
+        }
+        if (order.status === status) {
+            return order;
         }
         const updateData = { status };
         if (status === order_schema_1.OrderStatus.CONFIRMED) {
@@ -481,6 +494,7 @@ let AdminService = class AdminService {
         if (status === order_schema_1.OrderStatus.CONFIRMED) {
             await this.sendOrderConfirmationEmail(orderId);
         }
+        await this.sendOrderStatusChangedEmail(orderId, status);
         return updatedOrder;
     }
     async deleteOrder(orderId) {
@@ -545,6 +559,27 @@ let AdminService = class AdminService {
                     landmark: address?.landmark || undefined,
                 },
             }, adminEmail);
+        }
+        catch (error) {
+        }
+    }
+    async sendOrderStatusChangedEmail(orderId, status) {
+        try {
+            const order = await this.orderModel.findById(orderId).lean();
+            if (!order)
+                return;
+            const user = await this.userModel.findById(order.userId).lean();
+            if (!user?.email)
+                return;
+            await this.emailNotificationService.sendOrderStatusChangedEmail({
+                orderNumber: order.orderNumber,
+                status,
+                customerName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer',
+                customerEmail: user.email,
+                trackingNumber: order.trackingNumber,
+                deliveryPartner: order.deliveryPartner,
+                updatedAt: new Date(),
+            });
         }
         catch (error) {
         }
@@ -934,8 +969,28 @@ let AdminService = class AdminService {
         return banner;
     }
     async createBanner(createBannerDto) {
-        const banner = new this.bannerModel(createBannerDto);
-        return banner.save();
+        const image = createBannerDto?.image || createBannerDto?.imageUrl;
+        if (!image) {
+            throw new common_1.BadRequestException('Banner image is required');
+        }
+        const payload = {
+            title: createBannerDto?.title,
+            subtitle: createBannerDto?.subtitle,
+            image,
+            mobileImage: createBannerDto?.mobileImage,
+            link: createBannerDto?.link,
+            displayOrder: Number.isFinite(Number(createBannerDto?.displayOrder))
+                ? Number(createBannerDto.displayOrder)
+                : (Number.isFinite(Number(createBannerDto?.priority)) ? Number(createBannerDto.priority) : 0),
+            isActive: typeof createBannerDto?.isActive === 'boolean' ? createBannerDto.isActive : true,
+        };
+        const banner = new this.bannerModel(payload);
+        try {
+            return await banner.save();
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error?.message || 'Failed to create banner');
+        }
     }
     async updateBanner(id, updateBannerDto) {
         const banner = await this.bannerModel.findByIdAndUpdate(id, updateBannerDto, { new: true });

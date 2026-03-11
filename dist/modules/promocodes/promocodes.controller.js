@@ -24,6 +24,9 @@ let PromoCodesController = class PromoCodesController {
     constructor(promoCodesService) {
         this.promoCodesService = promoCodesService;
     }
+    findAllForAdmin() {
+        return this.promoCodesService.findAllForAdmin();
+    }
     findAll() {
         return this.promoCodesService.findAll();
     }
@@ -42,6 +45,16 @@ let PromoCodesController = class PromoCodesController {
 };
 exports.PromoCodesController = PromoCodesController;
 __decorate([
+    (0, common_1.Get)('admin/all'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.SUPER_ADMIN),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all promo codes for superadmin' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PromoCodesController.prototype, "findAllForAdmin", null);
+__decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all promo codes' }),
     __metadata("design:type", Function),
@@ -59,7 +72,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.SUPER_ADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create promo code' }),
     __param(0, (0, common_1.Body)()),
@@ -70,7 +83,7 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.SUPER_ADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Update promo code' }),
     __param(0, (0, common_1.Param)('id')),
@@ -82,7 +95,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.SUPER_ADMIN),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.SUPER_ADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Delete promo code' }),
     __param(0, (0, common_1.Param)('id')),

@@ -20,9 +20,13 @@ const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const orders_dto_1 = require("./dto/orders.dto");
 const order_schema_1 = require("../../database/schemas/order.schema");
+const public_decorator_1 = require("../../common/decorators/public.decorator");
 let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
+    }
+    track(query) {
+        return this.ordersService.trackOrder(query);
     }
     create(userId, dto) {
         console.log('OrdersController: userId received:', userId);
@@ -39,6 +43,15 @@ let OrdersController = class OrdersController {
     }
 };
 exports.OrdersController = OrdersController;
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('track'),
+    (0, swagger_1.ApiOperation)({ summary: 'Track order by order number and email/phone' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [orders_dto_1.TrackOrderDto]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "track", null);
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new order' }),

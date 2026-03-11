@@ -283,6 +283,9 @@ let AuthService = class AuthService {
             message: 'Verification OTP resent successfully. Please check your email.',
         };
     }
+    async getEmailDeliveryHealth() {
+        return this.emailOtpService.getDeliveryHealth();
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

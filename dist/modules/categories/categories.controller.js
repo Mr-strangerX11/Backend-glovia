@@ -33,6 +33,9 @@ let CategoriesController = class CategoriesController {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         return categories;
     }
+    findByParent(parentId) {
+        return this.categoriesService.findByParent(parentId);
+    }
     findBySlug(slug) {
         return this.categoriesService.findBySlug(slug);
     }
@@ -83,6 +86,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('parent/:parentId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get sub-categories by parent category id' }),
+    __param(0, (0, common_1.Param)('parentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], CategoriesController.prototype, "findByParent", null);
 __decorate([
     (0, common_1.Get)(':slug'),
     (0, swagger_1.ApiOperation)({ summary: 'Get category by slug' }),

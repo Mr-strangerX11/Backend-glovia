@@ -1,10 +1,18 @@
 import { SkinType } from '../../../database/schemas/user.schema';
 export declare class UpdateProfileDto {
+    email?: string;
     firstName?: string;
     lastName?: string;
     phone?: string;
     skinType?: SkinType;
     profileImage?: string;
+}
+export declare class SendEmailChangeOtpDto {
+    email: string;
+}
+export declare class VerifyEmailChangeOtpDto {
+    email: string;
+    otp: string;
 }
 export declare class CreateAddressDto {
     fullName: string;

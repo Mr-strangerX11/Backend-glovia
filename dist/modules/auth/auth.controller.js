@@ -19,6 +19,7 @@ const auth_service_1 = require("./auth.service");
 const auth_dto_1 = require("./dto/auth.dto");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const user_schema_1 = require("../../database/schemas/user.schema");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -47,6 +48,13 @@ let AuthController = class AuthController {
     }
     async getProfile(user) {
         return user;
+    }
+    async getEmailHealth(user) {
+        const role = user?.role;
+        if (role !== user_schema_1.UserRole.ADMIN && role !== user_schema_1.UserRole.SUPER_ADMIN) {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        return this.authService.getEmailDeliveryHealth();
     }
     async forgotPassword(dto) {
         return this.authService.forgotPassword(dto);
@@ -123,6 +131,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Get)('email-health'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get email delivery diagnostics (admin only)' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getEmailHealth", null);
 __decorate([
     (0, common_1.Post)('password/forgot'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

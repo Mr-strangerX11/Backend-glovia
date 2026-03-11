@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PromoCodesModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const promocodes_schema_1 = require("./promocodes.schema");
+const coupon_schema_1 = require("../../database/schemas/coupon.schema");
 const promocodes_service_1 = require("./promocodes.service");
 const promocodes_controller_1 = require("./promocodes.controller");
 let PromoCodesModule = class PromoCodesModule {
@@ -19,7 +19,7 @@ exports.PromoCodesModule = PromoCodesModule = __decorate([
     (0, common_1.Module)({
         imports: [
             mongoose_1.MongooseModule.forFeature([
-                { name: 'PromoCode', schema: promocodes_schema_1.PromoCodeSchema },
+                { name: coupon_schema_1.Coupon.name, schema: coupon_schema_1.CouponSchema },
             ]),
         ],
         providers: [promocodes_service_1.PromoCodesService],

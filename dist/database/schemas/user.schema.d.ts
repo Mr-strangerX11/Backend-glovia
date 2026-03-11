@@ -34,6 +34,7 @@ export declare class User extends Document {
     };
     isEmailVerified: boolean;
     isPhoneVerified: boolean;
+    loyaltyPoints: number;
     skinType?: SkinType;
     profileImage?: string;
     refreshToken?: string;
@@ -154,6 +155,15 @@ export declare const UserSchema: import("mongoose").Schema<User, import("mongoos
         id: string;
     }>;
     isPhoneVerified?: import("mongoose").SchemaDefinitionProperty<boolean, User, Document<unknown, {}, User, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<User & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    loyaltyPoints?: import("mongoose").SchemaDefinitionProperty<number, User, Document<unknown, {}, User, {
         id: string;
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<User & Required<{
         _id: Types.ObjectId;

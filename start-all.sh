@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Glovia Nepal Backend - Complete Startup Script
+# glovia Market place Backend - Complete Startup Script
 # Starts both NestJS API and OTP Authentication System
 
 set -e
 
 echo "=========================================="
-echo "🚀 Glovia Nepal Backend Startup"
+echo "🚀 glovia Market place Backend Startup"
 echo "=========================================="
 echo ""
 
@@ -162,6 +162,6 @@ echo "=========================================="
 echo "🎉 Backend initialization complete!"
 echo "=========================================="
 echo ""
-echo "Your Glovia Nepal backend is ready to use."
+echo "Your glovia Market place backend is ready to use."
 echo "Frontend should connect to http://localhost:3001"
 echo ""

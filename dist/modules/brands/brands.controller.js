@@ -61,8 +61,16 @@ let BrandsController = class BrandsController {
     }
     async updateBrand(id, dto, req) {
         const brand = await this.brandsService.updateBrand(id, dto);
-        const admin = req.user;
-        await this.auditLogService.log('UPDATE_BRAND', admin._id, admin.email, id, { dto });
+        const admin = req.user || {};
+        const adminId = admin._id || admin.id || admin.userId;
+        const adminEmail = admin.email || admin.username || 'unknown';
+        try {
+            if (adminId) {
+                await this.auditLogService.log('UPDATE_BRAND', adminId, adminEmail, id, { dto });
+            }
+        }
+        catch {
+        }
         return {
             success: true,
             message: 'Brand updated successfully',
@@ -71,8 +79,16 @@ let BrandsController = class BrandsController {
     }
     async deleteBrand(id, req) {
         await this.brandsService.deleteBrand(id);
-        const admin = req.user;
-        await this.auditLogService.log('DELETE_BRAND', admin._id, admin.email, id, {});
+        const admin = req.user || {};
+        const adminId = admin._id || admin.id || admin.userId;
+        const adminEmail = admin.email || admin.username || 'unknown';
+        try {
+            if (adminId) {
+                await this.auditLogService.log('DELETE_BRAND', adminId, adminEmail, id, {});
+            }
+        }
+        catch {
+        }
         return {
             success: true,
             message: 'Brand deleted successfully',

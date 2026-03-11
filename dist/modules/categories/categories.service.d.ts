@@ -96,6 +96,11 @@ export declare class CategoriesService {
         schema: import("mongoose").Schema;
         __v: number;
     }>;
+    findByParent(parentId: string): Promise<(Category & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
     create(dto: any): Promise<import("mongoose").Document<unknown, {}, Category, {}, import("mongoose").DefaultSchemaOptions> & Category & Required<{
         _id: Types.ObjectId;
     }> & {
