@@ -67,7 +67,7 @@ export class EmailNotificationService {
     const subject = `Order Confirmed - ${payload.orderNumber}`;
     const html = this.buildOrderConfirmedHtml(payload);
 
-    const fromName = process.env.SMTP_FROM_NAME || 'glovia Market place';
+    const fromName = process.env.SMTP_FROM_NAME || 'Glovia Market place';
     const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'noreply@glovia.local';
 
     const recipients = [payload.customerEmail, adminEmail].filter(Boolean).join(',');
@@ -114,7 +114,7 @@ export class EmailNotificationService {
     const subject = `Order Update - ${payload.orderNumber} is ${payload.status}`;
     const html = this.buildOrderStatusChangedHtml(payload);
 
-    const fromName = process.env.SMTP_FROM_NAME || 'glovia Market place';
+    const fromName = process.env.SMTP_FROM_NAME || 'Glovia Market place';
     const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'noreply@glovia.local';
     const recipients = payload.customerEmail;
 
@@ -175,8 +175,8 @@ export class EmailNotificationService {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-family: Arial, sans-serif;">
           <tr>
             <td style="background: #1e293b; padding: 24px 0; text-align: center;">
-              <img src="https://glovia.com.np/logo.png" alt="glovia Market place" style="height: 40px; margin-bottom: 8px;" />
-              <h1 style="color: #fff; font-size: 24px; margin: 0; letter-spacing: 1px;">glovia Market place</h1>
+              <img src="https://glovia.com.np/logo.png" alt="Glovia Market place" style="height: 40px; margin-bottom: 8px;" />
+              <h1 style="color: #fff; font-size: 24px; margin: 0; letter-spacing: 1px;">Glovia Market place</h1>
             </td>
           </tr>
           <tr>
@@ -220,12 +220,12 @@ export class EmailNotificationService {
                 ${payload.address.landmark ? `<p style=\"margin: 0 0 4px 0;\">Landmark: ${payload.address.landmark}</p>` : ''}
               </div>
 
-              <p style="margin-top: 32px; font-size: 16px; color: #64748b;">Thank you for shopping with <b>glovia Market place</b>!<br/>If you have any questions, reply to this email or contact our support.</p>
+              <p style="margin-top: 32px; font-size: 16px; color: #64748b;">Thank you for shopping with <b>Glovia Market place</b>!<br/>If you have any questions, reply to this email or contact our support.</p>
             </td>
           </tr>
           <tr>
             <td style="background: #f1f5f9; text-align: center; padding: 16px; color: #64748b; font-size: 13px;">
-              &copy; ${new Date().getFullYear()} glovia Market place. All rights reserved.
+              &copy; ${new Date().getFullYear()} Glovia Market place. All rights reserved.
             </td>
           </tr>
         </table>
@@ -252,7 +252,7 @@ export class EmailNotificationService {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-family: Arial, sans-serif;">
           <tr>
             <td style="background: #1e293b; padding: 24px 0; text-align: center;">
-              <h1 style="color: #fff; font-size: 24px; margin: 0; letter-spacing: 1px;">glovia Market place</h1>
+              <h1 style="color: #fff; font-size: 24px; margin: 0; letter-spacing: 1px;">Glovia Market place</h1>
             </td>
           </tr>
           <tr>
@@ -274,7 +274,7 @@ export class EmailNotificationService {
           </tr>
           <tr>
             <td style="background: #f1f5f9; text-align: center; padding: 16px; color: #64748b; font-size: 13px;">
-              &copy; ${new Date().getFullYear()} glovia Market place. All rights reserved.
+              &copy; ${new Date().getFullYear()} Glovia Market place. All rights reserved.
             </td>
           </tr>
         </table>

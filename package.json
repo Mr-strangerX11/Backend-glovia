@@ -1,8 +1,8 @@
 {
   "name": "glovia-marketplace-backend",
   "version": "1.0.0",
-  "description": "glovia Market place E-Commerce Backend API",
-  "author": "glovia Market place",
+  "description": "Glovia Market place E-Commerce Backend API",
+  "author": "Glovia Market place",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

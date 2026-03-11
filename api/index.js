@@ -165,7 +165,7 @@ async function createHandler() {
   expressApp.get('/', (req, res) => {
     res.json({
       status: 'ok',
-      message: 'glovia Market place Backend API',
+      message: 'Glovia Market place Backend API',
       version: '1.0.0',
       endpoints: {
         api: `/${apiPrefix}`,
@@ -176,7 +176,7 @@ async function createHandler() {
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('glovia Market place API')
+      .setTitle('Glovia Market place API')
       .setDescription('E-Commerce Platform API Documentation')
       .setVersion('1.0')
       .addBearerAuth()

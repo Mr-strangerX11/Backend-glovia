@@ -73,7 +73,7 @@ function skipTest(name, reason) {
 }
 
 async function runTests() {
-  log('\n🚀 glovia Market place - PRODUCTION READINESS TEST\n', colors.blue);
+  log('\n🚀 Glovia Market place - PRODUCTION READINESS TEST\n', colors.blue);
   log('Testing API: ' + API_URL + '\n', colors.cyan);
 
   // 1. Health & Connectivity
