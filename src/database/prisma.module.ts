@@ -5,8 +5,14 @@ import * as schemas from './schemas';
 
 function resolveMongoUri(configService: ConfigService): string {
   const mongoUri =
+    configService.get<string>('MONGO_URI') ||
+    configService.get<string>('MONGO_URL') ||
+    configService.get<string>('DB_URL') ||
     configService.get<string>('MONGODB_URI') ||
     configService.get<string>('DATABASE_URL') ||
+    process.env.MONGO_URI ||
+    process.env.MONGO_URL ||
+    process.env.DB_URL ||
     process.env.MONGODB_URI ||
     process.env.DATABASE_URL;
 
