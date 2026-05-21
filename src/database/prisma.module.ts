@@ -25,38 +25,50 @@ function resolveMongoUri(configService: ConfigService): string {
   return mongoUri;
 }
 
+const hasMongoConnectionString = Boolean(
+  process.env.MONGO_URI ||
+    process.env.MONGO_URL ||
+    process.env.DB_URL ||
+    process.env.MONGODB_URI ||
+    process.env.DATABASE_URL,
+);
+
+const mongooseConnectionImports = hasMongoConnectionString
+  ? [
+      MongooseModule.forRootAsync({
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          uri: resolveMongoUri(configService),
+          retryAttempts: 3,
+          retryDelay: 1000,
+        }),
+        inject: [ConfigService],
+      }),
+      MongooseModule.forFeature([
+        { name: 'User', schema: schemas.UserSchema },
+        { name: 'Address', schema: schemas.AddressSchema },
+        { name: 'Category', schema: schemas.CategorySchema },
+        { name: 'Brand', schema: schemas.BrandSchema },
+        { name: 'Product', schema: schemas.ProductSchema },
+        { name: 'ProductImage', schema: schemas.ProductImageSchema },
+        { name: 'CartItem', schema: schemas.CartItemSchema },
+        { name: 'WishlistItem', schema: schemas.WishlistItemSchema },
+        { name: 'Order', schema: schemas.OrderSchema },
+        { name: 'OrderItem', schema: schemas.OrderItemSchema },
+        { name: 'Payment', schema: schemas.PaymentSchema },
+        { name: 'Review', schema: schemas.ReviewSchema },
+        { name: 'Coupon', schema: schemas.CouponSchema },
+        { name: 'Banner', schema: schemas.BannerSchema },
+        { name: 'Blog', schema: schemas.BlogSchema },
+        { name: 'OtpVerification', schema: schemas.OtpVerificationSchema },
+        { name: 'Setting', schema: schemas.SettingSchema },
+      ]),
+    ]
+  : [];
+
 @Global()
 @Module({
-  imports: [
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: resolveMongoUri(configService),
-        retryAttempts: 3,
-        retryDelay: 1000,
-      }),
-      inject: [ConfigService],
-    }),
-    MongooseModule.forFeature([
-      { name: 'User', schema: schemas.UserSchema },
-      { name: 'Address', schema: schemas.AddressSchema },
-      { name: 'Category', schema: schemas.CategorySchema },
-      { name: 'Brand', schema: schemas.BrandSchema },
-      { name: 'Product', schema: schemas.ProductSchema },
-      { name: 'ProductImage', schema: schemas.ProductImageSchema },
-      { name: 'CartItem', schema: schemas.CartItemSchema },
-      { name: 'WishlistItem', schema: schemas.WishlistItemSchema },
-      { name: 'Order', schema: schemas.OrderSchema },
-      { name: 'OrderItem', schema: schemas.OrderItemSchema },
-      { name: 'Payment', schema: schemas.PaymentSchema },
-      { name: 'Review', schema: schemas.ReviewSchema },
-      { name: 'Coupon', schema: schemas.CouponSchema },
-      { name: 'Banner', schema: schemas.BannerSchema },
-      { name: 'Blog', schema: schemas.BlogSchema },
-      { name: 'OtpVerification', schema: schemas.OtpVerificationSchema },
-      { name: 'Setting', schema: schemas.SettingSchema },
-    ]),
-  ],
+  imports: mongooseConnectionImports,
   exports: [MongooseModule],
 })
 export class DatabaseModule {}

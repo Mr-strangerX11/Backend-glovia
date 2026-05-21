@@ -1,3 +1,4 @@
+import { config as loadEnv } from 'dotenv';
 import { AuditLogModule } from './modules/auditlog/auditlog.module';
 import { FlashDealsModule } from './modules/flash-deals/flash-deals.module';
 import { Module } from '@nestjs/common';
@@ -33,6 +34,49 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 
+loadEnv({ path: '.env.production' });
+loadEnv({ path: '.env' });
+
+const hasMongoConnectionString = Boolean(
+  process.env.MONGO_URI ||
+    process.env.MONGO_URL ||
+    process.env.DB_URL ||
+    process.env.MONGODB_URI ||
+    process.env.DATABASE_URL,
+);
+
+const dbEnabledImports = [
+  DatabaseModule,
+  AuthModule,
+  UsersModule,
+  ProductsModule,
+  CategoriesModule,
+  BrandsModule,
+  OrdersModule,
+  PromoCodesModule,
+  PopupsModule,
+  AuditLogModule,
+  PaymentsModule,
+  AdminModule,
+  CartModule,
+  WishlistModule,
+  ReviewsModule,
+  BannersModule,
+  BlogsModule,
+  UploadModule,
+  VerificationModule,
+  VendorsModule,
+  AnalyticsModule,
+  AiModule,
+  LoyaltyModule,
+  WalletModule,
+  SubscriptionsModule,
+  FlashDealsModule,
+  RealtimeModule,
+];
+
+const baseImports = [RedisModule, FirebaseModule, HealthModule];
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,36 +89,8 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
       limit: 10,
     }]),
     EmailNotificationModule,
-    DatabaseModule,
-    RedisModule,
-    FirebaseModule,
-    AuthModule,
-    UsersModule,
-    ProductsModule,
-    CategoriesModule,
-    BrandsModule,
-    OrdersModule,
-    PromoCodesModule,
-    PopupsModule,
-    AuditLogModule,
-    PaymentsModule,
-    AdminModule,
-    CartModule,
-    WishlistModule,
-    ReviewsModule,
-    BannersModule,
-    BlogsModule,
-    UploadModule,
-    VerificationModule,
-    VendorsModule,
-    HealthModule,
-    AnalyticsModule,
-    AiModule,
-    LoyaltyModule,
-    WalletModule,
-    SubscriptionsModule,
-    FlashDealsModule,
-    RealtimeModule,
+    ...(hasMongoConnectionString ? dbEnabledImports : []),
+    ...baseImports,
   ],
 })
 export class AppModule {}
