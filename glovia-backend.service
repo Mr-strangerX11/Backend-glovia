@@ -1,0 +1,32 @@
+[Unit]
+Description=Glovia Backend API
+After=network.target mongodb.service
+
+[Service]
+Type=simple
+User=nodeapp
+WorkingDirectory=/opt/glovia-backend
+Environment="NODE_ENV=production"
+Environment="PORT=3001"
+
+# Load environment variables from file
+EnvironmentFile=/opt/glovia-backend/.env.production
+
+ExecStart=/usr/bin/node dist/main.js
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=32768
+
+[Install]
+WantedBy=multi-user.target
