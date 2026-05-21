@@ -3,13 +3,29 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as schemas from './schemas';
 
+function resolveMongoUri(configService: ConfigService): string {
+  const mongoUri =
+    configService.get<string>('MONGODB_URI') ||
+    configService.get<string>('DATABASE_URL') ||
+    process.env.MONGODB_URI ||
+    process.env.DATABASE_URL;
+
+  if (!mongoUri) {
+    throw new Error(
+      'MongoDB connection string is missing. Set MONGODB_URI or DATABASE_URL.',
+    );
+  }
+
+  return mongoUri;
+}
+
 @Global()
 @Module({
   imports: [
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('DATABASE_URL'),
+        uri: resolveMongoUri(configService),
         retryAttempts: 3,
         retryDelay: 1000,
       }),
