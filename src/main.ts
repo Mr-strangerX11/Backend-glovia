@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import compression from 'compression';
+import compression = require('compression');
 import helmet from 'helmet';
 import type { Request, Response } from 'express';
 import { json, urlencoded } from 'express';
@@ -93,7 +93,10 @@ export async function createApp() {
 
   const apiPrefix = configService.get<string>('API_PREFIX') || 'api/v1';
   app.setGlobalPrefix(apiPrefix, {
-    exclude: [{ path: '/', method: RequestMethod.GET }],
+    exclude: [
+      { path: '', method: RequestMethod.GET },
+      { path: '/', method: RequestMethod.GET },
+    ],
   });
 
   if (process.env.NODE_ENV !== 'production') {
