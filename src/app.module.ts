@@ -33,6 +33,7 @@ import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { AppController } from './app.controller';
 
 loadEnv({ path: '.env.production' });
 loadEnv({ path: '.env' });
@@ -78,6 +79,7 @@ const dbEnabledImports = [
 const baseImports = [RedisModule, FirebaseModule, HealthModule];
 
 @Module({
+  controllers: [AppController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
