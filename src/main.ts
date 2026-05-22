@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import * as compression from 'compression';
+import compression from 'compression';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
@@ -15,6 +15,18 @@ function parseCorsOrigins(value?: string): string[] {
 }
 
 async function bootstrap() {
+  const app = await createApp();
+  const configService = app.get(ConfigService);
+
+  const port = process.env.PORT || configService.get<number>('PORT') || 3001;
+
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`🚀 Glovia Marketplace API running on port ${port}`);
+  console.log(`✅ API prefix: ${configService.get<string>('API_PREFIX') || 'api/v1'}`);
+}
+
+export async function createApp() {
   const app = await NestFactory.create(AppModule);
 
   const { AllExceptionsFilter } = await import(
@@ -100,12 +112,11 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  const port = process.env.PORT || configService.get<number>('PORT') || 3001;
-
-  await app.listen(port, '0.0.0.0');
-
-  console.log(`🚀 Glovia Marketplace API running on port ${port}`);
-  console.log(`✅ API prefix: ${apiPrefix}`);
+  return app;
 }
 
-bootstrap();
+if (require.main === module) {
+  void bootstrap();
+}
+
+export { bootstrap };
