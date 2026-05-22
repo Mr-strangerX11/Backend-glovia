@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import compression from 'compression';
 import helmet from 'helmet';
+import type { Request, Response } from 'express';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 
@@ -113,6 +114,29 @@ export async function createApp() {
   }
 
   return app;
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+let cachedServer: ((req: Request, res: Response) => unknown) | null = null;
+
+async function getServer() {
+  if (!cachedServer) {
+    const app = await createApp();
+    await app.init();
+    cachedServer = app.getHttpAdapter().getInstance();
+  }
+
+  return cachedServer;
+}
+
+export default async function handler(req: Request, res: Response) {
+  const server = await getServer();
+  return server(req, res);
 }
 
 if (require.main === module) {
